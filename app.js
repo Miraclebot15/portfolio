@@ -6,6 +6,7 @@ function letters(h,words){h.textContent='';var n=0;words.forEach(function(w){var
 var U='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="1 3" stroke-linecap="round"/></svg>',
 P='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2.5"/></svg>',
 H='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 1.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></svg>',
+V='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="6" fill="currentColor"/><path d="m3.5 7 2.2 2.2 4.8-5" fill="none" stroke="var(--bg,#fff)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 D={live:'<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="currentColor"/></svg>Live',dev:'<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>In development',soon:'<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v3l2 1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Coming soon'};
 var DL={live:'Live',dev:'In development',soon:'Coming soon'};
 if(page==='home'){
@@ -33,12 +34,20 @@ run();
 if(page==='projects'){
 var ul=$('ix'),cnt=$('cnt'),f='all';
 PROJECTS.forEach(function(p,i){var li=document.createElement('li');li.className='pr'+(p.e==='p'?' pl':p.e==='h'?' pt':'');li.dataset.d=p.d;
-li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm"'+(p.cs?' style="view-transition-name:p-'+p.cs.replace('.html','')+'"':'')+'>'+p.n+'</span><span class="sts"><span>'+D[p.d]+'</span><span>'+(p.e==='p'?P+'Planned':p.e==='h'?H+'Partial':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.cs?'<a class="btn" href="'+p.cs+'">Read more</a>':'')+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr">(opens in a new tab)</span></a>':'')+'</div></div>';
+li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm"'+(p.cs?' style="view-transition-name:p-'+p.cs.replace('.html','')+'"':'')+'>'+p.n+'</span><span class="sts"><span>'+(p.n==='ELLA'?'<span data-ella-status aria-live="polite">Checking…</span>':D[p.d])+'</span><span>'+(p.e==='p'?P+'Planned':p.e==='h'?H+'Partial':p.e==='v'?V+'Verified':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.cs?'<a class="btn" href="'+p.cs+'">Read more</a>':'')+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr">(opens in a new tab)</span></a>':'')+'</div></div>';
 li.querySelector('.row').addEventListener('click',function(e){var b=e.currentTarget;b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')});ul.appendChild(li)});
 function apply(){var n=0;ul.querySelectorAll('li').forEach(function(li){var show=f==='all'||li.dataset.d===f;li.hidden=!show;if(show)n++});cnt.textContent=n+(n===1?' project':' projects')+(f==='all'?'':' · '+DL[f])}
 document.querySelectorAll('.filters button').forEach(function(b){b.addEventListener('click',function(){f=b.dataset.f;document.querySelectorAll('.filters button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});apply()})});
 apply();
 }
+function refreshEllaStatus(){
+var nodes=document.querySelectorAll('[data-ella-status],#ella-deployment-status');
+if(!nodes.length)return;
+function show(label,state){nodes.forEach(function(n){n.textContent=label;n.dataset.status=state;n.setAttribute('aria-label','ELLA deployment status: '+label)})}
+show('Checking…','checking');
+fetch('/api/ella-status',{cache:'no-store',headers:{Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('Status endpoint unavailable');return r.json()}).then(function(s){if(s.status==='live')show('Live','live');else if(s.status==='down')show('Down','down');else show('Status unavailable','unknown')}).catch(function(){show('Status unavailable','unknown')});
+}
+refreshEllaStatus();
 var m=['miracleagbebaku122','gmail.com'],w='2349021637905',x='MiracleTechX',ig='miracle001992',gh='Miraclebot15';
 var map={mail:'mailto:'+m.join('@'),wa:'https://wa.me/'+w,x:'https://x.com/'+x,ig:'https://www.instagram.com/'+ig+'/',gh:'https://github.com/'+gh};
 document.querySelectorAll('[data-c]').forEach(function(l){l.href=map[l.dataset.c];if(l.dataset.c!=='mail'){l.target='_blank';l.rel='noopener noreferrer'}});
