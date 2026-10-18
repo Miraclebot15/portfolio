@@ -1,7 +1,7 @@
 (function(){
 var E='cubic-bezier(.2,.8,.2,1)',reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,$=function(i){return document.getElementById(i)};
-var page=document.body.dataset.page;
-document.querySelectorAll('nav a').forEach(function(a){if(a.dataset.p===page)a.setAttribute('aria-current','page')});
+var page=document.body.dataset.page;document.documentElement.classList.add('js');
+document.querySelectorAll('nav a').forEach(function(a){if(a.dataset.p===(document.body.dataset.nav||page))a.setAttribute('aria-current','page')});
 function letters(h,words){h.textContent='';var n=0;words.forEach(function(w){var s=document.createElement('span');s.className='ln';s.setAttribute('aria-hidden','true');w.split('').forEach(function(c){var l=document.createElement('span');l.className='l';l.style.setProperty('--i',n++);l.textContent=c;s.appendChild(l)});h.appendChild(s)})}
 var U='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="1 3" stroke-linecap="round"/></svg>',
 P='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2.5"/></svg>',
@@ -32,15 +32,15 @@ run();
 if(page==='projects'){
 var ul=$('ix'),cnt=$('cnt'),f='all';
 PROJECTS.forEach(function(p,i){var li=document.createElement('li');li.className='pr'+(p.e==='p'?' pl':'');li.dataset.d=p.d;
-li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm">'+p.n+'</span><span class="sts"><span>'+D[p.d]+'</span><span>'+(p.e==='p'?P+'Planned':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr" style="position:absolute;left:-999px"> (opens in a new tab)</span></a>':'')+'</div></div>';
+li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm">'+p.n+'</span><span class="sts"><span>'+D[p.d]+'</span><span>'+(p.e==='p'?P+'Planned':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.cs?'<a class="btn" href="'+p.cs+'">Read case study</a>':'')+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr">(opens in a new tab)</span></a>':'')+'</div></div>';
 li.querySelector('.row').addEventListener('click',function(e){var b=e.currentTarget;b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')});ul.appendChild(li)});
 function apply(){var n=0;ul.querySelectorAll('li').forEach(function(li){var show=f==='all'||li.dataset.d===f;li.hidden=!show;if(show)n++});cnt.textContent=n+(n===1?' project':' projects')+(f==='all'?'':' · '+DL[f])}
 document.querySelectorAll('.filters button').forEach(function(b){b.addEventListener('click',function(){f=b.dataset.f;document.querySelectorAll('.filters button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});apply()})});
 apply();
 }
-if(page==='contact'){
-var m=['miracleagbebaku122','gmail.com'],w=['2349021637905'],x=['MiracleTechX'];
-var map={mail:'mailto:'+m.join('@'),wa:'https://wa.me/'+w[0],x:'https://x.com/'+x[0]};
-document.querySelectorAll('[data-c]').forEach(function(a){a.href=map[a.dataset.c];if(a.dataset.c!=='mail'){a.target='_blank';a.rel='noopener noreferrer'}});
-}
+var m=['miracleagbebaku122','gmail.com'],w='2349021637905',x='MiracleTechX',ig='miracle001992',gh='Miraclebot15';
+var map={mail:'mailto:'+m.join('@'),wa:'https://wa.me/'+w,x:'https://x.com/'+x,ig:'https://www.instagram.com/'+ig+'/',gh:'https://github.com/'+gh};
+document.querySelectorAll('[data-c]').forEach(function(l){l.href=map[l.dataset.c];if(l.dataset.c!=='mail'){l.target='_blank';l.rel='noopener noreferrer'}});
+document.querySelectorAll('.stg .row').forEach(function(b){b.addEventListener('click',function(){b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')})});
+var pp=$('pipe');if(pp){if(reduce||!('IntersectionObserver' in window))pp.classList.add('in');else{new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){pp.classList.add('in');o.disconnect()}})},{threshold:.15}).observe(pp)}}
 })();
