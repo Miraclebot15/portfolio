@@ -40,14 +40,15 @@ function apply(){var n=0;ul.querySelectorAll('li').forEach(function(li){var show
 document.querySelectorAll('.filters button').forEach(function(b){b.addEventListener('click',function(){f=b.dataset.f;document.querySelectorAll('.filters button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});apply()})});
 apply();
 }
-function refreshEllaStatus(){
-var nodes=document.querySelectorAll('[data-ella-status],#ella-deployment-status');
+function refreshProjectStatus(name,selector,endpoint){
+var nodes=document.querySelectorAll(selector);
 if(!nodes.length)return;
-function show(label,state){nodes.forEach(function(n){n.textContent=label;n.dataset.status=state;n.setAttribute('aria-label','ELLA deployment status: '+label)})}
+function show(label,state){nodes.forEach(function(n){n.textContent=label;n.dataset.status=state;n.setAttribute('aria-label',name+' website status: '+label)})}
 show('Checking…','checking');
-fetch('/api/ella-status',{cache:'no-store',headers:{Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('Status endpoint unavailable');return r.json()}).then(function(s){if(s.status==='live')show('Live','live');else if(s.status==='down')show('Down','down');else show('Status unavailable','unknown')}).catch(function(){show('Status unavailable','unknown')});
+fetch(endpoint,{cache:'no-store',headers:{Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('Status endpoint unavailable');return r.json()}).then(function(s){if(s.status==='live')show('Live','live');else if(s.status==='down')show('Down','down');else show('Status unavailable','unknown')}).catch(function(){show('Status unavailable','unknown')});
 }
-refreshEllaStatus();
+refreshProjectStatus('ELLA','[data-ella-status],#ella-deployment-status','/api/ella-status');
+refreshProjectStatus('NEXUS CORE','[data-nexus-status],#nexus-deployment-status','/api/nexus-status');
 var m=['miracleagbebaku122','gmail.com'],w='2349021637905',x='MiracleTechX',ig='miracle001992',gh='Miraclebot15';
 var map={mail:'mailto:'+m.join('@'),wa:'https://wa.me/'+w,x:'https://x.com/'+x,ig:'https://www.instagram.com/'+ig+'/',gh:'https://github.com/'+gh};
 document.querySelectorAll('[data-c]').forEach(function(l){l.href=map[l.dataset.c];if(l.dataset.c!=='mail'){l.target='_blank';l.rel='noopener noreferrer'}});
