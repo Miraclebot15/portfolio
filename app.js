@@ -5,6 +5,7 @@ document.querySelectorAll('nav a').forEach(function(a){if(a.dataset.p===(documen
 function letters(h,words){h.textContent='';var n=0;words.forEach(function(w){var s=document.createElement('span');s.className='ln';s.setAttribute('aria-hidden','true');w.split('').forEach(function(c){var l=document.createElement('span');l.className='l';l.style.setProperty('--i',n++);l.textContent=c;s.appendChild(l)});h.appendChild(s)})}
 var U='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="1 3" stroke-linecap="round"/></svg>',
 P='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2.5"/></svg>',
+H='<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 1.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></svg>',
 D={live:'<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="currentColor"/></svg>Live',dev:'<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>In development',soon:'<svg viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v3l2 1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Coming soon'};
 var DL={live:'Live',dev:'In development',soon:'Coming soon'};
 if(page==='home'){
@@ -31,8 +32,8 @@ run();
 }
 if(page==='projects'){
 var ul=$('ix'),cnt=$('cnt'),f='all';
-PROJECTS.forEach(function(p,i){var li=document.createElement('li');li.className='pr'+(p.e==='p'?' pl':'');li.dataset.d=p.d;
-li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm"'+(p.cs?' style="view-transition-name:p-'+p.cs.replace('.html','')+'"':'')+'>'+p.n+'</span><span class="sts"><span>'+D[p.d]+'</span><span>'+(p.e==='p'?P+'Planned':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.cs?'<a class="btn" href="'+p.cs+'">Read more</a>':'')+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr">(opens in a new tab)</span></a>':'')+'</div></div>';
+PROJECTS.forEach(function(p,i){var li=document.createElement('li');li.className='pr'+(p.e==='p'?' pl':p.e==='h'?' pt':'');li.dataset.d=p.d;
+li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm"'+(p.cs?' style="view-transition-name:p-'+p.cs.replace('.html','')+'"':'')+'>'+p.n+'</span><span class="sts"><span>'+D[p.d]+'</span><span>'+(p.e==='p'?P+'Planned':p.e==='h'?H+'Partial':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.cs?'<a class="btn" href="'+p.cs+'">Read more</a>':'')+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr">(opens in a new tab)</span></a>':'')+'</div></div>';
 li.querySelector('.row').addEventListener('click',function(e){var b=e.currentTarget;b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')});ul.appendChild(li)});
 function apply(){var n=0;ul.querySelectorAll('li').forEach(function(li){var show=f==='all'||li.dataset.d===f;li.hidden=!show;if(show)n++});cnt.textContent=n+(n===1?' project':' projects')+(f==='all'?'':' · '+DL[f])}
 document.querySelectorAll('.filters button').forEach(function(b){b.addEventListener('click',function(){f=b.dataset.f;document.querySelectorAll('.filters button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});apply()})});

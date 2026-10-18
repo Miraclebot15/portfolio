@@ -104,3 +104,5 @@ h2{font:700 clamp(24px,3.6vw,32px)/1.15 "Bricolage Grotesque",system-ui,sans-ser
 .prog{display:none}
 @supports (animation-timeline:scroll()){.prog{display:block;position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:3px;background:var(--acc);transform:scaleX(0);transform-origin:left;animation:grow linear both;animation-timeline:scroll(root);z-index:5}@keyframes grow{to{transform:scaleX(1)}}}
 @media (prefers-reduced-motion:reduce){.prog{display:none!important}}
+
+li.pr.pt{border-bottom-style:solid}
