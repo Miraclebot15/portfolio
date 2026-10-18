@@ -1,0 +1,190 @@
+[
+ {
+  "slug": "nexus-core",
+  "name": "NEXUS CORE",
+  "state": "In development",
+  "url": "https://nexus-core-psi-fawn.vercel.app/",
+  "link_label": "Open live app",
+  "motif": "nexus",
+  "purpose": "A governance-first AI orchestration system where models propose plans and separate controls decide what is allowed to run.",
+  "summary": "NEXUS CORE coordinates AI models, tools and specialized engines through a controlled execution architecture. A model may propose what should happen, but the system independently decides whether an action is permitted and how it is carried out. The aim is AI agents that are controllable, auditable and reliable, instead of agents that act on whatever a model outputs.",
+  "points": [
+   "Planning is kept separate from authorization and execution.",
+   "Sensitive operations, including financial actions, are designed to need approval.",
+   "Audit hashes and execution records support traceability.",
+   "Sandboxed tools run supported operations in a controlled way.",
+   "A coordinator directs specialized engines across capabilities.",
+   "Includes authentication, streaming responses and file uploads."
+  ],
+  "tech": [
+   "Python",
+   "FastAPI",
+   "SQLite",
+   "Next.js"
+  ],
+  "flow": {
+   "title": "How a request moves",
+   "note": "Open a stage to read its role. An overview of the design.",
+   "steps": [
+    [
+     "ELLA Planner",
+     "Plans how a request should be handled."
+    ],
+    [
+     "BOUNDARY",
+     "Authorization boundary"
+    ],
+    [
+     "Governance Engine",
+     "Applies policy and execution controls, including approval for sensitive operations."
+    ],
+    [
+     "JANE Corrector",
+     "Helps identify and correct errors in the execution process."
+    ],
+    [
+     "Sandboxed tools",
+     "Provide controlled execution of supported operations."
+    ],
+    [
+     "Synthesis",
+     "Combines results into a final response."
+    ]
+   ]
+  }
+ },
+ {
+  "slug": "ella",
+  "name": "ELLA",
+  "state": "Live",
+  "url": "https://ella-bot-qgq0.onrender.com/",
+  "link_label": "Open live app",
+  "motif": "ella",
+  "purpose": "An AI assistant for WhatsApp that holds natural, context-aware conversations instead of rigid helpdesk replies.",
+  "summary": "ELLA is built for natural conversation inside WhatsApp, in individual and group chats. It is designed to understand Nigerian English and Pidgin, keep context, and route each message to the right handler instead of forcing everything into a fixed script.",
+  "points": [
+   "Context-aware replies in individual and group chats.",
+   "Awareness of Nigerian English and Pidgin.",
+   "Intent routing, so a message is not sent to a feature just because a few words match.",
+   "A developer console and settings for operating the assistant."
+  ],
+  "tech": [
+   "Node.js",
+   "Supabase"
+  ],
+  "flow": {
+   "title": "How a message is handled",
+   "note": "Open a step to read its role. An overview of the design.",
+   "steps": [
+    [
+     "Message in",
+     "A message arrives from an individual or group chat."
+    ],
+    [
+     "Context",
+     "The conversation so far shapes the reply."
+    ],
+    [
+     "Intent routing",
+     "Decides which handler the message belongs to."
+    ],
+    [
+     "Handler or AI reply",
+     "A specialized handler or a general AI-written reply."
+    ],
+    [
+     "Reply",
+     "The answer goes back to the chat."
+    ]
+   ]
+  }
+ },
+ {
+  "slug": "carecore",
+  "name": "CareCore",
+  "state": "Live",
+  "url": "https://carecore-huok.onrender.com/dashboard-app/",
+  "link_label": "Open dashboard",
+  "motif": "carecore",
+  "purpose": "A configurable AI customer-care platform for conversations, orders and payments, with approvals before sensitive actions.",
+  "summary": "CareCore helps a business run customer care through an AI agent configured for its tone, products and policies. An admin dashboard gives the business a ledger of activity, an approvals queue and settings for how the agent behaves.",
+  "points": [
+   "Configurable tone, scope handling, refund policy and escalation.",
+   "Approvals before sensitive actions, such as sending a payment link.",
+   "Escalation to a human by email, Slack webhook or SMS.",
+   "A product catalog and custom instructions for the agent."
+  ],
+  "tech": [
+   "Python",
+   "FastAPI",
+   "PostgreSQL",
+   "Stripe"
+  ]
+ },
+ {
+  "slug": "atelier",
+  "name": "Atelier",
+  "state": "In development",
+  "motif": "atelier",
+  "purpose": "A conversational studio that turns a written interface brief into a UI concept you can refine.",
+  "summary": "Atelier explores AI-assisted interface creation. You describe the interface you want, review the result, and refine it through conversation, with the goal of speeding up frontend development.",
+  "points": [
+   "From design intent to a usable interface concept.",
+   "Refinement through conversation.",
+   "Aimed at accelerating frontend work."
+  ]
+ },
+ {
+  "slug": "engine",
+  "name": "Engine",
+  "state": "In development",
+  "motif": "engine",
+  "purpose": "A UI and 3D-oriented library for building interactive interfaces and visual experiences.",
+  "summary": "Engine is a reusable foundation for interface work: building blocks for interactive UIs and 3D-oriented visual experiences, rather than a standalone app.",
+  "points": [
+   "Reusable building blocks for interactive interfaces.",
+   "Support for 3D-oriented visual experiences.",
+   "A foundation other projects can build on."
+  ]
+ },
+ {
+  "slug": "ultimate-agentic-ai",
+  "name": "Ultimate Agentic AI",
+  "state": "In development",
+  "motif": "agent",
+  "purpose": "An agentic AI project for completing multi-step tasks with tools.",
+  "summary": "Ultimate Agentic AI explores systems that go beyond single answers: planning a task, using tools, handling errors and checking results as they work toward a goal.",
+  "points": [
+   "Multi-step task planning and execution.",
+   "Tool use inside AI-driven workflows.",
+   "Error handling and result checking."
+  ]
+ },
+ {
+  "slug": "lagoon",
+  "name": "Lagoon",
+  "state": "In development",
+  "motif": "lagoon",
+  "purpose": "A social and communication platform that brings messaging, stories, short video and communities into one app.",
+  "summary": "Lagoon aims to combine several kinds of digital interaction in one experience instead of spreading them across separate apps. A backend API provides its foundation.",
+  "points": [
+   "Direct and group messaging.",
+   "Stories and temporary updates.",
+   "Short-form video.",
+   "Communities and shared spaces."
+  ]
+ },
+ {
+  "slug": "aurora",
+  "name": "AURORA",
+  "state": "Coming soon",
+  "motif": "aurora",
+  "purpose": "An AI video-editing model designed to support a broad range of visual styles.",
+  "summary": "AURORA is aimed at flexible AI-assisted video creation and editing, so creators are not limited to a small set of fixed templates or aesthetics.",
+  "points": [
+   "Broad visual-style support.",
+   "AI-assisted editing and creative transformation.",
+   "Flexible visual direction."
+  ]
+ }
+]
