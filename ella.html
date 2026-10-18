@@ -5,21 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ELLA — Miracle Agbebaku</title>
 <meta name="description" content="A WhatsApp-oriented AI assistant with context-aware replies and intent routing.">
+<meta property="og:title" content="ELLA — Miracle Agbebaku">
+<meta property="og:description" content="A WhatsApp-oriented AI assistant with context-aware replies and intent routing.">
+<meta property="og:type" content="website">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="case" data-nav="projects">
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a><span class="prog" aria-hidden="true"></span>
 <div class="wrap">
 <header class="top"><a class="brand" href="index.html">Miracle Agbebaku</a>
 <nav aria-label="Main"><a data-p="home" href="index.html">Home</a><a data-p="projects" href="projects.html">Projects</a><a data-p="engineering" href="engineering.html">Engineering</a><a data-p="about" href="about.html">About</a><a data-p="resume" href="resume.html">Resume</a><a data-p="contact" href="contact.html">Contact</a></nav></header>
 <main id="main">
-<h1 class="pg">ELLA</h1>
+<h1 class="pg" style="view-transition-name:p-ella">ELLA</h1>
 <p class="metas"><span class="tag">Deployment: Live</span><span class="tag">Evidence: Unverified</span></p><a class="btn" href="https://ella-bot-qgq0.onrender.com/" target="_blank" rel="noopener noreferrer">Open deployment <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M5 17.59 15.59 7H9V5h10v10h-2V8.41L6.41 19z"/></svg><span class="sr">(opens in a new tab)</span></a>
+<p><button class="tog" id="evt" aria-pressed="false"><i aria-hidden="true"></i>Evidence view</button></p>
 <h2>Overview</h2>
-<p class="lede">ELLA is an AI assistant for WhatsApp, built to hold natural, context-aware conversations instead of rigid helpdesk replies. It is meant to handle Nigerian English and Pidgin, and to work in both group and individual chats. The backend uses Node.js and Supabase.</p>
+<p class="lede">ELLA is an AI assistant for WhatsApp, built to hold natural, context-aware conversations instead of rigid helpdesk replies. It is meant to handle Nigerian English and Pidgin, and to work in both group and individual chats. The backend uses Node.js and Supabase.<span class="tag etag">Unverified</span></p>
 <h2>How a message is handled</h2>
 <p class="lede">Open a step to see its described role. This is a conceptual diagram, not a recording of a real conversation, and the exact internals have not been verified.</p>
 <ol class="pipe" id="pipe"><li class="stg" style="--i:0"><button class="row" aria-expanded="false" aria-controls="s0"><span class="nm sm">Incoming WhatsApp message</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s0"><div><p>A message arrives from an individual or group chat.</p><p class="note">Described. Integration details not checked.</p></div></div></li><li class="stg" style="--i:1"><button class="row" aria-expanded="false" aria-controls="s1"><span class="nm sm">Context</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s1"><div><p>Responses are meant to use conversation context, in group and individual chats.</p><p class="note">Context handling not checked.</p></div></div></li><li class="stg" style="--i:2"><button class="row" aria-expanded="false" aria-controls="s2"><span class="nm sm">Intent routing</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s2"><div><p>Decides which handler a message belongs to, so unrelated messages are not sent to a specialized feature just because a few words match.</p><p class="note">Improved routing is a stated goal. Current behavior not verified.</p></div></div></li><li class="stg" style="--i:3"><button class="row" aria-expanded="false" aria-controls="s3"><span class="nm sm">Handler or AI reply</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s3"><div><p>A specialized handler or a general AI-written reply.</p><p class="note">Handlers not checked.</p></div></div></li><li class="stg" style="--i:4"><button class="row" aria-expanded="false" aria-controls="s4"><span class="nm sm">Reply</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s4"><div><p>The answer returned to the user. It should not claim an action succeeded when the operation failed.</p><p class="note">Failure handling is a stated priority. Not verified.</p></div></div></li></ol>

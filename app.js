@@ -32,7 +32,7 @@ run();
 if(page==='projects'){
 var ul=$('ix'),cnt=$('cnt'),f='all';
 PROJECTS.forEach(function(p,i){var li=document.createElement('li');li.className='pr'+(p.e==='p'?' pl':'');li.dataset.d=p.d;
-li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm">'+p.n+'</span><span class="sts"><span>'+D[p.d]+'</span><span>'+(p.e==='p'?P+'Planned':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.cs?'<a class="btn" href="'+p.cs+'">Read case study</a>':'')+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr">(opens in a new tab)</span></a>':'')+'</div></div>';
+li.innerHTML='<button class="row" aria-expanded="false" aria-controls="d'+i+'"><span class="nm"'+(p.cs?' style="view-transition-name:p-'+p.cs.replace('.html','')+'"':'')+'>'+p.n+'</span><span class="sts"><span>'+D[p.d]+'</span><span>'+(p.e==='p'?P+'Planned':U+'Unverified')+'</span></span></button><div class="dt" id="d'+i+'"><div><p>'+p.t+'</p>'+(p.cs?'<a class="btn" href="'+p.cs+'">Read more</a>':'')+(p.url?'<a class="btn" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Open deployment<span class="sr">(opens in a new tab)</span></a>':'')+'</div></div>';
 li.querySelector('.row').addEventListener('click',function(e){var b=e.currentTarget;b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')});ul.appendChild(li)});
 function apply(){var n=0;ul.querySelectorAll('li').forEach(function(li){var show=f==='all'||li.dataset.d===f;li.hidden=!show;if(show)n++});cnt.textContent=n+(n===1?' project':' projects')+(f==='all'?'':' · '+DL[f])}
 document.querySelectorAll('.filters button').forEach(function(b){b.addEventListener('click',function(){f=b.dataset.f;document.querySelectorAll('.filters button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});apply()})});
@@ -42,5 +42,6 @@ var m=['miracleagbebaku122','gmail.com'],w='2349021637905',x='MiracleTechX',ig='
 var map={mail:'mailto:'+m.join('@'),wa:'https://wa.me/'+w,x:'https://x.com/'+x,ig:'https://www.instagram.com/'+ig+'/',gh:'https://github.com/'+gh};
 document.querySelectorAll('[data-c]').forEach(function(l){l.href=map[l.dataset.c];if(l.dataset.c!=='mail'){l.target='_blank';l.rel='noopener noreferrer'}});
 document.querySelectorAll('.stg .row').forEach(function(b){b.addEventListener('click',function(){b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')})});
+var et=$('evt');if(et)et.addEventListener('click',function(){var on=document.documentElement.classList.toggle('ev');et.setAttribute('aria-pressed',on)});
 var pp=$('pipe');if(pp){if(reduce||!('IntersectionObserver' in window))pp.classList.add('in');else{new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){pp.classList.add('in');o.disconnect()}})},{threshold:.15}).observe(pp)}}
 })();

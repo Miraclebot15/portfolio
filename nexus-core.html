@@ -5,21 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NEXUS CORE — Miracle Agbebaku</title>
 <meta name="description" content="Governance-first AI orchestration: planning, authorization and execution as separate stages.">
+<meta property="og:title" content="NEXUS CORE — Miracle Agbebaku">
+<meta property="og:description" content="Governance-first AI orchestration: planning, authorization and execution as separate stages.">
+<meta property="og:type" content="website">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="case" data-nav="projects">
-<a class="skip" href="#main">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a><span class="prog" aria-hidden="true"></span>
 <div class="wrap">
 <header class="top"><a class="brand" href="index.html">Miracle Agbebaku</a>
 <nav aria-label="Main"><a data-p="home" href="index.html">Home</a><a data-p="projects" href="projects.html">Projects</a><a data-p="engineering" href="engineering.html">Engineering</a><a data-p="about" href="about.html">About</a><a data-p="resume" href="resume.html">Resume</a><a data-p="contact" href="contact.html">Contact</a></nav></header>
 <main id="main">
-<h1 class="pg">NEXUS CORE</h1>
+<h1 class="pg" style="view-transition-name:p-nexus-core">NEXUS CORE</h1>
 <p class="metas"><span class="tag">Deployment: In development</span><span class="tag">Evidence: Unverified</span></p><a class="btn" href="https://nexus-core-psi-fawn.vercel.app/" target="_blank" rel="noopener noreferrer">Open deployment <svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M5 17.59 15.59 7H9V5h10v10h-2V8.41L6.41 19z"/></svg><span class="sr">(opens in a new tab)</span></a>
+<p><button class="tog" id="evt" aria-pressed="false"><i aria-hidden="true"></i>Evidence view</button></p>
 <h2>Overview</h2>
-<p class="lede">NEXUS CORE is a governance-first AI orchestration system. A model may propose what should happen, but the system decides separately whether an action is permitted and how it runs. The aim is AI agents that are more controllable, auditable and reliable than agents that act on whatever a model outputs.</p>
+<p class="lede">NEXUS CORE is a governance-first AI orchestration system. A model may propose what should happen, but the system decides separately whether an action is permitted and how it runs. The aim is AI agents that are more controllable, auditable and reliable than agents that act on whatever a model outputs.<span class="tag etag">Unverified</span></p>
 <h2>Architecture</h2>
 <p class="lede">Open a stage to see its described role. This is a conceptual overview of the described design. The exact runtime order and communication paths have not been verified.</p>
 <ol class="pipe" id="pipe"><li class="stg" style="--i:0"><button class="row" aria-expanded="false" aria-controls="s0"><span class="nm sm">ELLA Planner</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s0"><div><p>Plans how a request should be handled.</p><p class="note">Described as the proposing stage. Implementation not checked.</p></div></div></li><li class="bnd" style="--i:1"><span>Trust boundary (conceptual placement)</span></li><li class="stg" style="--i:2"><button class="row" aria-expanded="false" aria-controls="s2"><span class="nm sm">Governance Engine</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s2"><div><p>Applies policy and execution controls, including approval for sensitive operations such as financial actions.</p><p class="note">Approval controls are described as intended. Enforcement in code not checked.</p></div></div></li><li class="stg" style="--i:3"><button class="row" aria-expanded="false" aria-controls="s3"><span class="nm sm">JANE Corrector</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s3"><div><p>Helps identify and correct errors in the execution process.</p><p class="note">Scope and limits of correction not checked.</p></div></div></li><li class="stg" style="--i:4"><button class="row" aria-expanded="false" aria-controls="s4"><span class="nm sm">Sandboxed tools</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s4"><div><p>Provide controlled execution of supported operations.</p><p class="note">Which operations are supported, and the sandbox’s strength, are not checked.</p></div></div></li><li class="stg" style="--i:5"><button class="row" aria-expanded="false" aria-controls="s5"><span class="nm sm">Synthesis</span><span class="sts"><span>Unverified</span></span></button><div class="dt" id="s5"><div><p>Combines results into a final response.</p><p class="note">Not checked.</p></div></div></li></ol>

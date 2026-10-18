@@ -93,3 +93,14 @@ h2{font:700 clamp(24px,3.6vw,32px)/1.15 "Bricolage Grotesque",system-ui,sans-ser
 .soc{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:var(--mute);transition:color .24s var(--ease),background .24s var(--ease)}
 .soc:hover{color:var(--ink);background:var(--card)}
 @media (prefers-reduced-motion:reduce){.js .pipe>li{opacity:1;transform:none}}
+
+.tog{white-space:nowrap;border:1px solid var(--rule);border-radius:999px;padding:0 16px;min-height:44px;display:inline-flex;align-items:center;gap:10px;transition:border-color .24s var(--ease)}
+.tog:hover{border-color:var(--ink)}
+.tog i{width:30px;height:16px;border:1px solid var(--rule);border-radius:99px;position:relative;display:block}
+.tog i::after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:var(--mute);transition:transform .24s var(--ease),background .24s}
+.tog[aria-pressed="true"] i::after{transform:translateX(14px);background:var(--acc)}
+.etag{display:none;margin-left:8px;vertical-align:middle}.ev .etag{display:inline-block}
+::view-transition-group(*){animation-duration:.5s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+.prog{display:none}
+@supports (animation-timeline:scroll()){.prog{display:block;position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:3px;background:var(--acc);transform:scaleX(0);transform-origin:left;animation:grow linear both;animation-timeline:scroll(root);z-index:5}@keyframes grow{to{transform:scaleX(1)}}}
+@media (prefers-reduced-motion:reduce){.prog{display:none!important}}
