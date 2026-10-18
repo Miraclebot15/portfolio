@@ -15,9 +15,12 @@ async function probe() {
     });
     // A non-5xx response confirms the web service is responding, including redirects
     // and ordinary client errors. A 5xx response is treated as unavailable.
-    return response.status >= 200 && response.status < 500;
+    if (response.status >= 200 && response.status < 500) return "live";
+    if (response.status >= 500) return "down";
+    return "unknown";
   } catch (_) {
-    return false;
+    // A timeout or network error is inconclusive, not proof of downtime.
+    return "unknown";
   } finally {
     clearTimeout(timer);
   }
@@ -34,9 +37,13 @@ module.exports = async function handler(req, res) {
 
   try {
     const results = await Promise.all([probe(), probe()]);
-    const live = results.some(Boolean);
+    const status = results.includes("live")
+      ? "live"
+      : results.every((result) => result === "down")
+        ? "down"
+        : "unknown";
     return res.status(200).json({
-      status: live ? "live" : "down",
+      status,
       checkedAt: new Date().toISOString(),
       target: TARGET
     });
