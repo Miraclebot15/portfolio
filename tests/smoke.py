@@ -26,14 +26,17 @@ with sync_playwright() as p:
             errors = []
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.on("console", lambda m: errors.append(m.text) if m.type == "error" and "ERR_NAME" not in m.text else None)
-            page.goto(BASE + f)
-            page.wait_for_timeout(900)
+            page.goto(BASE + f, wait_until="domcontentloaded", timeout=15000)
+            page.wait_for_timeout(150)
             if page.evaluate("document.documentElement.scrollWidth > innerWidth"):
                 problems.append(f"{f} @{label}: horizontal overflow")
             small = page.evaluate("""[...document.querySelectorAll('a,button')].filter(e => e.offsetParent && !e.closest('.menu')
-                && e.getBoundingClientRect().height < 43.5 && !e.classList.contains('skip') && !e.classList.contains('sr')).length""")
+                && e.getBoundingClientRect().height < 43.5 && !e.classList.contains('skip') && !e.classList.contains('sr'))
+                .map(e => ({tag:e.tagName.toLowerCase(), id:e.id, cls:typeof e.className === 'string' ? e.className : '',
+                    text:(e.innerText || e.getAttribute('aria-label') || '').trim().slice(0,48),
+                    height:Math.round(e.getBoundingClientRect().height*10)/10}))""")
             if small:
-                problems.append(f"{f} @{label}: {small} tap target(s) under 44px")
+                problems.append(f"{f} @{label}: tap target(s) under 44px: {small}")
             for e in errors:
                 problems.append(f"{f} @{label}: console error: {e}")
             page.close()

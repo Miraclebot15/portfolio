@@ -44,11 +44,13 @@
 
 | Page | File | Purpose |
 | --- | --- | --- |
-| Home | `index.html` | Hero, what I build, typed code panel, selected work, technology marquee |
+| Home | `index.html` | Branded entry page with clear routes into the portfolio and About page |
+| Portfolio | `portfolio.html` | Hero, what I build, typed code panel, selected work, technology marquee |
 | Projects | `projects.html` | All projects with working status filters |
 | Project pages | `nexus-core.html`, `ella.html`, `carecore.html`, `atelier.html`, `engine.html`, `ultimate-agentic-ai.html`, `lagoon.html`, `aurora.html` | Each project's purpose, what it is for, tech, and (where relevant) an interactive overview of how it works |
 | Engineering | `engineering.html` | Journal landing page |
-| About | `about.html` | Direction and interests |
+| About | `about.html` | Animated profile, principles and interactive terminal with 50+ programming-language views |
+| Website language | Shared header control | Compact searchable language picker backed by Google Translate |
 | Resume | `resume.html` | Focus areas, technologies, projects, links |
 | Contact | `contact.html` | WhatsApp, email, X, Instagram, GitHub |
 | 404 | `404.html` | Not-found page |

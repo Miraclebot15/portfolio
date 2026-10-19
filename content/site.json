@@ -10,6 +10,11 @@
    "Home"
   ],
   [
+   "portfolio",
+   "portfolio.html",
+   "Portfolio"
+  ],
+  [
    "projects",
    "projects.html",
    "Projects"
