@@ -86,14 +86,14 @@ def page(fn, title, key, desc, body, nav=None, prog=False):
 <a class="skip" href="#main">Skip to content</a>{p}
 <header class="top"><div class="bar"><a class="brand" href="index.html">{NAME}</a>
 <nav class="links" aria-label="Main">{links}</nav>
-<div class="tools"><button class="ib" id="theme" aria-label="Toggle light and dark theme" aria-pressed="false">{ic("sun","ic i-sun")}{ic("moon","ic i-moon")}</button><button class="ib mb" id="mb" aria-label="Open menu" aria-expanded="false" aria-controls="menu">{ic("menu")}</button></div></div></header>
+<div class="tools"><div class="site-language" id="site-language"><button class="site-language-trigger" id="site-language-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="site-language-panel" aria-label="Change website language"><span aria-hidden="true">文</span><span id="site-language-current">EN</span><span aria-hidden="true">⌄</span></button><div class="site-language-panel" id="site-language-panel" role="dialog" aria-label="Choose website language" hidden><label for="site-language-search">WEBSITE LANGUAGE</label><input id="site-language-search" type="search" placeholder="Search languages…" autocomplete="off"><div id="site-language-options" class="site-language-options" role="listbox" aria-label="Languages"></div><p>Translation provided by Google Translate.</p></div></div><button class="ib" id="theme" aria-label="Toggle light and dark theme" aria-pressed="false">{ic("sun","ic i-sun")}{ic("moon","ic i-moon")}</button><button class="ib mb" id="mb" aria-label="Open menu" aria-expanded="false" aria-controls="menu">{ic("menu")}</button></div></div></header>
 <div class="menu" id="menu" role="dialog" aria-label="Menu"><button class="ib x" id="mx" aria-label="Close menu">{ic("close")}</button>{big}<div class="socs">{soc}</div></div>
 <main id="main">
 {body}
 </main>
 <div class="wrap"><footer class="ft"><span>© {SITE["year"]} {NAME}</span><div class="socs" role="group" aria-label="Contact links">{soc}</div></footer></div>
 <noscript><p style="text-align:center;color:var(--mute)">Contact links need JavaScript enabled.</p></noscript>
-<script src="app.js"></script>
+<div id="google_translate_element" hidden></div><script>function googleTranslateElementInit(){if(window.google&&google.translate){new google.translate.TranslateElement({pageLanguage:"en",includedLanguages:"af,sq,am,ar,hy,az,eu,be,bn,bs,bg,ca,ceb,zh-CN,zh-TW,hr,cs,da,nl,eo,et,fi,fr,gl,ka,de,el,gu,ht,ha,he,hi,hu,is,id,ga,it,ja,jv,kn,kk,km,ko,ku,ky,lo,la,lv,lt,mk,ms,ml,mt,mi,mr,mn,my,ne,no,ps,fa,pl,pt,pa,ro,ru,sr,si,sk,sl,so,es,su,sw,sv,tg,ta,te,th,tr,uk,ur,uz,vi,cy,yi,yo,zu",autoDisplay:false},"google_translate_element");}}</script><script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script><script src="app.js"></script>
 </body>
 </html>
 ''')
@@ -178,12 +178,20 @@ for i, p in enumerate(PROJECTS):
 
 # ---- other pages -------------------------------------------------------
 def ph(eyebrow, h, lede=""): return f'<div class="wrap phead"><p class="eyebrow">{eyebrow}</p><h1>{h}</h1>{f"<p class=\"lede\">{lede}</p>" if lede else ""}</div>'
-page("about.html", f"About — {NAME}", "about", "Engineering direction and interests of Miracle Agbebaku.",
- ph("About", "About", "I’m a software developer who likes building complete products and understanding the engineering underneath them, not only the interface on top.") +
- '''<div class="wrap" style="padding-bottom:70px"><div class="stm"><div class="rv"><h2 class="h3s" style="margin-top:0">What I work on</h2></div><ul class="plain rv" style="--i:1"><li>AI and agentic systems, including orchestration and the controls around what an agent may do.</li><li>Backend and full-stack engineering: APIs, integrations and application architecture.</li><li>Frontend work with React, Next.js and TypeScript.</li><li>Conversational AI and messaging automation.</li><li>Automation, developer tooling, testing and debugging.</li></ul></div>
-<div class="stm" style="margin-top:30px"><div class="rv"><h2 class="h3s" style="margin-top:0">How I work</h2></div><p class="lede rv" style="--i:1">I try to understand why a system behaves the way it does before I add to it, and I like finishing products, not only prototyping them.</p></div>
-<div class="stm" style="margin-top:30px"><div class="rv"><h2 class="h3s" style="margin-top:0">Where I’m heading</h2></div><p class="lede rv" style="--i:1">More capable AI systems and, in time, hardware and robotics.</p></div>
-<p class="cta"><a class="btn pri mag" href="projects.html">See projects '''+ic("right")+'''</a></p></div>''')
+about_markup = """
+<div class="wrap phead about-head"><p class="eyebrow">About / system profile</p><h1>Built with intent.<br><span class="accent-word">Engineered to work.</span></h1><p class="lede">I’m Miracle Agbebaku — a developer focused on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet.</p><div class="about-meta"><span><i></i> AI systems</span><span><i></i> Product engineering</span><span><i></i> Automation</span></div></div>
+<section class="wrap about-layout"><div class="about-copy">
+<article class="about-panel rv"><p class="eyebrow">01 / What I build</p><h2>From model output to useful software.</h2><p>I work across AI and agentic systems, backend APIs, full-stack applications, conversational automation and developer tooling. The interface matters, but so do architecture, observability, security boundaries and recovery when something breaks.</p></article>
+<article class="about-panel rv"><p class="eyebrow">02 / How I think</p><h2>Understand the failure path.</h2><p>I prefer to trace how a system actually behaves before changing it. I test assumptions, look for edge cases, and value reliable behavior over flashy demos. I’m building my foundations in computer science while exploring the deeper engineering behind intelligent systems.</p></article>
+<article class="about-panel rv"><p class="eyebrow">03 / Direction</p><h2>Software first. Hardware next.</h2><p>My current focus is AI engineering, automation and full-stack product development. Over time, I want to carry that knowledge further into robotics and hardware-aware systems.</p><a class="btn mag" href="projects.html">Explore the projects <span aria-hidden="true">↗</span></a></article></div>
+<section class="terminal-shell rv" aria-labelledby="terminal-title"><div class="terminal-top"><div class="terminal-brand"><span class="terminal-mark">M/</span><div><strong id="terminal-title">MIRACLE / INTERACTIVE PROFILE</strong><small>LOCAL INTERFACE · READ-ONLY</small></div></div><div class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></div></div>
+<div class="terminal-toolbar"><label for="terminal-language">LANGUAGE</label><div class="terminal-select-wrap"><select id="terminal-language" aria-label="Programming language"></select><span aria-hidden="true">⌄</span></div><span class="terminal-status"><i></i> READY</span></div>
+<div class="terminal-code-head"><span id="terminal-file">profile.py</span><span id="terminal-lang-label">PYTHON</span></div><pre class="terminal-code" aria-live="polite"><code id="terminal-code"></code></pre><div class="terminal-divider"></div>
+<div class="terminal-output-label"><span>OUTPUT / SESSION</span><button type="button" id="terminal-clear">CLEAR</button></div>
+<div class="terminal-output" id="terminal-output" role="log" aria-live="polite"><p><span class="term-muted">miracle@portfolio:~$</span> <span>help</span></p><p>Interactive profile ready. Enter a command below.</p><p class="term-muted">Commands: help · about · projects · principles · now · clear</p></div>
+<form class="terminal-input-row" id="terminal-form"><label for="terminal-command" aria-label="Terminal command">›</label><input id="terminal-command" name="command" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type help and press Enter"><button type="submit">RUN <span aria-hidden="true">↗</span></button></form><p class="terminal-footnote">A small, interactive profile — no shell access and no commands are sent to a server.</p></section></section>
+"""
+page("about.html", f"About — {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup)
 stack_chips = "".join(f'<span class="tag">{ic(i)}{esc(n)}</span>' for n, i in SITE["stack"])
 prow_links = "".join(f'<li><a href="{p["slug"]}.html">{esc(p["name"])}</a> — {esc(p["purpose"])}</li>' for p in PROJECTS)
 page("resume.html", f"Resume — {NAME}", "resume", "Summary, focus areas and projects.",
