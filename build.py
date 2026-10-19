@@ -150,7 +150,7 @@ tech = f'''<section class="sec tech" style="padding-top:0"><div class="wrap"><p 
 <div class="mq" role="group" aria-label="Technologies used across my projects">{tech_row(False)}{tech_row(True)}</div>
 <div class="wrap"><button class="btn pz" id="pause" aria-pressed="false">{ic("pause","ic pa")}{ic("play","ic pl")}<span class="lbl">Pause motion</span></button></div></section>'''
 cta = f'''<section class="wrap sec" style="padding-top:0"><h2 class="ctaBig rv">Let’s build something.</h2><div class="cta"><a class="btn pri mag up" data-c="wa" href="#">{ic("wa")}Message on WhatsApp</a><a class="btn mag up" data-c="mail" href="#">{ic("mail")}Send an email</a></div></section>'''
-page("index.html", f"{NAME} — Software engineer", "home", "Software engineer building AI agents, backend systems and developer tooling.", hero + band + build + code + work + tech + cta)
+page("portfolio.html", f"Portfolio — {NAME}", "portfolio", "Selected software projects and engineering work by Miracle Agbebaku.", hero + band + build + code + work + tech + cta)
 
 # ---- projects list -----------------------------------------------------
 rows = "".join(f'''<li data-d="{STATE_CLASS[p["state"]]}"><a class="prow" href="{p["slug"]}.html"><span class="pn">{pnum(i)}</span><h3 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><span class="side">{chip(p["state"], p.get("check"))}<span class="ar">{ic("right")}</span></span></a></li>''' for i, p in enumerate(PROJECTS))
