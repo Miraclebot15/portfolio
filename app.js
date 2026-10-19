@@ -84,6 +84,7 @@ $$('[data-c]').forEach(function(l){l.href=map[l.dataset.c];if(l.dataset.c!=='mai
 })();
 
 
+(function(){
 /* About profile terminal: local command interpreter, never a system shell. */
 var termLang=$('terminal-language'),termCode=$('terminal-code'),termFile=$('terminal-file'),termLabel=$('terminal-lang-label'),termOut=$('terminal-output'),termForm=$('terminal-form'),termInput=$('terminal-command');
 if(termLang&&termCode&&termOut&&termForm){
@@ -178,3 +179,5 @@ langPanel.addEventListener('keydown',function(e){if(e.key==='Escape'){closeLang(
 document.addEventListener('click',function(e){if(!langRoot.contains(e.target))closeLang()});
 var cookieMatch=document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([^;]+)/);if(cookieMatch&&langCurrent)langCurrent.textContent=cookieMatch[1].toUpperCase();
 }
+
+})();
