@@ -283,7 +283,7 @@ html{scroll-behavior:auto}
 .terminal-input-row>label{font-size:21px;color:var(--lang-accent)}
 .terminal-input-row input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:#e5ecef;font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .terminal-input-row input::placeholder{color:#657780}
-.terminal-input-row button{min-height:38px;flex:none;border-radius:8px;padding:0 12px;background:var(--lang-accent);color:#101719;font-weight:800;font-size:10px;letter-spacing:.06em;transition:filter .2s}
+.terminal-input-row button{min-height:44px;flex:none;border-radius:8px;padding:0 12px;background:var(--lang-accent);color:#101719;font-weight:800;font-size:10px;letter-spacing:.06em;transition:filter .2s}
 .terminal-input-row button:hover{filter:brightness(1.12)}
 .terminal-footnote{padding:0 20px 18px;margin:0;color:#667982;font-size:10px;line-height:1.6}
 @media(max-width:900px){.about-layout{grid-template-columns:1fr}.terminal-shell{position:relative;top:auto;grid-row:1}.about-copy{grid-row:2}}
