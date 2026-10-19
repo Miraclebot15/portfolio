@@ -233,3 +233,59 @@ html{scroll-behavior:auto}
 @media (prefers-reduced-motion:reduce){.band .dup{display:none}}
 
 .gate .slot{fill:none;stroke:var(--rule);stroke-width:2;stroke-dasharray:5 5}
+
+
+/* About / branded interactive terminal -------------------------------- */
+:root{--accent:#74e0c2}
+.accent-word{color:var(--acc)}
+.about-head{padding-bottom:clamp(32px,6vw,72px)}
+.about-head h1{max-width:13ch;font-size:clamp(44px,8vw,104px);line-height:.94;letter-spacing:-.055em;margin-bottom:24px}
+.about-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.about-meta span{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--rule);border-radius:999px;padding:9px 13px;font-size:13px;color:var(--mute)}
+.about-meta i,.terminal-status i{width:7px;height:7px;display:inline-block;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 13%,transparent)}
+.about-layout{display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:clamp(26px,5vw,72px);align-items:start;padding-bottom:clamp(64px,10vw,120px)}
+.about-copy{display:grid;gap:14px}
+.about-panel{padding:26px 0 30px;border-top:1px solid var(--rule)}
+.about-panel .eyebrow{font-size:12px;letter-spacing:.12em}
+.about-panel h2{font-size:clamp(26px,3vw,40px);line-height:1.02;margin-bottom:16px}
+.about-panel p:not(.eyebrow){font-size:16px;line-height:1.8;color:var(--mute);max-width:56ch}
+.about-panel .btn{margin-top:10px}
+.terminal-shell{--lang-accent:#75b9e7;min-width:0;background:#0b0f12;color:#e5ecef;border:1px solid #29343a;border-radius:22px;overflow:hidden;box-shadow:0 22px 80px #0002;position:sticky;top:90px;font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.terminal-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid #29343a;background:#10161a}
+.terminal-brand{display:flex;align-items:center;gap:12px;min-width:0}
+.terminal-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--lang-accent);color:var(--lang-accent);font-weight:800;font-size:15px;border-radius:12px;flex:none;transition:color .2s,border-color .2s}
+.terminal-brand strong,.terminal-brand small{display:block;overflow-wrap:anywhere}
+.terminal-brand strong{font-size:11px;letter-spacing:.08em;color:#edf3f5}
+.terminal-brand small{font-size:10px;letter-spacing:.1em;color:#7f929b;margin-top:3px}
+.terminal-lights{display:flex;gap:5px;flex:none}
+.terminal-lights i{width:7px;height:7px;border-radius:50%;background:#354148}
+.terminal-lights i:first-child{background:#e1a26d}
+.terminal-toolbar{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #202b30;flex-wrap:wrap}
+.terminal-toolbar>label{font-size:10px;letter-spacing:.12em;color:#83959d}
+.terminal-select-wrap{position:relative;min-width:0}
+.terminal-select-wrap select{appearance:none;background:#151e23;color:#e5ecef;border:1px solid #34434b;border-radius:10px;min-height:42px;max-width:min(250px,55vw);padding:0 34px 0 12px;font:500 13px inherit;cursor:pointer;outline-offset:3px}
+.terminal-select-wrap select:focus-visible{outline:2px solid var(--lang-accent)}
+.terminal-select-wrap>span{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--lang-accent)}
+.terminal-status{margin-left:auto;display:inline-flex;align-items:center;gap:8px;color:#90a49d;font-size:10px;letter-spacing:.1em}
+.terminal-status i{width:6px;height:6px}
+.terminal-code-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px 0;color:#83959d;font-size:10px;letter-spacing:.1em}
+#terminal-lang-label{color:var(--lang-accent);text-align:right}
+.terminal-code{margin:0;min-height:220px;max-height:320px;overflow:auto;padding:18px 20px 22px;white-space:pre;tab-size:4;color:#d8e3e7;font:12px/1.85 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;scrollbar-color:#35464f #0b0f12}
+.terminal-code code{font:inherit}
+.terminal-divider{height:1px;background:#29343a}
+.terminal-output-label{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 4px;color:#7f929b;font-size:10px;letter-spacing:.1em}
+.terminal-output-label button{color:#a9b7bd;min-height:36px;padding:0 10px;border-radius:7px}
+.terminal-output-label button:hover{background:#192328;color:#fff}
+.terminal-output{padding:8px 20px 14px;max-height:170px;min-height:84px;overflow:auto;color:#cbd7dc;font-size:12px;scrollbar-color:#35464f #0b0f12}
+.terminal-output p{margin:0 0 6px;overflow-wrap:anywhere}
+.term-muted{color:#8ba19d}
+.terminal-input-row{display:flex;align-items:center;gap:10px;margin:0 14px 12px;padding:6px 7px 6px 13px;background:#11191d;border:1px solid #2c3b42;border-radius:12px;min-height:52px}
+.terminal-input-row>label{font-size:21px;color:var(--lang-accent)}
+.terminal-input-row input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:#e5ecef;font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.terminal-input-row input::placeholder{color:#657780}
+.terminal-input-row button{min-height:38px;flex:none;border-radius:8px;padding:0 12px;background:var(--lang-accent);color:#101719;font-weight:800;font-size:10px;letter-spacing:.06em;transition:filter .2s}
+.terminal-input-row button:hover{filter:brightness(1.12)}
+.terminal-footnote{padding:0 20px 18px;margin:0;color:#667982;font-size:10px;line-height:1.6}
+@media(max-width:900px){.about-layout{grid-template-columns:1fr}.terminal-shell{position:relative;top:auto;grid-row:1}.about-copy{grid-row:2}}
+@media(max-width:480px){.terminal-shell{border-radius:16px;margin-inline:-2px}.terminal-top{padding:14px}.terminal-toolbar{gap:8px;padding:11px 13px}.terminal-code{padding:16px 14px;font-size:11px;min-height:190px}.terminal-code-head{padding-inline:14px}.terminal-output{padding-inline:14px}.terminal-output-label{padding-inline:14px}.terminal-footnote{padding-inline:14px}.terminal-brand strong{font-size:10px}.terminal-select-wrap select{max-width:48vw}.terminal-input-row{margin-inline:9px}.about-panel{padding-block:22px}}
+@media(prefers-reduced-motion:reduce){.terminal-mark,.terminal-input-row button{transition:none}}
