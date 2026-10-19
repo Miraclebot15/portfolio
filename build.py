@@ -19,7 +19,9 @@ def ic(n, cls="ic"):
     return f'<svg class="{cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="{ICONS[n]}"/></svg>'
 def esc(s): return html.escape(s, quote=True)
 def write(fn, s): open(os.path.join(ROOT, fn), "w", encoding="utf-8").write(s)
-def chip(state): return f'<span class="chip {STATE_CLASS[state]}"><i></i>{state}</span>'
+def chip(state, check=None):
+    c = f' data-check="{check}" aria-live="polite"' if check else ""
+    return f'<span class="chip {STATE_CLASS[state]}"{c}><i></i><b class="lbl">{state}</b></span>'
 
 # ---- code highlighting -------------------------------------------------
 def highlight(code, lang):
@@ -112,7 +114,7 @@ def pnum(i): return f"{i+1:02d}"
 
 def pcard(i, p):
     live = f'<a class="btn up" href="{p["url"]}" target="_blank" rel="noopener noreferrer">{esc(p.get("link_label","Open live"))} {ic("ext")}<span class="sr">(opens in a new tab)</span></a>' if p.get("url") else ""
-    return f'''<article class="pcard" style="--i:{i}"><div><span class="pn">{pnum(i)}</span><h3>{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><div class="chips">{chip(p["state"])}</div><div class="go"><a class="btn pri" href="{p["slug"]}.html">View project {ic("right")}</a>{live}</div></div><div class="mo">{motif(p["motif"])}</div></article>'''
+    return f'''<article class="pcard" style="--i:{i}"><div><span class="pn">{pnum(i)}</span><h3>{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><div class="chips">{chip(p["state"], p.get("check"))}</div><div class="go"><a class="btn pri" href="{p["slug"]}.html">View project {ic("right")}</a>{live}</div></div><div class="mo">{motif(p["motif"])}</div></article>'''
 
 # ---- home --------------------------------------------------------------
 snip = {k: open(os.path.join(ROOT, f"content/snippets/authorize.{k}"), encoding="utf-8").read().rstrip("\n") for k in ("py", "cpp")}
@@ -151,7 +153,7 @@ cta = f'''<section class="wrap sec" style="padding-top:0"><h2 class="ctaBig rv">
 page("index.html", f"{NAME} — Software engineer", "home", "Software engineer building AI agents, backend systems and developer tooling.", hero + band + build + code + work + tech + cta)
 
 # ---- projects list -----------------------------------------------------
-rows = "".join(f'''<li data-d="{STATE_CLASS[p["state"]]}"><a class="prow" href="{p["slug"]}.html"><span class="pn">{pnum(i)}</span><h3 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><span class="side">{chip(p["state"])}<span class="ar">{ic("right")}</span></span></a></li>''' for i, p in enumerate(PROJECTS))
+rows = "".join(f'''<li data-d="{STATE_CLASS[p["state"]]}"><a class="prow" href="{p["slug"]}.html"><span class="pn">{pnum(i)}</span><h3 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><span class="side">{chip(p["state"], p.get("check"))}<span class="ar">{ic("right")}</span></span></a></li>''' for i, p in enumerate(PROJECTS))
 page("projects.html", f"Projects — {NAME}", "projects", "Projects by Miracle Agbebaku: AI orchestration, messaging assistants, customer care, UI tooling and more.",
  f'''<div class="wrap phead"><p class="eyebrow">Work</p><h1>Projects</h1><p class="lede">What each project is for. Open one for the full picture.</p>
 <div class="filters" role="group" aria-label="Filter by status"><button data-f="all" aria-pressed="true">All</button><button data-f="live" aria-pressed="false">Live</button><button data-f="dev" aria-pressed="false">In development</button><button data-f="soon" aria-pressed="false">Coming soon</button></div><p class="count" id="cnt" aria-live="polite">{len(PROJECTS)} projects</p></div>
@@ -168,7 +170,7 @@ for i, p in enumerate(PROJECTS):
     nxt = PROJECTS[(i + 1) % len(PROJECTS)]
     live = f'<a class="btn pri up" href="{p["url"]}" target="_blank" rel="noopener noreferrer">{esc(p.get("link_label","Open live"))} {ic("ext")}<span class="sr">(opens in a new tab)</span></a>' if p.get("url") else ""
     pts = "".join(f"<li>{esc(x)}</li>" for x in p["points"])
-    body = f'''<div class="wrap phead"><a class="back" href="projects.html">{ic("right")}Projects</a><p class="eyebrow" style="display:flex">{pnum(i)}</p><h1 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h1><div class="chips" style="margin-bottom:18px">{chip(p["state"])}</div><p class="lede">{esc(p["purpose"])}</p><div class="cta" style="margin-top:6px">{live}</div></div>
+    body = f'''<div class="wrap phead"><a class="back" href="projects.html">{ic("right")}Projects</a><p class="eyebrow" style="display:flex">{pnum(i)}</p><h1 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h1><div class="chips" style="margin-bottom:{"6px" if p.get("check") else "18px"}">{chip(p["state"], p.get("check"))}</div>{"<p class=\"cap\" style=\"margin:0 0 18px\">" + esc(p.get("check_note", "Live status checks whether the deployed website responds.")) + "</p>" if p.get("check") else ""}<p class="lede">{esc(p["purpose"])}</p><div class="cta" style="margin-top:6px">{live}</div></div>
 <div class="wrap pgrid"><div><h2 class="h3s" style="margin-top:20px">About</h2><p class="lede" style="font-size:18px">{esc(p["summary"])}</p><h2 class="h3s">What it’s for</h2><ul class="plain">{pts}</ul>{("<h2 class=\"h3s\">Built with</h2>" + tech_tags(p["tech"])) if p.get("tech") else ""}{flow(p["flow"]) if p.get("flow") else ""}</div>
 <div class="side"><div class="motifbox">{motif(p["motif"])}</div></div></div>
 <div class="wrap" style="padding-bottom:50px"><a class="nextp" href="{nxt["slug"]}.html"><small>Next project</small><span>{esc(nxt["name"])}{ic("right")}</span></a></div>'''

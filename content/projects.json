@@ -2,9 +2,9 @@
  {
   "slug": "nexus-core",
   "name": "NEXUS CORE",
-  "state": "In development",
+  "state": "Live",
   "url": "https://nexus-core-psi-fawn.vercel.app/",
-  "link_label": "Open live app",
+  "link_label": "Open live UI",
   "motif": "nexus",
   "purpose": "A governance-first AI orchestration system where models propose plans and separate controls decide what is allowed to run.",
   "summary": "NEXUS CORE coordinates AI models, tools and specialized engines through a controlled execution architecture. A model may propose what should happen, but the system independently decides whether an action is permitted and how it is carried out. The aim is AI agents that are controllable, auditable and reliable, instead of agents that act on whatever a model outputs.",
@@ -51,13 +51,15 @@
      "Combines results into a final response."
     ]
    ]
-  }
+  },
+  "check": "/api/nexus-status",
+  "check_note": "Live status checks the deployed interface."
  },
  {
   "slug": "ella",
   "name": "ELLA",
   "state": "Live",
-  "url": "https://ella-bot-qgq0.onrender.com/",
+  "url": "https://ella-bot-ng2x.onrender.com/",
   "link_label": "Open live app",
   "motif": "ella",
   "purpose": "An AI assistant for WhatsApp that holds natural, context-aware conversations instead of rigid helpdesk replies.",
@@ -97,7 +99,8 @@
      "The answer goes back to the chat."
     ]
    ]
-  }
+  },
+  "check": "/api/ella-status"
  },
  {
   "slug": "carecore",
@@ -119,7 +122,8 @@
    "FastAPI",
    "PostgreSQL",
    "Stripe"
-  ]
+  ],
+  "check": "/api/carecore-status"
  },
  {
   "slug": "atelier",
