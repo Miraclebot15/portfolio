@@ -93,7 +93,7 @@ def page(fn, title, key, desc, body, nav=None, prog=False):
 </main>
 <div class="wrap"><footer class="ft"><span>© {SITE["year"]} {NAME}</span><div class="socs" role="group" aria-label="Contact links">{soc}</div></footer></div>
 <noscript><p style="text-align:center;color:var(--mute)">Contact links need JavaScript enabled.</p></noscript>
-<div id="google_translate_element" hidden></div><script>function googleTranslateElementInit(){if(window.google&&google.translate){new google.translate.TranslateElement({pageLanguage:"en",includedLanguages:"af,sq,am,ar,hy,az,eu,be,bn,bs,bg,ca,ceb,zh-CN,zh-TW,hr,cs,da,nl,eo,et,fi,fr,gl,ka,de,el,gu,ht,ha,he,hi,hu,is,id,ga,it,ja,jv,kn,kk,km,ko,ku,ky,lo,la,lv,lt,mk,ms,ml,mt,mi,mr,mn,my,ne,no,ps,fa,pl,pt,pa,ro,ru,sr,si,sk,sl,so,es,su,sw,sv,tg,ta,te,th,tr,uk,ur,uz,vi,cy,yi,yo,zu",autoDisplay:false},"google_translate_element");}}</script><script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script><script src="app.js"></script>
+<div id="google_translate_element" hidden></div><script>function googleTranslateElementInit(){{if(window.google&&google.translate){{new google.translate.TranslateElement({{pageLanguage:"en",includedLanguages:"af,sq,am,ar,hy,az,eu,be,bn,bs,bg,ca,ceb,zh-CN,zh-TW,hr,cs,da,nl,eo,et,fi,fr,gl,ka,de,el,gu,ht,ha,he,hi,hu,is,id,ga,it,ja,jv,kn,kk,km,ko,ku,ky,lo,la,lv,lt,mk,ms,ml,mt,mi,mr,mn,my,ne,no,ps,fa,pl,pt,pa,ro,ru,sr,si,sk,sl,so,es,su,sw,sv,tg,ta,te,th,tr,uk,ur,uz,vi,cy,yi,yo,zu",autoDisplay:false}},"google_translate_element");}}}}</script><script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script><script src="app.js"></script>
 </body>
 </html>
 ''')
