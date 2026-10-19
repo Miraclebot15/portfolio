@@ -263,7 +263,7 @@ html{scroll-behavior:auto}
 .terminal-toolbar{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #202b30;flex-wrap:wrap}
 .terminal-toolbar>label{font-size:10px;letter-spacing:.12em;color:#83959d}
 .terminal-select-wrap{position:relative;min-width:0}
-.terminal-select-wrap select{appearance:none;background:#151e23;color:#e5ecef;border:1px solid #34434b;border-radius:10px;min-height:42px;max-width:min(250px,55vw);padding:0 34px 0 12px;font:500 13px inherit;cursor:pointer;outline-offset:3px}
+.terminal-select-wrap select{appearance:none;background:#151e23;color:#e5ecef;border:1px solid #34434b;border-radius:10px;min-height:44px;max-width:min(250px,55vw);padding:0 34px 0 12px;font:500 13px inherit;cursor:pointer;outline-offset:3px}
 .terminal-select-wrap select:focus-visible{outline:2px solid var(--lang-accent)}
 .terminal-select-wrap>span{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--lang-accent)}
 .terminal-status{margin-left:auto;display:inline-flex;align-items:center;gap:8px;color:#90a49d;font-size:10px;letter-spacing:.1em}
@@ -274,7 +274,7 @@ html{scroll-behavior:auto}
 .terminal-code code{font:inherit}
 .terminal-divider{height:1px;background:#29343a}
 .terminal-output-label{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 4px;color:#7f929b;font-size:10px;letter-spacing:.1em}
-.terminal-output-label button{color:#a9b7bd;min-height:36px;padding:0 10px;border-radius:7px}
+.terminal-output-label button{color:#a9b7bd;min-height:44px;padding:0 10px;border-radius:7px}
 .terminal-output-label button:hover{background:#192328;color:#fff}
 .terminal-output{padding:8px 20px 14px;max-height:170px;min-height:84px;overflow:auto;color:#cbd7dc;font-size:12px;scrollbar-color:#35464f #0b0f12}
 .terminal-output p{margin:0 0 6px;overflow-wrap:anywhere}
