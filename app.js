@@ -162,6 +162,7 @@ var clearBtn=$('terminal-clear');if(clearBtn)clearBtn.addEventListener('click',f
 
 
 /* Compact searchable website translation picker. */
+var $=function(i){return document.getElementById(i)};
 var langRoot=$('site-language'),langTrigger=$('site-language-trigger'),langPanel=$('site-language-panel'),langSearch=$('site-language-search'),langOptions=$('site-language-options'),langCurrent=$('site-language-current');
 if(langRoot&&langTrigger&&langPanel&&langSearch&&langOptions){
 var siteLanguages=[
