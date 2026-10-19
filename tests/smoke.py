@@ -26,8 +26,8 @@ with sync_playwright() as p:
             errors = []
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.on("console", lambda m: errors.append(m.text) if m.type == "error" and "ERR_NAME" not in m.text else None)
-            page.goto(BASE + f)
-            page.wait_for_timeout(900)
+            page.goto(BASE + f, wait_until="domcontentloaded", timeout=15000)
+            page.wait_for_timeout(150)
             if page.evaluate("document.documentElement.scrollWidth > innerWidth"):
                 problems.append(f"{f} @{label}: horizontal overflow")
             small = page.evaluate("""[...document.querySelectorAll('a,button')].filter(e => e.offsetParent && !e.closest('.menu')
