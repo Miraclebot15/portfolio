@@ -86,6 +86,7 @@ $$('[data-c]').forEach(function(l){l.href=map[l.dataset.c];if(l.dataset.c!=='mai
 
 (function(){
 /* About profile terminal: local command interpreter, never a system shell. */
+var $=function(i){return document.getElementById(i)};
 var termLang=$('terminal-language'),termCode=$('terminal-code'),termFile=$('terminal-file'),termLabel=$('terminal-lang-label'),termOut=$('terminal-output'),termForm=$('terminal-form'),termInput=$('terminal-command');
 if(termLang&&termCode&&termOut&&termForm){
 var languages=[
