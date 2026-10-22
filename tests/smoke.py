@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
-"""Smoke test: console errors, horizontal overflow, tap-target size, broken links.
+"""Browser smoke test. Serves the site over HTTP, stubs the /api status checks, then verifies:
+console errors, horizontal overflow, tap-target size, broken internal links, and that the
+live-status chips show Live / Down / Status unavailable correctly.
 
 Requires:  pip install playwright && playwright install chromium
 Run from the repo root:  python3 tests/smoke.py
 """
-import glob, os, re, sys
+import functools, glob, http.server, json, os, re, sys, threading
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE = "file://" + ROOT + "/"
+class Quiet(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *args, **kwargs):
+        pass
+
+handler = functools.partial(Quiet, directory=ROOT)
+server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+BASE = f"http://127.0.0.1:{server.server_address[1]}/"
+
 pages = sorted(os.path.basename(f) for f in glob.glob(ROOT + "/*.html"))
 SIZES = [("320", 320), ("390", 390), ("820", 820), ("1440", 1440)]
 problems = []
@@ -18,11 +28,16 @@ for f in pages:  # internal links must exist
         if not h.startswith(("http", "mailto")) and not os.path.exists(os.path.join(ROOT, h)):
             problems.append(f"{f}: broken link {h}")
 
+def stub(status):
+    return lambda route: route.fulfill(status=200, content_type="application/json",
+                                       body=json.dumps({"status": status, "checkedAt": "2026-10-18T12:00:00Z"}))
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     for f in pages:
         for label, w in SIZES:
             page = browser.new_page(viewport={"width": w, "height": 800})
+            page.route("**/api/*-status", stub("live"))
             errors = []
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.on("console", lambda m: errors.append(m.text) if m.type == "error" and "ERR_NAME" not in m.text else None)
@@ -40,7 +55,26 @@ with sync_playwright() as p:
             for e in errors:
                 problems.append(f"{f} @{label}: console error: {e}")
             page.close()
+
+    # Live status behaviour on the projects page
+    for mode, expected in [("live", "Live"), ("down", "Down"), ("unknown", "Status unavailable")]:
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        page.route("**/api/*-status", stub(mode))
+        page.goto(BASE + "projects.html")
+        page.wait_for_timeout(800)
+        labels = page.evaluate("[...document.querySelectorAll('[data-check] .lbl')].map(e => e.textContent)")
+        if not labels or any(l != expected for l in labels):
+            problems.append(f"status '{mode}': expected every chip to read {expected!r}, got {labels}")
+        page.close()
+    page = browser.new_page(viewport={"width": 1440, "height": 900})  # endpoint failing entirely
+    page.route("**/api/*-status", lambda route: route.fulfill(status=500, body="error"))
+    page.goto(BASE + "projects.html")
+    page.wait_for_timeout(800)
+    labels = page.evaluate("[...document.querySelectorAll('[data-check] .lbl')].map(e => e.textContent)")
+    if not labels or any(l != "Status unavailable" for l in labels):
+        problems.append(f"status endpoint error: expected 'Status unavailable', got {labels}")
     browser.close()
 
-print("\n".join(problems) if problems else f"OK: {len(pages)} pages x {len(SIZES)} sizes, no problems")
+server.shutdown()
+print("\n".join(problems) if problems else f"OK: {len(pages)} pages x {len(SIZES)} sizes + live-status states, no problems")
 sys.exit(1 if problems else 0)

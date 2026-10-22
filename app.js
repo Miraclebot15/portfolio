@@ -23,10 +23,10 @@ menu.addEventListener('keydown',function(e){if(e.key==='Escape')setMenu(false)})
 $$('a',menu).forEach(function(a){a.addEventListener('click',function(){setMenu(false)})})}
 
 /* Reveal on scroll */
-var targets=$$('.rv,.gate,.motifbox,.mo,.pipe,.pcard');
+var targets=$$('.rv,.gate,.motifbox,.mo,.pipe,.pcard,.ph');
 if(!('IntersectionObserver' in window)||reduce){targets.forEach(function(t){t.classList.add('in')})}
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}else if(e.target.classList.contains('gate')){e.target.classList.remove('in')}})},{threshold:.18});
-targets.forEach(function(t){io.observe(t)})}
+targets.forEach(function(t){io.observe(t)});setTimeout(function(){$$('.ph').forEach(function(p){p.classList.add('in')})},2600)}
 
 /* Rotating typed word */
 var rot=document.querySelector('.rot');
@@ -76,6 +76,21 @@ cnt.textContent=n+(n===1?' project':' projects')})})}
 
 /* Architecture stages */
 $$('.st .hb').forEach(function(b){b.addEventListener('click',function(){b.setAttribute('aria-expanded',b.getAttribute('aria-expanded')==='true'?'false':'true')})});
+
+/* Live website status: polls the same-origin /api/*-status functions */
+var chks=$$('[data-check]');
+if(chks.length){var eps={};chks.forEach(function(c){(eps[c.dataset.check]=eps[c.dataset.check]||[]).push(c)});
+function paint(list,st,time){list.forEach(function(c){c.className='chip '+(st==='live'?'live':st==='down'?'down':st==='checking'?'checking':'unknown');
+c.querySelector('.lbl').textContent={live:'Live',down:'Down',checking:'Checking…'}[st]||'Status unavailable';c.title=time?'Checked '+time:'';c.dataset.status=st})}
+function poll(){Object.keys(eps).forEach(function(u){fetch(u,{cache:'no-store',headers:{Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('x');return r.json()}).then(function(s){paint(eps[u],s.status,new Date(s.checkedAt||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}))}).catch(function(){paint(eps[u],'unknown')})})}
+Object.keys(eps).forEach(function(u){paint(eps[u],'checking')});poll();
+setInterval(function(){if(document.visibilityState==='visible')poll()},60000);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')poll()})}
+
+
+
+/* Scrollable regions must be reachable by keyboard */
+['.terminal-code','.terminal-output'].forEach(function(s){var el=document.querySelector(s);if(el&&!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0')});
 
 /* Contact links are assembled here, not written in the HTML */
 var m=['miracleagbebaku122','gmail.com'],w='2349021637905',x='MiracleTechX',ig='miracle001992',gh='Miraclebot15';

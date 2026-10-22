@@ -152,6 +152,20 @@ tech = f'''<section class="sec tech" style="padding-top:0"><div class="wrap"><p 
 cta = f'''<section class="wrap sec" style="padding-top:0"><h2 class="ctaBig rv">Let’s build something.</h2><div class="cta"><a class="btn pri mag up" data-c="wa" href="#">{ic("wa")}Message on WhatsApp</a><a class="btn mag up" data-c="mail" href="#">{ic("mail")}Send an email</a></div></section>'''
 page("portfolio.html", f"Portfolio — {NAME}", "portfolio", "Selected software projects and engineering work by Miracle Agbebaku.", hero + band + build + code + work + tech + cta)
 
+
+# ---- photos (responsive WebP with JPEG fallback) -------------------------
+def photo(name, alt, ratio, sizes, eager=False, caption=""):
+    w, h = ratio
+    cap = f"<figcaption>{esc(caption)}</figcaption>" if caption else ""
+    load = 'loading="eager" fetchpriority="high"' if eager else 'loading="lazy"'
+    return (f'<figure class="ph" style="--ar:{w}/{h}"><picture>'
+            f'<source type="image/webp" srcset="assets/images/{name}-640.webp 640w, assets/images/{name}-960.webp 960w" sizes="{sizes}">'
+            f'<img src="assets/images/{name}-960.jpg" width="960" height="{round(960*h/w)}" alt="{esc(alt)}" {load} decoding="async"></picture>{cap}</figure>')
+HERO_PHOTO = photo("miracle-hero", "Portrait of Miracle Agbebaku", (4, 5), "(max-width: 900px) 60vw, 300px", eager=True)
+ABOUT_PHOTO = photo("miracle-about", "Miracle Agbebaku", (1, 1), "(max-width: 900px) 90vw, 420px", caption="Miracle Agbebaku")
+landing = open(os.path.join(ROOT, "content/landing.html"), encoding="utf-8").read().replace("{PHOTO_HERO}", '<div class="visual-core visual-photo">' + HERO_PHOTO + '</div>')
+page("index.html", f"{NAME} — Software & AI Systems", "home", "Miracle Agbebaku builds AI systems, software products, automation and the engineering behind them.", landing)
+
 # ---- projects list -----------------------------------------------------
 rows = "".join(f'''<li data-d="{STATE_CLASS[p["state"]]}"><a class="prow" href="{p["slug"]}.html"><span class="pn">{pnum(i)}</span><h3 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><span class="side">{chip(p["state"], p.get("check"))}<span class="ar">{ic("right")}</span></span></a></li>''' for i, p in enumerate(PROJECTS))
 page("projects.html", f"Projects — {NAME}", "projects", "Projects by Miracle Agbebaku: AI orchestration, messaging assistants, customer care, UI tooling and more.",
@@ -179,7 +193,7 @@ for i, p in enumerate(PROJECTS):
 # ---- other pages -------------------------------------------------------
 def ph(eyebrow, h, lede=""): return f'<div class="wrap phead"><p class="eyebrow">{eyebrow}</p><h1>{h}</h1>{f"<p class=\"lede\">{lede}</p>" if lede else ""}</div>'
 about_markup = """
-<div class="wrap phead about-head"><p class="eyebrow">About / system profile</p><h1>Built with intent.<br><span class="accent-word">Engineered to work.</span></h1><p class="lede">I’m Miracle Agbebaku — a developer focused on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet.</p><div class="about-meta"><span><i></i> AI systems</span><span><i></i> Product engineering</span><span><i></i> Automation</span></div></div>
+<div class="wrap phead about-head has-photo"><div class="about-intro"><p class="eyebrow">About / system profile</p><h1>Built with intent.<br><span class="accent-word">Engineered to work.</span></h1><p class="lede">I’m Miracle Agbebaku — a developer focused on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet.</p><div class="about-meta"><span><i></i> AI systems</span><span><i></i> Product engineering</span><span><i></i> Automation</span></div></div>{ABOUT_PHOTO}</div>
 <section class="wrap about-layout"><div class="about-copy">
 <article class="about-panel rv"><p class="eyebrow">01 / What I build</p><h2>From model output to useful software.</h2><p>I work across AI and agentic systems, backend APIs, full-stack applications, conversational automation and developer tooling. The interface matters, but so do architecture, observability, security boundaries and recovery when something breaks.</p></article>
 <article class="about-panel rv"><p class="eyebrow">02 / How I think</p><h2>Understand the failure path.</h2><p>I prefer to trace how a system actually behaves before changing it. I test assumptions, look for edge cases, and value reliable behavior over flashy demos. I’m building my foundations in computer science while exploring the deeper engineering behind intelligent systems.</p></article>
@@ -191,7 +205,7 @@ about_markup = """
 <div class="terminal-output" id="terminal-output" role="log" aria-live="polite"><p><span class="term-muted">miracle@portfolio:~$</span> <span>help</span></p><p>Interactive profile ready. Enter a command below.</p><p class="term-muted">Commands: help · about · projects · principles · now · clear</p></div>
 <form class="terminal-input-row" id="terminal-form"><label for="terminal-command" aria-label="Terminal command">›</label><input id="terminal-command" name="command" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type help and press Enter"><button type="submit">RUN <span aria-hidden="true">↗</span></button></form><p class="terminal-footnote">A small, interactive profile — no shell access and no commands are sent to a server.</p></section></section>
 """
-page("about.html", f"About — {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup)
+page("about.html", f"About — {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup.replace("{ABOUT_PHOTO}", ABOUT_PHOTO))
 stack_chips = "".join(f'<span class="tag">{ic(i)}{esc(n)}</span>' for n, i in SITE["stack"])
 prow_links = "".join(f'<li><a href="{p["slug"]}.html">{esc(p["name"])}</a> — {esc(p["purpose"])}</li>' for p in PROJECTS)
 page("resume.html", f"Resume — {NAME}", "resume", "Summary, focus areas and projects.",
