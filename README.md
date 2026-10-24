@@ -1,6 +1,6 @@
 <div align="center">
 
-# Miracle Agbebaku — Portfolio
+# Miracle Agbebaku: Portfolio
 
 **A hand-built, framework-free portfolio with a content-driven static generator, a motion system and typed-code storytelling.**
 
@@ -149,17 +149,28 @@ Defined as CSS custom properties at the top of `styles.css`.
 
 | Token | Dark | Light |
 | --- | --- | --- |
-| `--bg` | `#0e1114` | `#f4f6f7` |
-| `--bg2` | `#14181c` | `#e9eef0` |
-| `--card` | `#161b20` | `#ffffff` |
-| `--ink` | `#eef2f4` | `#12181c` |
-| `--mute` | `#9aa7b0` | `#4a5861` |
-| `--rule` | `#2a3239` | `#c4cdd2` |
-| `--acc` | `#6fe0c0` | `#0a7a62` |
+| `--bg` | `#0b0b0d` | `#f2eee6` |
+| `--bg2` | `#121214` | `#e8e3d8` |
+| `--card` | `#17171a` | `#faf7f0` |
+| `--ink` | `#f2eee6` | `#121212` |
+| `--mute` | `#a8a398` | `#5a554b` |
+| `--rule` | `#2b2a27` | `#cdc6b6` |
+| `--acc` (signal vermilion) | `#ff5a36` | `#c93810` |
+| `--ok` (live status only) | `#3ddc84` | `#16894a` |
 
-- **Type:** Bricolage Grotesque for display, Hanken Grotesk for text, with system fallbacks. Code uses the platform monospace stack.
+- **Type:** Instrument Serif for display (with an italic accent), Geist for text and Geist Mono for labels and code, each with system fallbacks. Italic accent words use the `.it` class.
 - **Theme:** a tiny inline script in each page `<head>` applies the saved or system theme before first paint. Without JavaScript, the system preference is used.
 - **Status chips:** `Live` (filled dot), `In development` (half dot), `Coming soon` (dashed ring). Status is always a text label as well as a shape.
+
+## Home page choreography
+
+| Piece | What it does | Fallback |
+| --- | --- | --- |
+| Hero headline | Masked line-by-line reveal | Instant, fully visible |
+| Hero photo | Pointer tilt, soft spotlight and light scroll parallax (fine pointers only) | Static photo |
+| Approach story | Pinned on large screens; scroll position drives the token and the active step | Stacked, all steps visible on phones, short screens and reduced motion |
+| Project rail | Scroll-snap carousel with arrows, progress bar, mouse drag and a card spotlight | Native horizontal scrolling |
+| Technology marquee | Two opposite rows, pausable | Static wrapped list |
 
 ## Motion system
 
@@ -176,9 +187,13 @@ Rules the code follows:
 
 - Animate `transform` and `opacity` wherever possible.
 - Continuous animations only run while visible (the hero illustration pauses off-screen). Marquees can be paused with the on-page control and pause on hover.
-- Typed text types once, can be skipped, and the full code is always available to assistive technology.
+- Typed text types once, and the full code is always available to assistive technology.
 - Navigation is never blocked while a transition plays.
 - With `prefers-reduced-motion`, animation and transitions are effectively removed, marquees become static wrapped lists, the typed code appears complete and page transitions are off.
+
+## Translation
+
+The language picker uses Google Translate's engine, but all of Google's own interface (top banner, tooltips, highlights) is hidden with CSS and removed by a small observer in `app.js`. The picker keeps its attribution line. Code samples, names and the language list are marked `translate="no"`.
 
 ## Accessibility
 

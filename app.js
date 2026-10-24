@@ -1,5 +1,6 @@
 (function(){
 var d=document.documentElement,$=function(i){return document.getElementById(i)},$$=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+var $$=function(q,r){return [].slice.call((r||document).querySelectorAll(q))};
 var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 d.classList.add('js');
 
@@ -23,7 +24,7 @@ menu.addEventListener('keydown',function(e){if(e.key==='Escape')setMenu(false)})
 $$('a',menu).forEach(function(a){a.addEventListener('click',function(){setMenu(false)})})}
 
 /* Reveal on scroll */
-var targets=$$('.rv,.gate,.motifbox,.mo,.pipe,.pcard,.ph');
+var targets=$$('.rv,.gate,.motifbox,.mo,.pipe,.pcard,.ph,.rcard');
 if(!('IntersectionObserver' in window)||reduce){targets.forEach(function(t){t.classList.add('in')})}
 else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}else if(e.target.classList.contains('gate')){e.target.classList.remove('in')}})},{threshold:.18});
 targets.forEach(function(t){io.observe(t)});setTimeout(function(){$$('.ph').forEach(function(p){p.classList.add('in')})},2600)}
@@ -92,6 +93,46 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
 /* Scrollable regions must be reachable by keyboard */
 ['.terminal-code','.terminal-output'].forEach(function(s){var el=document.querySelector(s);if(el&&!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0')});
 
+
+/* Header solid state once the page scrolls */
+(function(){var h=document.querySelector('header.top');if(!h)return;function f(){h.classList.toggle('solid',scrollY>16)}f();addEventListener('scroll',f,{passive:true})})();
+
+/* Hero: pointer spotlight, photo tilt and gentle parallax (fine pointers only) */
+(function(){var hero=document.querySelector('[data-hero]');if(!hero||reduce)return;
+var fig=hero.querySelector('.hero2-photo'),tilt=fig&&fig.querySelector('.tilt'),fine=matchMedia('(hover:hover) and (pointer:fine)').matches,raf=0,px=0,py=0;
+if(fine){hero.addEventListener('pointermove',function(e){px=e.clientX;py=e.clientY;if(raf)return;raf=requestAnimationFrame(function(){raf=0;var r=hero.getBoundingClientRect();hero.style.setProperty('--mx',((px-r.left)/r.width*100).toFixed(1)+'%');hero.style.setProperty('--my',((py-r.top)/r.height*100).toFixed(1)+'%');
+if(tilt){var b=fig.getBoundingClientRect(),dx=(px-(b.left+b.width/2))/(innerWidth/2),dy=(py-(b.top+b.height/2))/(innerHeight/2);tilt.style.setProperty('--ry',(dx*6).toFixed(2)+'deg');tilt.style.setProperty('--rx',(-dy*5).toFixed(2)+'deg')}})});
+hero.addEventListener('pointerleave',function(){if(tilt){tilt.style.setProperty('--rx','0deg');tilt.style.setProperty('--ry','0deg')}})}
+if(fig){var t=0;addEventListener('scroll',function(){if(t)return;t=requestAnimationFrame(function(){t=0;var y=scrollY;if(y<innerHeight*1.2)fig.style.transform='translateY('+(y*.07).toFixed(1)+'px)'})},{passive:true})}})();
+
+/* Approach: scroll-driven story (pinned on large screens, static elsewhere) */
+(function(){var story=document.querySelector('[data-story]');if(!story)return;
+var steps=[].slice.call(story.querySelectorAll('.step')),flow=story.querySelector('.flow'),mq=matchMedia('(min-width:901px)'),raf=0;
+function ty(p){return p<.33?128*(p/.33):p<.66?128:128+152*((p-.66)/.34)}
+function paint(p,s){steps.forEach(function(el,i){el.classList.toggle('on',i===s)});flow.dataset.s=s;flow.style.setProperty('--ty',ty(p).toFixed(1)+'px')}
+function update(){raf=0;if(!mq.matches||reduce){steps.forEach(function(el){el.classList.add('on')});flow.dataset.s=2;flow.style.setProperty('--ty','280px');return}
+var r=story.getBoundingClientRect(),span=r.height-innerHeight,p=span>0?Math.min(1,Math.max(0,-r.top/span)):0;paint(p,p<.33?0:p<.66?1:2)}
+function req(){if(!raf)raf=requestAnimationFrame(update)}
+addEventListener('scroll',req,{passive:true});addEventListener('resize',req);update()})();
+
+/* Project rail: buttons, progress bar, mouse drag, card spotlight */
+(function(){var rail=document.getElementById('rail');if(!rail)return;
+var bar=document.querySelector('.rail-bar i'),prev=document.querySelector('.rail-btn.prev'),next=document.querySelector('.rail-btn.next');
+function upd(){var max=rail.scrollWidth-rail.clientWidth,vis=rail.clientWidth/rail.scrollWidth,p=max>0?rail.scrollLeft/max:0;bar.style.setProperty('--w',(vis*100).toFixed(1)+'%');bar.style.setProperty('--x',(p*(1/vis-1)*100).toFixed(1)+'%');prev.disabled=rail.scrollLeft<4;next.disabled=rail.scrollLeft>max-4}
+function step(d){var c=rail.querySelector('.rcard');rail.scrollBy({left:d*(c.offsetWidth+18),behavior:reduce?'auto':'smooth'})}
+prev.addEventListener('click',function(){step(-1)});next.addEventListener('click',function(){step(1)});
+rail.addEventListener('scroll',function(){requestAnimationFrame(upd)},{passive:true});addEventListener('resize',upd);upd();
+var down=false,sx=0,sl=0,moved=0;
+rail.addEventListener('pointerdown',function(e){if(e.pointerType!=='mouse'||e.button!==0)return;down=true;moved=0;sx=e.clientX;sl=rail.scrollLeft});
+addEventListener('pointermove',function(e){if(!down)return;var dx=e.clientX-sx;moved=Math.max(moved,Math.abs(dx));if(moved>5)rail.classList.add('drag');rail.scrollLeft=sl-dx});
+addEventListener('pointerup',function(){if(!down)return;down=false;rail.classList.remove('drag')});
+rail.addEventListener('click',function(e){if(moved>5){e.preventDefault();e.stopPropagation();moved=0}},true);
+$$('.rcard',rail).forEach(function(c){c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px')})})})();
+
+/* Google Translate injects a banner and shifts the page: remove both as soon as they appear */
+(function(){function kill(){document.querySelectorAll('iframe.skiptranslate,.skiptranslate>iframe,.VIpgJd-ZVi9od-ORHb-OEVmcd,#goog-gt-tt').forEach(function(n){n.style.setProperty('display','none','important')});if(document.body.style.top)document.body.style.setProperty('top','0','important')}
+new MutationObserver(kill).observe(document.body,{childList:true,attributes:true,attributeFilter:['style']});kill()})();
+
 /* Contact links are assembled here, not written in the HTML */
 var m=['miracleagbebaku122','gmail.com'],w='2349021637905',x='MiracleTechX',ig='miracle001992',gh='Miraclebot15';
 var map={mail:'mailto:'+m.join('@'),wa:'https://wa.me/'+w,x:'https://x.com/'+x,ig:'https://www.instagram.com/'+ig+'/',gh:'https://github.com/'+gh};
@@ -100,10 +141,10 @@ $$('[data-c]').forEach(function(l){l.href=map[l.dataset.c];if(l.dataset.c!=='mai
 
 
 (function(){
-/* About profile terminal: local command interpreter, never a system shell. */
-var $=function(i){return document.getElementById(i)};
-var termLang=$('terminal-language'),termCode=$('terminal-code'),termFile=$('terminal-file'),termLabel=$('terminal-lang-label'),termOut=$('terminal-output'),termForm=$('terminal-form'),termInput=$('terminal-command');
-if(termLang&&termCode&&termOut&&termForm){
+var $=function(i){return document.getElementById(i)},$$=function(q,r){return [].slice.call((r||document).querySelectorAll(q))},reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* About profile terminal: a local command interpreter, never a system shell. */
+var twRoot=$('terminal');
+if(twRoot){
 var languages=[
 ['Python','py','#75b9e7','def build_with_intent():\n    focus = ["AI systems", "backend", "automation"]\n    principle = "understand before changing"\n    return {"focus": focus, "principle": principle}'],
 ['JavaScript','js','#f0d45c','const focus = ["AI systems", "backend", "automation"];\nconst principle = "understand before changing";\n\nexport function buildWithIntent() {\n  return { focus, principle };\n}'],
@@ -159,22 +200,61 @@ var languages=[
 ['Nix','nix','#8eaed4','{\n  focus = [ "AI systems" "backend" "automation" ];\n  principle = "understand before changing";\n}'],
 ['WebAssembly','wat','#b4a3d9','(module\n  (func (export "main")\n    nop))']
 ];
-languages.forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[0];termLang.appendChild(o)});
-function renderCode(){var x=languages.find(function(l){return l[0]===termLang.value})||languages[0];termCode.textContent=x[3];termCode.style.setProperty('--lang-accent',x[2]);termFile.textContent='profile.'+x[1];termLabel.textContent=x[0].toUpperCase();document.querySelector('.terminal-shell').style.setProperty('--lang-accent',x[2])}
-termLang.addEventListener('change',renderCode);renderCode();
-var commandHelp='Available commands: help, about, projects, principles, now, clear.';
-function terminalWrite(cmd,lines){var p=document.createElement('p'),prompt=document.createElement('span');prompt.className='term-muted';prompt.textContent='miracle@portfolio:~$ ';p.appendChild(prompt);p.appendChild(document.createTextNode(cmd));termOut.appendChild(p);lines.forEach(function(line){var out=document.createElement('p');out.textContent=line;termOut.appendChild(out)});termOut.scrollTop=termOut.scrollHeight}
-function runCommand(raw){var cmd=raw.trim().toLowerCase();if(!cmd)return;if(cmd==='clear'){termOut.textContent='';return}var replies={
-help:['Available commands: help, about, projects, principles, now, clear.'],
-about:['Miracle Agbebaku — software developer focused on AI systems, agent orchestration, backend and full-stack engineering.'],
-projects:['Explore the dedicated Projects page for current project descriptions and status.','Use the “Explore the projects” link beside this terminal.'],
-principles:['Understand the system before changing it.','Keep boundaries explicit. Test assumptions and failure paths. Prefer reliable behavior over flashy demos.'],
-now:['Current focus: AI engineering, backend/full-stack product development and automation.','Long-term direction: robotics and hardware-aware systems.']
-};terminalWrite(raw,replies[cmd]||['Command not found: '+cmd+'. Type help to see available commands.'])}
-termForm.addEventListener('submit',function(e){e.preventDefault();runCommand(termInput.value);termInput.value='';termInput.focus()});
-var clearBtn=$('terminal-clear');if(clearBtn)clearBtn.addEventListener('click',function(){termOut.textContent='';termInput.focus()});
+var TOP=['Python','JavaScript','TypeScript','Go','Rust','C++','Java','SQL'];
+var HASH={Python:1,Ruby:1,Bash:1,PowerShell:1,Perl:1,R:1,Julia:1,YAML:1,Dockerfile:1,Nix:1,Elixir:1,Crystal:1,Nim:1,GraphQL:1,Markdown:1};
+var DASH={SQL:1,Haskell:1,Lua:1};
+var PCT={Erlang:1,MATLAB:1,Prolog:1};
+var SEMI={Lisp:1,Clojure:1,Assembly:1,WebAssembly:1};
+var KW=/^(?:def|class|return|import|from|as|if|elif|else|for|while|in|not|and|or|is|lambda|with|try|except|finally|raise|yield|async|await|const|let|var|function|export|default|new|this|type|interface|enum|extends|implements|public|private|protected|static|final|void|int|long|float|double|bool|boolean|string|char|struct|impl|fn|func|pub|mut|use|mod|match|package|using|namespace|template|trait|where|select|group|order|by|limit|insert|into|values|update|set|delete|create|table|true|false|null|nil|none|self|val|fun|object|when|begin|end|do|then|unless|echo|print|let|rec|module|open|defmodule|defp|fun|record|include|section|data|division|program|procedure|pragma|contract|uint256|string|memory|mapping|event|emit|msg|require)$/i;
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function hl(code,name){
+var cm=HASH[name]?'#[^\\n]*':DASH[name]?'--[^\\n]*':PCT[name]?'%[^\\n]*':SEMI[name]?';[^\\n]*':'\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/|#(?!include\\b)[^\\n]*';
+var rx=new RegExp('("(?:\\\\.|[^"\\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\\n])*\'|`(?:\\\\.|[^`\\\\])*`)|('+cm+')|(#include[^\\n]*)|(\\b\\d+(?:\\.\\d+)?\\b)|([A-Za-z_][A-Za-z0-9_]*)(?=\\()|(\\b[A-Za-z_][A-Za-z0-9_]*\\b)','g');
+return code.replace(rx,function(m,s,c,inc,n,f,w){
+if(s)return '<span class="s">'+esc(s)+'</span>';if(c)return '<span class="c">'+esc(c)+'</span>';if(inc)return '<span class="k">'+esc(inc)+'</span>';
+if(n)return '<span class="n">'+n+'</span>';if(f)return KW.test(f)?'<span class="k">'+f+'</span>':'<span class="f">'+f+'</span>';
+if(w&&KW.test(w))return '<span class="k">'+w+'</span>';return esc(m)})}
+var pre=$('tw-pre'),codeEl=pre.querySelector('code'),gut=$('tw-gut'),fileEl=$('tw-file'),sel=$('tw-all'),pills=$('tw-pills'),outEl=$('tw-out'),form=$('tw-form'),inp=$('tw-in'),copyB=$('tw-copy'),stateEl=$('tw-state');
+var current=languages[0],typeId=0;
+languages.forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[0];sel.appendChild(o)});
+TOP.forEach(function(n){var x=languages.find(function(l){return l[0]===n});if(!x)return;var b=document.createElement('button');b.type='button';b.className='tw-pill';b.textContent=n;b.setAttribute('aria-pressed','false');b.dataset.n=n;b.setAttribute('translate','no');pills.appendChild(b);b.addEventListener('click',function(){setLang(n,true)})});
+function textNodes(el){var w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT),a=[],n;while(n=w.nextNode())a.push(n);return a}
+function typeCode(){var id=++typeId,nodes=textNodes(codeEl),full=nodes.map(function(n){return n.nodeValue});if(reduce||!full.length)return;
+var car=document.createElement('i');car.className='caret';nodes.forEach(function(n){n.nodeValue=''});var ni=0,ci=0;
+(function step(){if(id!==typeId){car.remove();return}
+var budget=7;while(budget--&&ni<nodes.length){var s=full[ni];ci=Math.min(s.length,ci+1);nodes[ni].nodeValue=s.slice(0,ci);if(ci>=s.length){ni++;ci=0}}
+if(ni<nodes.length){nodes[ni].parentNode.insertBefore(car,nodes[ni]);requestAnimationFrame(step)}else{setTimeout(function(){if(id===typeId)car.remove()},1400)}})()}
+function setLang(name,animate){var x=languages.find(function(l){return l[0]===name})||languages[0];current=x;
+twRoot.style.setProperty('--lang-accent',x[2]);fileEl.textContent='profile.'+x[1];sel.value=x[0];
+$$('.tw-pill',pills).forEach(function(b){b.setAttribute('aria-pressed',b.dataset.n===x[0])});
+var src=x[3];codeEl.innerHTML=hl(src,x[0]);var n=src.split('\n').length,g='';for(var i=1;i<=n;i++)g+=i+(i<n?'\n':'');gut.textContent=g;
+pre.setAttribute('aria-label',x[0]+' code sample');if(animate)typeCode()}
+sel.addEventListener('change',function(){setLang(sel.value,true)});
+copyB.addEventListener('click',function(){var t=current[3];function done(){copyB.textContent='Copied';setTimeout(function(){copyB.textContent='Copy'},1500)}
+if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,function(){})}else{var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){}ta.remove()}});
+var projects=[];try{projects=JSON.parse($('project-data').textContent)}catch(e){}
+function addLine(parts,i){var p=document.createElement('p');p.style.setProperty('--i',i||0);(Array.isArray(parts)?parts:[parts]).forEach(function(x){if(typeof x==='string')p.appendChild(document.createTextNode(x));else if(x.mu){var s=document.createElement('span');s.className='mu';s.textContent=x.mu;p.appendChild(s)}else{var a=document.createElement('a');a.href=x.href;a.textContent=x.text;p.appendChild(a)}});outEl.appendChild(p)}
+var CMDS={
+help:function(){return [['Commands: help, about, projects, principles, now, links, clear'],[{mu:'Tab completes. Arrow keys move through history.'}]]},
+about:function(){return [['Miracle Agbebaku, software developer focused on AI systems, agent orchestration, backend and full-stack engineering.']]},
+projects:function(){return projects.map(function(p){return [{text:p.name,href:p.slug+'.html'},{mu:'  '+p.state}]}).concat([[{mu:'Open one to read what it is for.'}]])},
+principles:function(){return [['Understand the system before changing it.'],['Keep boundaries explicit. Test assumptions and failure paths.'],['Prefer reliable behavior over flashy demos.']]},
+now:function(){return [['Current focus: AI engineering, backend and full-stack product development, and automation.'],['Long-term direction: robotics and hardware-aware systems.']]},
+links:function(){return [[{text:'Projects',href:'projects.html'}],[{text:'Resume',href:'resume.html'}],[{text:'Contact',href:'contact.html'}]]}};
+var history=[],hi=0;
+function run(raw){var cmd=raw.trim().toLowerCase();if(!cmd)return;history.push(raw.trim());hi=history.length;
+if(cmd==='clear'){outEl.textContent='';return}
+var p=document.createElement('p');var pr=document.createElement('span');pr.className='pr';pr.textContent='miracle@portfolio ~ $ ';p.appendChild(pr);p.appendChild(document.createTextNode(raw.trim()));outEl.appendChild(p);
+var lines=CMDS[cmd]?CMDS[cmd]():[['Command not found: '+cmd+'. Type help to see what is available.']];lines.forEach(function(l,i){addLine(l,i+1)});
+while(outEl.children.length>70)outEl.removeChild(outEl.firstChild);outEl.scrollTop=outEl.scrollHeight}
+form.addEventListener('submit',function(e){e.preventDefault();run(inp.value);inp.value='';inp.focus()});
+$$('.tw-chip').forEach(function(b){b.addEventListener('click',function(){run(b.dataset.cmd)})});
+inp.addEventListener('keydown',function(e){
+if(e.key==='ArrowUp'&&history.length){e.preventDefault();hi=Math.max(0,hi-1);inp.value=history[hi]||''}
+else if(e.key==='ArrowDown'&&history.length){e.preventDefault();hi=Math.min(history.length,hi+1);inp.value=history[hi]||''}
+else if(e.key==='Tab'&&inp.value){var m=Object.keys(CMDS).concat(['clear']).filter(function(c){return c.indexOf(inp.value.toLowerCase())===0});if(m.length===1){e.preventDefault();inp.value=m[0]}}});
+setLang('Python',false);run('help');
 }
-
 
 /* Compact searchable website translation picker. */
 var $=function(i){return document.getElementById(i)};

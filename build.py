@@ -75,16 +75,16 @@ def page(fn, title, key, desc, body, nav=None, prog=False):
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
 <meta property="og:type" content="website">
-<meta name="theme-color" content="#0e1114">
+<meta name="theme-color" content="#0b0b0d">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 {theme}
 <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="{key}">
 <a class="skip" href="#main">Skip to content</a>{p}
-<header class="top"><div class="bar"><a class="brand" href="index.html">{NAME}</a>
+<header class="top"><div class="bar"><a class="brand" href="index.html" translate="no">{NAME}</a>
 <nav class="links" aria-label="Main">{links}</nav>
 <div class="tools"><div class="site-language" id="site-language"><button class="site-language-trigger" id="site-language-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="site-language-panel" aria-label="Change website language"><span aria-hidden="true">文</span><span id="site-language-current">EN</span><span aria-hidden="true">⌄</span></button><div class="site-language-panel" id="site-language-panel" role="dialog" aria-label="Choose website language" hidden><label for="site-language-search">WEBSITE LANGUAGE</label><input id="site-language-search" type="search" placeholder="Search languages…" autocomplete="off"><div id="site-language-options" class="site-language-options" role="listbox" aria-label="Languages"></div><p>Translation provided by Google Translate.</p></div></div><button class="ib" id="theme" aria-label="Toggle light and dark theme" aria-pressed="false">{ic("sun","ic i-sun")}{ic("moon","ic i-moon")}</button><button class="ib mb" id="mb" aria-label="Open menu" aria-expanded="false" aria-controls="menu">{ic("menu")}</button></div></div></header>
 <div class="menu" id="menu" role="dialog" aria-label="Menu"><button class="ib x" id="mx" aria-label="Close menu">{ic("close")}</button>{big}<div class="socs">{soc}</div></div>
@@ -150,7 +150,7 @@ tech = f'''<section class="sec tech" style="padding-top:0"><div class="wrap"><p 
 <div class="mq" role="group" aria-label="Technologies used across my projects">{tech_row(False)}{tech_row(True)}</div>
 <div class="wrap"><button class="btn pz" id="pause" aria-pressed="false">{ic("pause","ic pa")}{ic("play","ic pl")}<span class="lbl">Pause motion</span></button></div></section>'''
 cta = f'''<section class="wrap sec" style="padding-top:0"><h2 class="ctaBig rv">Let’s build something.</h2><div class="cta"><a class="btn pri mag up" data-c="wa" href="#">{ic("wa")}Message on WhatsApp</a><a class="btn mag up" data-c="mail" href="#">{ic("mail")}Send an email</a></div></section>'''
-page("portfolio.html", f"Portfolio — {NAME}", "portfolio", "Selected software projects and engineering work by Miracle Agbebaku.", hero + band + build + code + work + tech + cta)
+page("portfolio.html", f"Portfolio | {NAME}", "portfolio", "Selected software projects and engineering work by Miracle Agbebaku.", hero + band + build + code + work + tech + cta)
 
 
 # ---- photos (responsive WebP with JPEG fallback) -------------------------
@@ -161,14 +161,19 @@ def photo(name, alt, ratio, sizes, eager=False, caption=""):
     return (f'<figure class="ph" style="--ar:{w}/{h}"><picture>'
             f'<source type="image/webp" srcset="assets/images/{name}-640.webp 640w, assets/images/{name}-960.webp 960w" sizes="{sizes}">'
             f'<img src="assets/images/{name}-960.jpg" width="960" height="{round(960*h/w)}" alt="{esc(alt)}" {load} decoding="async"></picture>{cap}</figure>')
-HERO_PHOTO = photo("miracle-hero", "Portrait of Miracle Agbebaku", (4, 5), "(max-width: 900px) 60vw, 300px", eager=True)
-ABOUT_PHOTO = photo("miracle-about", "Miracle Agbebaku", (1, 1), "(max-width: 900px) 90vw, 420px", caption="Miracle Agbebaku")
-landing = open(os.path.join(ROOT, "content/landing.html"), encoding="utf-8").read().replace("{PHOTO_HERO}", '<div class="visual-core visual-photo">' + HERO_PHOTO + '</div>')
-page("index.html", f"{NAME} — Software & AI Systems", "home", "Miracle Agbebaku builds AI systems, software products, automation and the engineering behind them.", landing)
+HERO_PHOTO = photo("miracle-hero", "Miracle Agbebaku", (4, 5), "(max-width: 900px) 70vw, 420px", eager=True)
+ABOUT_PHOTO = photo("miracle-about", "Miracle Agbebaku", (1, 1), "(max-width: 900px) 90vw, 430px")
+ARROW = ic("right")
+TICKER = "".join(f"<span>{esc(w)}</span>" for w in ["AI agents", "Backend systems", "Messaging automation", "Developer tooling", "Product engineering", "Orchestration"])
+RAIL = "".join(f'''<article class="rcard"><div class="rtop"><span class="rnum">{pnum(i)}</span>{motif(p["motif"])}</div><div><h3><a href="{p["slug"]}.html" translate="no">{esc(p["name"])}</a></h3><p>{esc(p["purpose"])}</p></div><div class="rfoot">{chip(p["state"], p.get("check"))}{(f'<a class="live-link" href="{p["url"]}" target="_blank" rel="noopener noreferrer">Open {ic("ext")}<span class="sr">(opens in a new tab)</span></a>') if p.get("url") else ""}</div></article>''' for i, p in enumerate(PROJECTS))
+landing = (open(os.path.join(ROOT, "content/landing.html"), encoding="utf-8").read()
+           .replace("{PHOTO_HERO}", HERO_PHOTO).replace("{TICKER}", TICKER).replace("{RAIL_CARDS}", RAIL).replace("{TECH}", tech)
+           .replace("{ARROW}", ARROW).replace("{WA}", ic("wa")).replace("{MAIL}", ic("mail")))
+page("index.html", f"{NAME} | Software & AI Systems", "home", "Miracle Agbebaku builds AI systems, software products, automation and the engineering behind them.", landing)
 
 # ---- projects list -----------------------------------------------------
 rows = "".join(f'''<li data-d="{STATE_CLASS[p["state"]]}"><a class="prow" href="{p["slug"]}.html"><span class="pn">{pnum(i)}</span><h3 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><span class="side">{chip(p["state"], p.get("check"))}<span class="ar">{ic("right")}</span></span></a></li>''' for i, p in enumerate(PROJECTS))
-page("projects.html", f"Projects — {NAME}", "projects", "Projects by Miracle Agbebaku: AI orchestration, messaging assistants, customer care, UI tooling and more.",
+page("projects.html", f"Projects | {NAME}", "projects", "Projects by Miracle Agbebaku: AI orchestration, messaging assistants, customer care, UI tooling and more.",
  f'''<div class="wrap phead"><p class="eyebrow">Work</p><h1>Projects</h1><p class="lede">What each project is for. Open one for the full picture.</p>
 <div class="filters" role="group" aria-label="Filter by status"><button data-f="all" aria-pressed="true">All</button><button data-f="live" aria-pressed="false">Live</button><button data-f="dev" aria-pressed="false">In development</button><button data-f="soon" aria-pressed="false">Coming soon</button></div><p class="count" id="cnt" aria-live="polite">{len(PROJECTS)} projects</p></div>
 <div class="wrap" style="padding-bottom:60px"><ul class="plist">{rows}</ul></div>''')
@@ -188,38 +193,59 @@ for i, p in enumerate(PROJECTS):
 <div class="wrap pgrid"><div><h2 class="h3s" style="margin-top:20px">About</h2><p class="lede" style="font-size:18px">{esc(p["summary"])}</p><h2 class="h3s">What it’s for</h2><ul class="plain">{pts}</ul>{("<h2 class=\"h3s\">Built with</h2>" + tech_tags(p["tech"])) if p.get("tech") else ""}{flow(p["flow"]) if p.get("flow") else ""}</div>
 <div class="side"><div class="motifbox">{motif(p["motif"])}</div></div></div>
 <div class="wrap" style="padding-bottom:50px"><a class="nextp" href="{nxt["slug"]}.html"><small>Next project</small><span>{esc(nxt["name"])}{ic("right")}</span></a></div>'''
-    page(f'{p["slug"]}.html', f'{p["name"]} — {NAME}', "case", p["purpose"], body, nav="projects", prog=True)
+    page(f'{p["slug"]}.html', f'{p["name"]} | {NAME}', "case", p["purpose"], body, nav="projects", prog=True)
 
 # ---- other pages -------------------------------------------------------
 def ph(eyebrow, h, lede=""): return f'<div class="wrap phead"><p class="eyebrow">{eyebrow}</p><h1>{h}</h1>{f"<p class=\"lede\">{lede}</p>" if lede else ""}</div>'
 about_markup = """
-<div class="wrap phead about-head has-photo"><div class="about-intro"><p class="eyebrow">About / system profile</p><h1>Built with intent.<br><span class="accent-word">Engineered to work.</span></h1><p class="lede">I’m Miracle Agbebaku — a developer focused on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet.</p><div class="about-meta"><span><i></i> AI systems</span><span><i></i> Product engineering</span><span><i></i> Automation</span></div></div>{ABOUT_PHOTO}</div>
-<section class="wrap about-layout"><div class="about-copy">
-<article class="about-panel rv"><p class="eyebrow">01 / What I build</p><h2>From model output to useful software.</h2><p>I work across AI and agentic systems, backend APIs, full-stack applications, conversational automation and developer tooling. The interface matters, but so do architecture, observability, security boundaries and recovery when something breaks.</p></article>
-<article class="about-panel rv"><p class="eyebrow">02 / How I think</p><h2>Understand the failure path.</h2><p>I prefer to trace how a system actually behaves before changing it. I test assumptions, look for edge cases, and value reliable behavior over flashy demos. I’m building my foundations in computer science while exploring the deeper engineering behind intelligent systems.</p></article>
-<article class="about-panel rv"><p class="eyebrow">03 / Direction</p><h2>Software first. Hardware next.</h2><p>My current focus is AI engineering, automation and full-stack product development. Over time, I want to carry that knowledge further into robotics and hardware-aware systems.</p><a class="btn mag" href="projects.html">Explore the projects <span aria-hidden="true">↗</span></a></article></div>
-<section class="terminal-shell rv" aria-labelledby="terminal-title"><div class="terminal-top"><div class="terminal-brand"><span class="terminal-mark">M/</span><div><strong id="terminal-title">MIRACLE / INTERACTIVE PROFILE</strong><small>LOCAL INTERFACE · READ-ONLY</small></div></div><div class="terminal-lights" aria-hidden="true"><i></i><i></i><i></i></div></div>
-<div class="terminal-toolbar"><label for="terminal-language">LANGUAGE</label><div class="terminal-select-wrap"><select id="terminal-language" aria-label="Programming language"></select><span aria-hidden="true">⌄</span></div><span class="terminal-status"><i></i> READY</span></div>
-<div class="terminal-code-head"><span id="terminal-file">profile.py</span><span id="terminal-lang-label">PYTHON</span></div><pre class="terminal-code" aria-live="polite"><code id="terminal-code"></code></pre><div class="terminal-divider"></div>
-<div class="terminal-output-label"><span>OUTPUT / SESSION</span><button type="button" id="terminal-clear">CLEAR</button></div>
-<div class="terminal-output" id="terminal-output" role="log" aria-live="polite"><p><span class="term-muted">miracle@portfolio:~$</span> <span>help</span></p><p>Interactive profile ready. Enter a command below.</p><p class="term-muted">Commands: help · about · projects · principles · now · clear</p></div>
-<form class="terminal-input-row" id="terminal-form"><label for="terminal-command" aria-label="Terminal command">›</label><input id="terminal-command" name="command" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type help and press Enter"><button type="submit">RUN <span aria-hidden="true">↗</span></button></form><p class="terminal-footnote">A small, interactive profile — no shell access and no commands are sent to a server.</p></section></section>
+<div class="wrap about2-head">
+<div><p class="kicker"><span class="dot"></span>About the developer</p>
+<h1 class="h1d">Built with intent. <span class="it">Engineered to work.</span></h1>
+<p class="lead">I’m Miracle Agbebaku, a developer focused on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet.</p>
+<div class="tags2"><span>AI systems</span><span>Product engineering</span><span>Automation</span></div></div>
+<div class="pwrap">{ABOUT_PHOTO}</div>
+</div>
+<div class="wrap a2rows">
+<div class="a2row rv"><b>01</b><div><p class="kicker">What I build</p><h2>From model output to useful software.</h2></div><p>I work across AI and agentic systems, backend APIs, full-stack applications, conversational automation and developer tooling. The interface matters, but so do architecture, observability, security boundaries and recovery when something breaks.</p></div>
+<div class="a2row rv"><b>02</b><div><p class="kicker">How I think</p><h2>Understand the failure path.</h2></div><div><p>I prefer to trace how a system actually behaves before changing it. I test assumptions, look for edge cases, and value reliable behavior over flashy demos. I’m building my foundations in computer science while exploring the deeper engineering behind intelligent systems.</p><a class="btn mag" href="projects.html">Explore the projects {ARROW}</a></div></div>
+</div>
+<div class="wrap">
+<p class="kicker">Try it</p>
+<section class="tw" id="terminal" aria-labelledby="tw-t">
+<div class="tw-head"><div class="tw-title"><span class="tw-mark" aria-hidden="true" translate="no">M/</span><div><strong id="tw-t">Interactive profile</strong><small>Runs in your browser, read-only</small></div></div><span class="tw-status"><i></i><span id="tw-state">Ready</span></span></div>
+<div class="tw-body">
+<div class="tw-code">
+<div class="tw-langs" id="tw-pills" role="group" aria-label="Choose a language"><span class="tw-select"><label class="sr" for="tw-all">All languages</label><select id="tw-all" translate="no"></select><span aria-hidden="true">▾</span></span></div>
+<div class="tw-filebar"><span id="tw-file" translate="no">profile.py</span><button class="tw-copy" id="tw-copy" type="button">Copy</button></div>
+<div class="tw-editor" translate="no"><div class="tw-gut" id="tw-gut" aria-hidden="true">1</div><pre class="tw-pre" id="tw-pre" tabindex="0" aria-label="Code sample"><code></code></pre></div>
+</div>
+<div class="tw-session">
+<div class="tw-chips" role="group" aria-label="Run a command"><button class="tw-chip" type="button" data-cmd="help">help</button><button class="tw-chip" type="button" data-cmd="about">about</button><button class="tw-chip" type="button" data-cmd="projects">projects</button><button class="tw-chip" type="button" data-cmd="principles">principles</button><button class="tw-chip" type="button" data-cmd="now">now</button><button class="tw-chip" type="button" data-cmd="links">links</button><button class="tw-chip" type="button" data-cmd="clear">clear</button></div>
+<div class="tw-out" id="tw-out" role="log" aria-live="polite" tabindex="0" aria-label="Terminal output"></div>
+<form class="tw-form" id="tw-form" autocomplete="off"><label for="tw-in" aria-hidden="true">&rsaquo;</label><input id="tw-in" type="text" autocapitalize="none" spellcheck="false" placeholder="Type a command" aria-label="Command"><button type="submit">Run</button></form>
+<p class="tw-foot">A small interactive profile. No shell access, and nothing you type is sent to a server.</p>
+</div>
+</div>
+</section>
+</div>
+<script type="application/json" id="project-data">{PROJECT_JSON}</script>
 """
-page("about.html", f"About — {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup.replace("{ABOUT_PHOTO}", ABOUT_PHOTO))
+PROJECT_JSON = json.dumps([{"name": p["name"], "slug": p["slug"], "state": p["state"]} for p in PROJECTS]).replace("</", "<\\/")
+page("about.html", f"About | {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup.replace("{ABOUT_PHOTO}", ABOUT_PHOTO).replace("{ARROW}", ic("right")).replace("{PROJECT_JSON}", PROJECT_JSON))
 stack_chips = "".join(f'<span class="tag">{ic(i)}{esc(n)}</span>' for n, i in SITE["stack"])
-prow_links = "".join(f'<li><a href="{p["slug"]}.html">{esc(p["name"])}</a> — {esc(p["purpose"])}</li>' for p in PROJECTS)
-page("resume.html", f"Resume — {NAME}", "resume", "Summary, focus areas and projects.",
+prow_links = "".join(f'<li><a href="{p["slug"]}.html">{esc(p["name"])}</a>: {esc(p["purpose"])}</li>' for p in PROJECTS)
+page("resume.html", f"Resume | {NAME}", "resume", "Summary, focus areas and projects.",
  ph("Resume", "Resume", "Software developer working on AI agents, backend systems and developer tooling.") +
  f'''<div class="wrap" style="padding-bottom:70px"><h2 class="h3s">Focus</h2><ul class="plain"><li>AI agents and orchestration</li><li>Backend, APIs and integrations</li><li>Frontend with React, Next.js and TypeScript</li><li>Messaging automation and developer tooling</li></ul>
 <h2 class="h3s">Technologies</h2><div class="stk">{stack_chips}</div><h2 class="h3s">Projects</h2><ul class="plain">{prow_links}</ul>
 <h2 class="h3s">Links</h2><a class="crow" data-c="gh" href="#">{ic("gh")}<b>GitHub</b>{ic("ext")}</a><a class="crow" data-c="mail" href="#">{ic("mail")}<b>Email</b>{ic("ext")}</a></div>''')
-page("engineering.html", f"Engineering — {NAME}", "engineering", "Technical write-ups and notes.",
+page("engineering.html", f"Engineering | {NAME}", "engineering", "Technical write-ups and notes.",
  ph("Journal", "Engineering", "Technical write-ups, architecture notes and debugging stories.") +
  '<div class="wrap" style="padding-bottom:80px"><div class="soon"><p><strong>Coming soon.</strong></p><p>The first write-ups are planned on how NEXUS CORE separates planning from execution, and how ELLA decides where a message should go.</p></div></div>')
-page("contact.html", f"Contact — {NAME}", "contact", "Ways to contact Miracle Agbebaku.",
+page("contact.html", f"Contact | {NAME}", "contact", "Ways to contact Miracle Agbebaku.",
  ph("Contact", "Say hello", "The fastest way to reach me is WhatsApp. The other channels work too.") +
  '<div class="wrap" style="padding-bottom:80px">' + "".join(f'<a class="crow" data-c="{k}" href="#">{ic(k)}<b>{l}</b>{ic("ext")}</a>' for k, l in [("wa", "WhatsApp"), ("mail", "Email"), ("x", "X"), ("ig", "Instagram"), ("gh", "GitHub")]) + '</div>')
-page("404.html", f"Not found — {NAME}", "none", "Page not found.", ph("404", "Not found", "That page doesn’t exist.") + f'<div class="wrap" style="padding-bottom:80px"><a class="btn pri" href="index.html">Back home {ic("right")}</a></div>')
+page("404.html", f"Not found | {NAME}", "none", "Page not found.", ph("404", "Not found", "That page doesn’t exist.") + f'<div class="wrap" style="padding-bottom:80px"><a class="btn pri" href="index.html">Back home {ic("right")}</a></div>')
 
 # ---- static files ------------------------------------------------------
 write("favicon.svg", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e1114"/><path d="M14 48V16h6l12 20 12-20h6v32h-6V28L32 48 20 28v20z" fill="#6fe0c0"/></svg>')
