@@ -1,0 +1,80 @@
+[
+ {
+  "slug": "note-model-authority",
+  "title": "Why a model should not approve its own actions",
+  "lede": "A short design note on the idea behind NEXUS CORE.",
+  "read": "2 min read",
+  "project": "nexus-core",
+  "sections": [
+   {
+    "h": "The problem",
+    "p": [
+     "A language model can write a convincing plan, and a convincing plan is easy to mistake for a safe one. If the same component proposes an action and decides whether it may run, the system is only as trustworthy as the model on its worst day."
+    ]
+   },
+   {
+    "h": "The separation",
+    "p": [
+     "NEXUS CORE is designed around distinct roles. A planner proposes what should happen. A governance stage decides what is permitted and under what conditions. A controlled execution layer carries out only what was approved, and a synthesis step turns the results into an answer."
+    ]
+   },
+   {
+    "h": "Controls at the edges",
+    "p": [
+     "Sensitive operations, including financial actions, are designed to need explicit approval. Audit hashes and execution records exist so that what happened can be reconstructed afterwards. A corrector stage looks for mistakes in execution and in intermediate results."
+    ]
+   },
+   {
+    "h": "What it costs",
+    "p": [
+     "Separating the roles adds moving parts, more code to maintain and some latency. The trade is deliberate: failures become easier to locate, because each stage has one job and leaves a record."
+    ]
+   },
+   {
+    "h": "Scope of this note",
+    "p": [
+     "This note describes design intent. The project page explains what each stage is for."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-message-routing",
+  "title": "Sending a message to the right place",
+  "lede": "A short design note on intent routing in a WhatsApp assistant.",
+  "read": "2 min read",
+  "project": "ella",
+  "sections": [
+   {
+    "h": "The problem",
+    "p": [
+     "On a messaging platform people write in fragments, mix languages and refer to things said earlier. A message that happens to contain a keyword is not necessarily a command."
+    ]
+   },
+   {
+    "h": "Routing is a decision",
+    "p": [
+     "ELLA is designed to look at the conversation context and the intent of a message before choosing a handler, instead of matching a few words. When a reference is ambiguous, a short clarifying question is better than a confident guess."
+    ]
+   },
+   {
+    "h": "Honest failure",
+    "p": [
+     "When an AI provider or an integration fails, the assistant should say so. Claiming that an action succeeded when the underlying operation failed is worse than showing a plain error."
+    ]
+   },
+   {
+    "h": "Where language fits",
+    "p": [
+     "Awareness of Nigerian English and Pidgin matters because the same sentence can mean different things depending on how it is written. Routing is only as good as the assistant's understanding of the message."
+    ]
+   },
+   {
+    "h": "Scope of this note",
+    "p": [
+     "This note describes design priorities. It makes no claim about test results."
+    ]
+   }
+  ]
+ }
+]

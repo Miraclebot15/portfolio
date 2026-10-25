@@ -45,6 +45,8 @@ with sync_playwright() as p:
             page.wait_for_timeout(150)
             if page.evaluate("document.documentElement.scrollWidth > innerWidth"):
                 problems.append(f"{f} @{label}: horizontal overflow")
+            if page.evaluate("/[\\u2014\\u2013]/.test(document.body.innerText)"):
+                problems.append(f"{f} @{label}: em or en dash in visible text")
             small = page.evaluate("""[...document.querySelectorAll('a,button')].filter(e => e.offsetParent && !e.closest('.menu')
                 && e.getBoundingClientRect().height < 43.5 && !e.classList.contains('skip') && !e.classList.contains('sr'))
                 .map(e => ({tag:e.tagName.toLowerCase(), id:e.id, cls:typeof e.className === 'string' ? e.className : '',

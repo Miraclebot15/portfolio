@@ -53,7 +53,8 @@
    ]
   },
   "check": "/api/nexus-status",
-  "check_note": "Live status checks the deployed interface."
+  "check_note": "Live status checks the deployed interface.",
+  "color": "#ff5a36"
  },
  {
   "slug": "ella",
@@ -100,7 +101,8 @@
     ]
    ]
   },
-  "check": "/api/ella-status"
+  "check": "/api/ella-status",
+  "color": "#7b6cff"
  },
  {
   "slug": "carecore",
@@ -123,7 +125,8 @@
    "PostgreSQL",
    "Stripe"
   ],
-  "check": "/api/carecore-status"
+  "check": "/api/carecore-status",
+  "color": "#1fc9a1"
  },
  {
   "slug": "atelier",
@@ -136,7 +139,8 @@
    "From design intent to a usable interface concept.",
    "Refinement through conversation.",
    "Aimed at accelerating frontend work."
-  ]
+  ],
+  "color": "#ffb020"
  },
  {
   "slug": "engine",
@@ -149,7 +153,8 @@
    "Reusable building blocks for interactive interfaces.",
    "Support for 3D-oriented visual experiences.",
    "A foundation other projects can build on."
-  ]
+  ],
+  "color": "#35a8ff"
  },
  {
   "slug": "ultimate-agentic-ai",
@@ -162,21 +167,27 @@
    "Multi-step task planning and execution.",
    "Tool use inside AI-driven workflows.",
    "Error handling and result checking."
-  ]
+  ],
+  "color": "#c85bff"
  },
  {
   "slug": "lagoon",
   "name": "Lagoon",
-  "state": "In development",
+  "state": "Live",
   "motif": "lagoon",
   "purpose": "A social and communication platform that brings messaging, stories, short video and communities into one app.",
-  "summary": "Lagoon aims to combine several kinds of digital interaction in one experience instead of spreading them across separate apps. A backend API provides its foundation.",
+  "summary": "Lagoon aims to combine several kinds of digital interaction in one experience instead of spreading them across separate apps. Its backend API is deployed and provides the foundation, and the full application is in development.",
   "points": [
    "Direct and group messaging.",
    "Stories and temporary updates.",
    "Short-form video.",
    "Communities and shared spaces."
-  ]
+  ],
+  "color": "#ff4f9a",
+  "url": "https://lagoon-api.fiyin.workers.dev/",
+  "link_label": "Open API",
+  "check": "/api/lagoon-status",
+  "check_note": "Live status checks the deployed API."
  },
  {
   "slug": "aurora",
@@ -189,6 +200,7 @@
    "Broad visual-style support.",
    "AI-assisted editing and creative transformation.",
    "Flexible visual direction."
-  ]
+  ],
+  "color": "#8dffcf"
  }
 ]

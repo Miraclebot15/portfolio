@@ -1,6 +1,6 @@
 // Unit checks for the /api status functions, with fetch mocked. Run: node tests/api-check.js
 const assert = require("assert");
-const handlers = ["ella-status", "nexus-status", "carecore-status"].map((n) => [n, require("../api/" + n + ".js")]);
+const handlers = ["ella-status", "nexus-status", "carecore-status", "lagoon-status"].map((n) => [n, require("../api/" + n + ".js")]);
 
 function run(handler, method = "GET") {
   return new Promise((resolve) => {

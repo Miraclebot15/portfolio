@@ -162,6 +162,25 @@ Defined as CSS custom properties at the top of `styles.css`.
 - **Theme:** a tiny inline script in each page `<head>` applies the saved or system theme before first paint. Without JavaScript, the system preference is used.
 - **Status chips:** `Live` (filled dot), `In development` (half dot), `Coming soon` (dashed ring). Status is always a text label as well as a shape.
 
+## Resume
+
+`resume.html` shows the resume as a paper view in the page, with **Download PDF**, **Open PDF** and **Print** buttons. The PDF is generated from the same content as the site:
+
+```bash
+pip install reportlab
+python3 tools/make_resume.py     # writes assets/Miracle-Agbebaku-Resume.pdf
+```
+
+Sections appear only when content exists. Experience, education and contact details are deliberately absent until you add them.
+
+## Engineering notes
+
+Short design notes live in `content/notes.json` (`slug`, `title`, `lede`, `read`, `project`, `sections`). Each entry becomes a page and a card on `engineering.html`. Notes describe design intent, never test results.
+
+## Colour blocks
+
+`.tone-inv` flips a section to the inverse of the current theme and `.tone-acc` makes a full vermilion band. Each project has a `color` in `content/projects.json` that tints its rail card and project page.
+
 ## Home page choreography
 
 | Piece | What it does | Fallback |
@@ -178,10 +197,10 @@ One easing curve, `cubic-bezier(.2,.8,.2,1)`, and a small set of durations:
 
 | Use | Duration |
 | --- | --- |
-| Hover and focus feedback | 250–300 ms |
-| Reveals and panel changes | 450–900 ms |
-| Menu and page transitions | 450–650 ms |
-| Marquees | 48–60 s per loop |
+| Hover and focus feedback | 250 to 300 ms |
+| Reveals and panel changes | 450 to 900 ms |
+| Menu and page transitions | 450 to 650 ms |
+| Marquees | 48 to 60 s per loop |
 
 Rules the code follows:
 
