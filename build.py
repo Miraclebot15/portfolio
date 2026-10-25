@@ -164,17 +164,22 @@ def photo(name, alt, ratio, sizes, eager=False, caption=""):
 HERO_PHOTO = photo("miracle-hero", "Miracle Agbebaku", (4, 5), "(max-width: 900px) 70vw, 420px", eager=True)
 ABOUT_PHOTO = photo("miracle-about", "Miracle Agbebaku", (1, 1), "(max-width: 900px) 90vw, 430px")
 ARROW = ic("right")
-TICKER = "".join(f"<span>{esc(w)}</span>" for w in ["AI agents", "Backend systems", "Messaging automation", "Developer tooling", "Product engineering", "Orchestration"])
-RAIL = "".join(f'''<article class="rcard"><div class="rtop"><span class="rnum">{pnum(i)}</span>{motif(p["motif"])}</div><div><h3><a href="{p["slug"]}.html" translate="no">{esc(p["name"])}</a></h3><p>{esc(p["purpose"])}</p></div><div class="rfoot">{chip(p["state"], p.get("check"))}{(f'<a class="live-link" href="{p["url"]}" target="_blank" rel="noopener noreferrer">Open {ic("ext")}<span class="sr">(opens in a new tab)</span></a>') if p.get("url") else ""}</div></article>''' for i, p in enumerate(PROJECTS))
+WORDS = ["AI agents", "Backend systems", "Messaging automation", "Developer tooling", "Product engineering", "Orchestration"]
+def tape_words(rev=False):
+    ws = WORDS[::-1] if rev else WORDS
+    return "".join(f"<span>{esc(w)}</span>" for w in ws * 2)
+TAPE = (f'<div class="tapes" aria-hidden="true"><div class="tape a"><div class="tk"><div>{tape_words()}</div><div>{tape_words()}</div></div></div>'
+        f'<div class="tape b"><div class="tk"><div>{tape_words(True)}</div><div>{tape_words(True)}</div></div></div></div>')
+RAIL = "".join(f'''<article class="rcard" style="--pc:{p["color"]}"><div class="rtop"><span class="rnum">{pnum(i)}</span>{motif(p["motif"])}</div><div><h3><a href="{p["slug"]}.html" translate="no">{esc(p["name"])}</a></h3><p>{esc(p["purpose"])}</p></div><div class="rfoot">{chip(p["state"], p.get("check"))}{(f'<a class="live-link" href="{p["url"]}" target="_blank" rel="noopener noreferrer">Open {ic("ext")}<span class="sr">(opens in a new tab)</span></a>') if p.get("url") else ""}</div></article>''' for i, p in enumerate(PROJECTS))
 landing = (open(os.path.join(ROOT, "content/landing.html"), encoding="utf-8").read()
-           .replace("{PHOTO_HERO}", HERO_PHOTO).replace("{TICKER}", TICKER).replace("{RAIL_CARDS}", RAIL).replace("{TECH}", tech)
+           .replace("{PHOTO_HERO}", HERO_PHOTO).replace("{TAPE}", TAPE).replace("{RAIL_CARDS}", RAIL).replace("{TECH}", tech)
            .replace("{ARROW}", ARROW).replace("{WA}", ic("wa")).replace("{MAIL}", ic("mail")))
 page("index.html", f"{NAME} | Software & AI Systems", "home", "Miracle Agbebaku builds AI systems, software products, automation and the engineering behind them.", landing)
 
 # ---- projects list -----------------------------------------------------
 rows = "".join(f'''<li data-d="{STATE_CLASS[p["state"]]}"><a class="prow" href="{p["slug"]}.html"><span class="pn">{pnum(i)}</span><h3 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h3><p class="pp">{esc(p["purpose"])}</p><span class="side">{chip(p["state"], p.get("check"))}<span class="ar">{ic("right")}</span></span></a></li>''' for i, p in enumerate(PROJECTS))
 page("projects.html", f"Projects | {NAME}", "projects", "Projects by Miracle Agbebaku: AI orchestration, messaging assistants, customer care, UI tooling and more.",
- f'''<div class="wrap phead"><p class="eyebrow">Work</p><h1>Projects</h1><p class="lede">What each project is for. Open one for the full picture.</p>
+ f'''<div class="wrap phead"><p class="eyebrow">Work</p><h1><span class="ml"><span class="mw">Projects</span></span></h1><p class="lede">What each project is for. Open one for the full picture.</p>
 <div class="filters" role="group" aria-label="Filter by status"><button data-f="all" aria-pressed="true">All</button><button data-f="live" aria-pressed="false">Live</button><button data-f="dev" aria-pressed="false">In development</button><button data-f="soon" aria-pressed="false">Coming soon</button></div><p class="count" id="cnt" aria-live="polite">{len(PROJECTS)} projects</p></div>
 <div class="wrap" style="padding-bottom:60px"><ul class="plist">{rows}</ul></div>''')
 
@@ -189,18 +194,18 @@ for i, p in enumerate(PROJECTS):
     nxt = PROJECTS[(i + 1) % len(PROJECTS)]
     live = f'<a class="btn pri up" href="{p["url"]}" target="_blank" rel="noopener noreferrer">{esc(p.get("link_label","Open live"))} {ic("ext")}<span class="sr">(opens in a new tab)</span></a>' if p.get("url") else ""
     pts = "".join(f"<li>{esc(x)}</li>" for x in p["points"])
-    body = f'''<div class="wrap phead"><a class="back" href="projects.html">{ic("right")}Projects</a><p class="eyebrow" style="display:flex">{pnum(i)}</p><h1 style="view-transition-name:p-{p["slug"]}">{esc(p["name"])}</h1><div class="chips" style="margin-bottom:{"6px" if p.get("check") else "18px"}">{chip(p["state"], p.get("check"))}</div>{"<p class=\"cap\" style=\"margin:0 0 18px\">" + esc(p.get("check_note", "Live status checks whether the deployed website responds.")) + "</p>" if p.get("check") else ""}<p class="lede">{esc(p["purpose"])}</p><div class="cta" style="margin-top:6px">{live}</div></div>
+    body = f'''<div class="wrap phead"><a class="back" href="projects.html">{ic("right")}Projects</a><p class="eyebrow" style="display:flex">{pnum(i)}</p><h1 style="view-transition-name:p-{p["slug"]}"><span class="ml"><span class="mw">{esc(p["name"])}</span></span></h1><div class="chips" style="margin-bottom:{"6px" if p.get("check") else "18px"}">{chip(p["state"], p.get("check"))}</div>{"<p class=\"cap\" style=\"margin:0 0 18px\">" + esc(p.get("check_note", "Live status checks whether the deployed website responds.")) + "</p>" if p.get("check") else ""}<p class="lede">{esc(p["purpose"])}</p><div class="cta" style="margin-top:6px">{live}</div></div>
 <div class="wrap pgrid"><div><h2 class="h3s" style="margin-top:20px">About</h2><p class="lede" style="font-size:18px">{esc(p["summary"])}</p><h2 class="h3s">What it’s for</h2><ul class="plain">{pts}</ul>{("<h2 class=\"h3s\">Built with</h2>" + tech_tags(p["tech"])) if p.get("tech") else ""}{flow(p["flow"]) if p.get("flow") else ""}</div>
-<div class="side"><div class="motifbox">{motif(p["motif"])}</div></div></div>
+<div class="side"><div class="motifbox" style="--pc:{p["color"]}">{motif(p["motif"])}</div></div></div>
 <div class="wrap" style="padding-bottom:50px"><a class="nextp" href="{nxt["slug"]}.html"><small>Next project</small><span>{esc(nxt["name"])}{ic("right")}</span></a></div>'''
     page(f'{p["slug"]}.html', f'{p["name"]} | {NAME}', "case", p["purpose"], body, nav="projects", prog=True)
 
 # ---- other pages -------------------------------------------------------
-def ph(eyebrow, h, lede=""): return f'<div class="wrap phead"><p class="eyebrow">{eyebrow}</p><h1>{h}</h1>{f"<p class=\"lede\">{lede}</p>" if lede else ""}</div>'
+def ph(eyebrow, h, lede=""): return f'<div class="wrap phead"><p class="eyebrow">{eyebrow}</p><h1><span class="ml"><span class="mw">{h}</span></span></h1>{f"<p class=\"lede\">{lede}</p>" if lede else ""}</div>'
 about_markup = """
 <div class="wrap about2-head">
 <div><p class="kicker"><span class="dot"></span>About the developer</p>
-<h1 class="h1d">Built with intent. <span class="it">Engineered to work.</span></h1>
+<h1 class="h1d"><span class="ml"><span class="mw">Built with intent. <span class="it">Engineered to work.</span></span></span></h1>
 <p class="lead">I’m Miracle Agbebaku, a developer focused on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet.</p>
 <div class="tags2"><span>AI systems</span><span>Product engineering</span><span>Automation</span></div></div>
 <div class="pwrap">{ABOUT_PHOTO}</div>
@@ -233,15 +238,32 @@ about_markup = """
 PROJECT_JSON = json.dumps([{"name": p["name"], "slug": p["slug"], "state": p["state"]} for p in PROJECTS]).replace("</", "<\\/")
 page("about.html", f"About | {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup.replace("{ABOUT_PHOTO}", ABOUT_PHOTO).replace("{ARROW}", ic("right")).replace("{PROJECT_JSON}", PROJECT_JSON))
 stack_chips = "".join(f'<span class="tag">{ic(i)}{esc(n)}</span>' for n, i in SITE["stack"])
-prow_links = "".join(f'<li><a href="{p["slug"]}.html">{esc(p["name"])}</a>: {esc(p["purpose"])}</li>' for p in PROJECTS)
-page("resume.html", f"Resume | {NAME}", "resume", "Summary, focus areas and projects.",
- ph("Resume", "Resume", "Software developer working on AI agents, backend systems and developer tooling.") +
- f'''<div class="wrap" style="padding-bottom:70px"><h2 class="h3s">Focus</h2><ul class="plain"><li>AI agents and orchestration</li><li>Backend, APIs and integrations</li><li>Frontend with React, Next.js and TypeScript</li><li>Messaging automation and developer tooling</li></ul>
-<h2 class="h3s">Technologies</h2><div class="stk">{stack_chips}</div><h2 class="h3s">Projects</h2><ul class="plain">{prow_links}</ul>
-<h2 class="h3s">Links</h2><a class="crow" data-c="gh" href="#">{ic("gh")}<b>GitHub</b>{ic("ext")}</a><a class="crow" data-c="mail" href="#">{ic("mail")}<b>Email</b>{ic("ext")}</a></div>''')
-page("engineering.html", f"Engineering | {NAME}", "engineering", "Technical write-ups and notes.",
- ph("Journal", "Engineering", "Technical write-ups, architecture notes and debugging stories.") +
- '<div class="wrap" style="padding-bottom:80px"><div class="soon"><p><strong>Coming soon.</strong></p><p>The first write-ups are planned on how NEXUS CORE separates planning from execution, and how ELLA decides where a message should go.</p></div></div>')
+RESUME_PDF = "assets/Miracle-Agbebaku-Resume.pdf"
+SUMMARY = "Software developer working on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet."
+FOCUS = ["AI agents and orchestration", "Backend, APIs and integrations", "Frontend with React, Next.js and TypeScript", "Messaging automation and developer tooling"]
+paper_projects = "".join(f'<div class="rp"><dt><a href="{p["slug"]}.html" translate="no">{esc(p["name"])}</a><span>{p["state"]}</span></dt><dd>{esc(p["purpose"])}</dd></div>' for p in PROJECTS)
+paper = f'''<article class="paper rv" aria-label="Resume of {NAME}"><header><h2 class="pname" translate="no">{NAME}</h2><p class="prole">Software developer · AI systems, backend and automation</p>
+<p class="plinks"><a href="{DOMAIN}">{DOMAIN.replace("https://", "")}</a> · <a data-c="gh" href="#">GitHub</a> · <a data-c="x" href="#">X</a></p></header>
+<section><h3>Summary</h3><p>{SUMMARY}</p></section>
+<section><h3>Focus</h3><ul>{"".join(f"<li>{x}</li>" for x in FOCUS)}</ul></section>
+<section><h3>Selected projects</h3><dl>{paper_projects}</dl></section>
+<section><h3>Technologies</h3><p>{", ".join(n for n, _ in SITE["stack"])}</p></section></article>'''
+page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku: summary, focus, projects and technologies. View it here or download the PDF.",
+ ph("Resume", "Resume", "Read it here, or take it with you.") +
+ f'''<div class="wrap" style="padding-bottom:80px"><div class="cta rv" style="margin:0 0 34px"><a class="btn pri mag" href="{RESUME_PDF}" download>Download PDF {ic("download")}</a><a class="btn mag" href="{RESUME_PDF}" target="_blank" rel="noopener noreferrer">Open PDF {ic("ext")}<span class="sr">(opens in a new tab)</span></a><button class="btn mag" id="print" type="button">Print</button></div>{paper}</div>''')
+NOTES = json.load(open(os.path.join(ROOT, "content/notes.json"), encoding="utf-8"))
+note_cards = "".join(f'''<a class="note-card" href="{n["slug"]}.html"><span class="mono">Design note · {n["read"]}</span><h3>{esc(n["title"])}</h3><p>{esc(n["lede"])}</p><span class="note-go">Read {ic("right")}</span></a>''' for n in NOTES)
+page("engineering.html", f"Engineering | {NAME}", "engineering", "Design notes on how my AI systems are built.",
+ ph("Journal", "Engineering", "Short design notes on the ideas behind the projects.") +
+ f'<div class="wrap" style="padding-bottom:90px"><div class="notes">{note_cards}</div></div>')
+for k, n in enumerate(NOTES):
+    nxt = NOTES[(k + 1) % len(NOTES)]
+    proj = next(p for p in PROJECTS if p["slug"] == n["project"])
+    secs = "".join(f'<h2>{esc(s["h"])}</h2>' + "".join(f"<p>{esc(t)}</p>" for t in s["p"]) for s in n["sections"])
+    page(f'{n["slug"]}.html', f'{n["title"]} | {NAME}', "engineering", n["lede"],
+     ph("Design note · " + n["read"], esc(n["title"]), esc(n["lede"])) +
+     f'''<div class="wrap" style="padding-bottom:40px"><article class="prose">{secs}<p><a class="btn mag" href="{proj["slug"]}.html">About {esc(proj["name"])} {ic("right")}</a></p></article>
+<a class="nextp" href="{nxt["slug"]}.html"><small>Next note</small><span>{esc(nxt["title"])}</span></a></div>''', nav="engineering")
 page("contact.html", f"Contact | {NAME}", "contact", "Ways to contact Miracle Agbebaku.",
  ph("Contact", "Say hello", "The fastest way to reach me is WhatsApp. The other channels work too.") +
  '<div class="wrap" style="padding-bottom:80px">' + "".join(f'<a class="crow" data-c="{k}" href="#">{ic(k)}<b>{l}</b>{ic("ext")}</a>' for k, l in [("wa", "WhatsApp"), ("mail", "Email"), ("x", "X"), ("ig", "Instagram"), ("gh", "GitHub")]) + '</div>')
@@ -254,3 +276,13 @@ write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="htt
 write("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
 write("vercel.json", json.dumps({"headers": [{"source": "/(.*)", "headers": [{"key": "X-Content-Type-Options", "value": "nosniff"}, {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}, {"key": "X-Frame-Options", "value": "DENY"}]}]}, indent=2) + "\n")
 print("built", len(pages) + 1, "pages")
+
+# ---- guard: no em or en dashes may ever ship in generated pages or content
+_bad = []
+for _f in sorted(os.listdir(ROOT)):
+    if _f.endswith((".html", ".xml", ".txt")):
+        _t = open(os.path.join(ROOT, _f), encoding="utf-8").read()
+        if "\u2014" in _t or "\u2013" in _t:
+            _bad.append(_f)
+if _bad:
+    raise SystemExit("build failed: em or en dash found in " + ", ".join(_bad))
