@@ -2,38 +2,68 @@
  {
   "slug": "note-model-authority",
   "title": "Why a model should not approve its own actions",
-  "lede": "A short design note on the idea behind NEXUS CORE.",
-  "read": "2 min read",
+  "lede": "The idea behind NEXUS CORE: keep intelligence, authority and execution in separate components.",
+  "read": "4 min read",
   "project": "nexus-core",
+  "kind": "Design intent",
+  "figure": {
+   "labels": [
+    "Planner",
+    "BOUNDARY:Boundary",
+    "Governance",
+    "Executor",
+    "Audit record"
+   ],
+   "caption": "Authority begins at the boundary. Everything to its left is untrusted proposal."
+  },
   "sections": [
    {
-    "h": "The problem",
+    "h": "The failure mode",
     "p": [
-     "A language model can write a convincing plan, and a convincing plan is easy to mistake for a safe one. If the same component proposes an action and decides whether it may run, the system is only as trustworthy as the model on its worst day."
+     "An agent that both proposes and authorizes its own actions collapses two separate questions into one: what should be done, and what is permitted. A language model is a probabilistic function of its context. Its output can be fluent, confident and wrong, and it can be steered by any text that reaches its context window, including files, web pages and user messages.",
+     "When authority sits inside that function, a single **adversarial input** or an ordinary mistake is enough to change what the system does. The model's confidence carries no information about whether an action is safe."
     ]
    },
    {
-    "h": "The separation",
+    "h": "Separating proposal from authority",
     "p": [
-     "NEXUS CORE is designed around distinct roles. A planner proposes what should happen. A governance stage decides what is permitted and under what conditions. A controlled execution layer carries out only what was approved, and a synthesis step turns the results into an answer."
+     "NEXUS CORE treats the model as an **untrusted, probabilistic component**. A planner produces a candidate plan, and that plan is data. Authority belongs to a governance stage implemented as ordinary code, whose decisions do not vary with the model's phrasing.",
+     "The system executes only what that stage released, through a layer that cannot be talked into doing more. The trust boundary sits between proposal and decision, which is where the trust actually changes."
     ]
    },
    {
-    "h": "Controls at the edges",
+    "h": "Deterministic policy",
     "p": [
-     "Sensitive operations, including financial actions, are designed to need explicit approval. Audit hashes and execution records exist so that what happened can be reconstructed afterwards. A corrector stage looks for mistakes in execution and in intermediate results."
+     "A policy engine evaluates each proposed step against explicit rules and returns a decision such as allow, deny or hold for approval. **Determinism** is the point: the same plan under the same policy produces the same decision, so rules can be unit tested, reviewed in a diff and changed deliberately.",
+     "A control that depends on how a prompt happens to be worded cannot be tested in that sense. A control expressed as code can."
     ]
    },
    {
-    "h": "What it costs",
+    "h": "Approval as state",
     "p": [
-     "Separating the roles adds moving parts, more code to maintain and some latency. The trade is deliberate: failures become easier to locate, because each stage has one job and leaves a record."
+     "Sensitive operations, including financial actions, are designed to enter a **held state**. Leaving that state requires an approval event that originates outside the model, so a persuasive explanation inside a model response cannot satisfy it.",
+     "The principle behind it is simple. A response that claims an action was authorized, or that it happened, is not evidence of either. Evidence is a state transition in the system, written down."
     ]
    },
    {
-    "h": "Scope of this note",
+    "h": "Evidence you can check",
     "p": [
-     "This note describes design intent. The project page explains what each stage is for."
+     "Governance decisions and executions are written to an audit record using **audit hashes**. Chaining records makes silent modification detectable, which turns the history into something that can be verified instead of trusted.",
+     "This also changes debugging. When a run behaves unexpectedly, the question becomes which stage made which decision, and the record answers it."
+    ]
+   },
+   {
+    "h": "Bounded recovery",
+    "p": [
+     "A corrector stage examines execution results and intermediate state for errors. It is deliberately bounded: it may propose repairs, and every repair re-enters the same governance path.",
+     "Without that constraint, error recovery would become a second, unreviewed route to authority, which is exactly the property the architecture is trying to remove."
+    ]
+   },
+   {
+    "h": "Costs and limits",
+    "p": [
+     "The separation adds components, state and latency, and each extra stage is more code to test. It does not make a model correct. It **narrows what an incorrect model can do** and makes failures attributable to a stage.",
+     "This note describes design intent. It makes no claim about test results or production readiness."
     ]
    }
   ]
@@ -41,38 +71,192 @@
  {
   "slug": "note-message-routing",
   "title": "Sending a message to the right place",
-  "lede": "A short design note on intent routing in a WhatsApp assistant.",
-  "read": "2 min read",
+  "lede": "Intent routing in a WhatsApp assistant, and why a message that looks like a command is not one.",
+  "read": "4 min read",
   "project": "ella",
+  "kind": "Design intent",
+  "figure": {
+   "labels": [
+    "Message",
+    "Context",
+    "Intent routing",
+    "Handler",
+    "Reply"
+   ],
+   "caption": "Routing is a decision made from intent and conversation state, not a lookup on keywords."
+  },
   "sections": [
    {
-    "h": "The problem",
+    "h": "Messages are not commands",
     "p": [
-     "On a messaging platform people write in fragments, mix languages and refer to things said earlier. A message that happens to contain a keyword is not necessarily a command."
+     "Messaging traffic is short, fragmentary and context-dependent. People mix languages, abbreviate, and answer a question asked ten messages ago. Treating each message as an isolated string to match against keywords produces a system that is brittle in exactly the situations users find most natural."
     ]
    },
    {
-    "h": "Routing is a decision",
+    "h": "Routing is classification",
     "p": [
-     "ELLA is designed to look at the conversation context and the intent of a message before choosing a handler, instead of matching a few words. When a reference is ambiguous, a short clarifying question is better than a confident guess."
+     "ELLA is designed to select a handler from two inputs: the **intent** of the message and the **state of the conversation**. Lexical overlap with a command is weak evidence on its own.",
+     "The cost of an error is asymmetric. A false positive runs a specialized behavior the user never asked for, while a missed match usually costs one more message. Routing is tuned with that asymmetry in mind."
+    ]
+   },
+   {
+    "h": "Ambiguity policy",
+    "p": [
+     "When a reference cannot be resolved there are two failure modes: ask, or guess. Asking costs one round trip. Guessing risks a wrong action and a loss of trust.",
+     "The design prefers the **clarifying question** whenever the ambiguity changes which handler should run, and a plain reply when it does not."
+    ]
+   },
+   {
+    "h": "Group chat semantics",
+    "p": [
+     "Groups add addressing and threading problems. The assistant must decide whether it is being spoken to, which earlier message a reply refers to, and how much of the shared context is relevant.",
+     "These are routing inputs, not formatting details. Getting them wrong produces replies that are technically valid and socially wrong."
     ]
    },
    {
     "h": "Honest failure",
     "p": [
-     "When an AI provider or an integration fails, the assistant should say so. Claiming that an action succeeded when the underlying operation failed is worse than showing a plain error."
+     "A chat assistant sits in front of third-party services that fail: model providers, media sources, storage. The contract is that an operation is reported as complete only when it **completed**.",
+     "A plain error is preferable to a confident message describing something that did not happen. The first is recoverable by the user, and the second is a silent data-integrity problem."
     ]
    },
    {
-    "h": "Where language fits",
+    "h": "Language is part of routing",
     "p": [
-     "Awareness of Nigerian English and Pidgin matters because the same sentence can mean different things depending on how it is written. Routing is only as good as the assistant's understanding of the message."
+     "Awareness of Nigerian English and Pidgin matters for routing as much as for tone, because the same sentence can mean different things depending on how it is written. A router that misreads the message cannot choose the right handler, however good the handlers are."
     ]
    },
    {
-    "h": "Scope of this note",
+    "h": "Keeping experiments apart",
     "p": [
+     "Voice and call work is maintained separately from production behavior and is not presented as available until it is verified. Developer and administrative controls are likewise separated from the user-facing surface.",
      "This note describes design priorities. It makes no claim about test results."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-status-checks",
+  "title": "Designing a status check that does not cry wolf",
+  "lede": "How the live Live, Down and Status unavailable chips on this site decide what to say.",
+  "read": "4 min read",
+  "project": null,
+  "kind": "Implementation note",
+  "figure": {
+   "labels": [
+    "Two probes",
+    "Classify",
+    "Live, Down or Unknown"
+   ],
+   "caption": "Two independent requests feed a three-valued verdict. Inconclusive evidence is never reported as down."
+  },
+  "sections": [
+   {
+    "h": "What is being measured",
+    "p": [
+     "Next to each deployed project the site shows **Live**, **Down** or **Status unavailable**. The check measures one thing: whether the deployed site answers an HTTP request. It does not measure whether the backend behind that site works, and the labels are worded to say so."
+    ]
+   },
+   {
+    "h": "Why the check runs on the server",
+    "p": [
+     "A browser may not read the status of another origin unless that origin sends the right cross-origin headers. Each project therefore has a small serverless function on this site that makes the request and returns a short JSON verdict.",
+     "The browser only talks to its own origin, which removes the cross-origin problem and keeps the logic in one place."
+    ]
+   },
+   {
+    "h": "A fixed target",
+    "p": [
+     "Each function requests exactly one hard-coded address. Nothing in the incoming request, such as a query parameter, can change the target.",
+     "That removes the class of **server-side request forgery** problems an open endpoint that fetches any URL would create. The functions also accept only GET and HEAD and answer anything else with 405."
+    ]
+   },
+   {
+    "h": "Two probes, three outcomes",
+    "p": [
+     "Every check issues two requests with a nine second timeout. A response below 500 counts as live, including redirects and 404 pages, because the host answered. Two server errors count as down. Everything else is reported as unknown, including timeouts, network errors and mixed results.",
+     "The verdict function is a pure mapping from two observations to one of three values, which is what makes it easy to test."
+    ]
+   },
+   {
+    "h": "Why unknown exists",
+    "p": [
+     "Free hosting tiers sleep when idle. The first request after a quiet period can time out while the service wakes. Reporting that as down would be a **false alarm**, so inconclusive evidence is shown as Status unavailable.",
+     "A monitor that raises alarms it cannot justify trains people to ignore it."
+    ]
+   },
+   {
+    "h": "Freshness and cost",
+    "p": [
+     "Responses are sent with no-store, so each answer reflects the moment of the check. The page asks again every minute while the tab is visible and stops while it is hidden, which keeps load proportional to attention."
+    ]
+   },
+   {
+    "h": "How it is tested",
+    "p": [
+     "The decision logic has unit tests that mock the network and cover live, down, timeout, mixed and rejected-method cases for each endpoint. A browser test serves the site, stubs the endpoints and asserts that every chip reads Live, Down and Status unavailable correctly, including when the endpoint itself fails."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-site-architecture",
+  "title": "How this portfolio is built",
+  "lede": "A static site with a readable build step, content as data and guardrails that run on every change.",
+  "read": "4 min read",
+  "project": null,
+  "kind": "Implementation note",
+  "figure": {
+   "labels": [
+    "content JSON",
+    "build.py",
+    "Static HTML",
+    "Vercel"
+   ],
+   "caption": "Pages are generated from data, committed as plain files and served as static assets."
+  },
+  "sections": [
+   {
+    "h": "Static output, readable build",
+    "p": [
+     "The site is plain HTML, CSS and JavaScript. A single Python script that uses only the standard library generates every page from JSON content files. There is no framework runtime to hydrate and no bundler to configure, so what is deployed is what is committed."
+    ]
+   },
+   {
+    "h": "Content as data",
+    "p": [
+     "Projects, technologies, design notes and the landing page live under content/. The generator renders them into pages, a sitemap and a robots file, and project pages share one template. Adding a project means editing **data**, not markup."
+    ]
+   },
+   {
+    "h": "Guardrails in the build",
+    "p": [
+     "The build fails if an em or en dash appears in any generated page. A browser test visits every page at four viewport widths and checks for console errors, horizontal overflow, undersized tap targets and broken internal links.",
+     "Constraints that are checked by machines stay true after the tenth edit."
+    ]
+   },
+   {
+    "h": "Progressive enhancement",
+    "p": [
+     "The content is in the HTML. Animation, the project rail, the typed code and the pinned scroll story are layered on by script and by newer CSS features, and each falls back to a plain layout when it is unavailable, including with JavaScript off."
+    ]
+   },
+   {
+    "h": "Motion with rules",
+    "p": [
+     "Animation uses transform and opacity, runs only while an element is visible, and respects the **reduced-motion** preference. Scroll-linked effects share one throttled listener and an IntersectionObserver, so the cost does not grow with the number of animated elements."
+    ]
+   },
+   {
+    "h": "Contact details stay out of the markup",
+    "p": [
+     "Email, WhatsApp and social links are assembled in the browser, so the HTML source carries no readable contact details. This reduces casual scraping and does not claim to be a security boundary."
+    ]
+   },
+   {
+    "h": "Deploy path",
+    "p": [
+     "A push to a branch produces a Vercel preview. Merging to main publishes. The status functions deploy alongside the pages and are covered by their own unit tests."
     ]
    }
   ]

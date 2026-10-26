@@ -173,6 +173,18 @@ python3 tools/make_resume.py     # writes assets/Miracle-Agbebaku-Resume.pdf
 
 Sections appear only when content exists. Experience, education and contact details are deliberately absent until you add them.
 
+## Writing and its motion
+
+Long-form copy lives in data, with a small amount of markup:
+
+- `**term**` in note sections and engineering concerns becomes a highlighted term whose underline sweeps in as the block enters view.
+- Each note has a `figure` of stages. A label starting with `BOUNDARY:` renders a dashed trust-boundary marker. The figure draws itself on scroll.
+- Notes get a sticky table of contents with scroll-spy and a reading progress bar.
+- Each project has `engineering` items, shown as a numbered accordion with the first item open. `eng_intro` states whether the content is design intent.
+- Section labels carry animated markers: four small structures that rotate with scroll, keep moving when idle, and change shape while the page is scrolling.
+
+Writing is held to one rule: content describes design intent or documents code that exists, and never claims results nobody has measured.
+
 ## Engineering notes
 
 Short design notes live in `content/notes.json` (`slug`, `title`, `lede`, `read`, `project`, `sections`). Each entry becomes a page and a card on `engineering.html`. Notes describe design intent, never test results.

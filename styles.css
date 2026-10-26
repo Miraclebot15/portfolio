@@ -636,3 +636,75 @@ main{padding:0!important}.wrap{padding:0!important;max-width:none!important}
 .hero2-photo .tilt{position:relative}
 .hero2-photo .tilt::before{content:"";position:absolute;inset:16px -16px -16px 16px;border:1px solid var(--acc);border-radius:4px;z-index:-1;transition:transform var(--d-slow) var(--ease-out)}
 .hero2-photo:hover .tilt::before{transform:translate(6px,6px)}
+
+/* ======================================================================
+   Animated section markers: replace the old dash before every label
+   ====================================================================== */
+.eyebrow::before{content:none}
+.eyebrow,.kicker{display:inline-flex;align-items:center;gap:12px}
+.mk{display:inline-block;width:30px;height:30px;flex:none;color:var(--acc);vertical-align:middle}
+.mk svg{width:100%;height:100%;display:block;overflow:visible}
+.mk .ln{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mk .pt{fill:currentColor;stroke:none}
+.mk .mrot,.mk .st,.mk .orb{transform-box:view-box;transform-origin:16px 16px}
+.mk .brt,.mk .hb,.mk .n1,.mk .n2,.mk .n3{transform-box:fill-box;transform-origin:center}
+.mk .orb{animation:spin 4.8s linear infinite}
+.mk .brt{animation:breath 3.2s ease-in-out infinite}
+.mk .hb{animation:breath 2.6s ease-in-out infinite}
+.mk .n1,.mk .n2,.mk .n3{animation:nodep 2.4s ease-in-out infinite}.mk .n2{animation-delay:.8s}.mk .n3{animation-delay:1.6s}
+.mk .tok{animation:tok 2.8s ease-in-out infinite alternate}
+.mk .st{transition:transform .8s cubic-bezier(.34,1.56,.64,1)}
+.scrolling .mk .v0 .st{transform:rotate(90deg) scale(.78)}
+.scrolling .mk .v3 .st{transform:scale(2)}
+.scrolling .mk .v2 .st{transform:translateY(-5px) scale(1.15)}
+.mk .tri,.mk .hexp{transition:stroke-dasharray .4s}
+.scrolling .mk .tri{stroke-dasharray:3 3}.scrolling .mk .hexp{stroke-dasharray:4 3}
+@keyframes breath{0%,100%{transform:scale(.86)}50%{transform:scale(1.12)}}
+@keyframes nodep{0%,100%{transform:scale(1)}50%{transform:scale(1.75)}}
+@keyframes tok{from{transform:translateX(0)}to{transform:translateX(15px)}}
+/* list bullets: a small turning diamond instead of a dash */
+.plain li::before{left:5px;top:25px;width:8px;height:8px;background:var(--acc);transform:rotate(45deg);animation:diam 3.6s ease-in-out infinite;animation-delay:calc(var(--i,0)*.3s)}
+@keyframes diam{0%,100%{transform:rotate(45deg) scale(1)}50%{transform:rotate(135deg) scale(.7)}}
+@media (prefers-reduced-motion:reduce){.mk *,.plain li::before{animation:none!important;transition:none!important}}
+
+/* ======================================================================
+   Write-ups: keyword sweeps, stage figures, table of contents, accordions
+   ====================================================================== */
+.kw{background:linear-gradient(var(--acc),var(--acc)) no-repeat 0 96%/0 .16em;color:inherit;padding:0 .04em;transition:background-size 1s var(--ease-out) .45s}
+.in .kw,html:not(.js) .kw{background-size:100% .16em}
+.note-wrap{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:clamp(24px,5vw,72px);padding-bottom:40px;align-items:start}
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 100px)}
+.toc .mono{margin:0 0 14px;font:500 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--rule)}
+.toc a{display:block;padding:8px 0 8px 16px;margin-left:-1px;border-left:2px solid transparent;color:var(--mute);text-decoration:none;font-size:14px;line-height:1.35;transition:color var(--d-med),border-color var(--d-med),padding-left .35s var(--ease-out)}
+.toc a:hover{color:var(--ink)}.toc a.on{color:var(--ink);border-left-color:var(--acc);padding-left:22px}
+.prose{max-width:68ch}
+.prose h2{display:flex;gap:16px;align-items:baseline;scroll-margin-top:110px}
+.prose h2 .sn{flex:none;font:500 12px var(--f-mono);letter-spacing:.1em;color:var(--acc)}
+.fig{margin:0 0 48px;padding:22px;border:1px solid var(--rule);border-radius:12px;background:var(--card)}
+.fig figcaption{margin:18px 4px 2px;font-size:14px;color:var(--mute)}
+.fig-st{list-style:none;margin:0;padding:0;display:flex;align-items:stretch}
+.fig-st li{position:relative;flex:1 1 0;min-width:0;padding:16px 12px 8px 0;display:flex;flex-direction:column;gap:8px;border-top:2px solid var(--rule)}
+.fig-st li::before{content:"";position:absolute;left:0;right:0;top:-2px;height:2px;background:var(--acc);transform:scaleX(0);transform-origin:left;transition:transform .9s var(--ease-out);transition-delay:calc(var(--i)*160ms + 150ms)}
+.js .fig-st li>*{opacity:0;transform:translateY(8px);transition:opacity .6s var(--ease-out),transform .7s var(--ease-out);transition-delay:calc(var(--i)*160ms + 250ms)}
+.fig.in .fig-st li::before{transform:scaleX(1)}
+.fig.in .fig-st li>*{opacity:1;transform:none}
+.fs b{font:500 11px var(--f-mono);letter-spacing:.1em;color:var(--acc)}
+.fs span{font:400 clamp(20px,2.3vw,28px)/1.05 var(--f-display)}
+.fig-st li.fb{flex:0 0 46px;border-top-style:dashed;border-top-color:var(--acc);padding:16px 0 8px;align-items:center}
+.fig-st li.fb span{writing-mode:vertical-rl;transform:rotate(180deg);font:500 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--acc);white-space:nowrap}
+.eng{list-style:none;margin:16px 0 44px;padding:0}
+.eng .st{border-top:1px solid var(--rule);border-bottom:0}.eng .st:last-child{border-bottom:1px solid var(--rule)}
+.eng .hb{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:18px 0;min-height:64px;font:400 clamp(24px,3vw,34px)/1.1 var(--f-display);letter-spacing:-.01em;text-align:left}
+.eng .en{font:500 12px var(--f-mono);letter-spacing:.1em;color:var(--acc)}
+.eng .hb[aria-expanded="true"] .et{color:var(--acc)}
+.eng .dt p{padding:0 0 18px 54px;max-width:64ch;margin:0;color:var(--mute)}
+@media (max-width:1000px){.note-wrap{grid-template-columns:1fr}.toc{display:none}}
+@media (max-width:700px){
+.fig-st{flex-direction:column}
+.fig-st li{flex:none;padding:14px 0 10px}
+.fig-st li.fb{flex:none;padding:12px 0;align-items:flex-start;border-top-style:dashed}
+.fig-st li.fb span{writing-mode:horizontal-tb;transform:none}
+.eng .hb{grid-template-columns:34px minmax(0,1fr) auto}.eng .dt p{padding-left:44px}}
+@media (prefers-reduced-motion:reduce){.kw{background-size:100% .16em;transition:none}.fig-st li::before{transform:scaleX(1)}.js .fig-st li>*{opacity:1;transform:none}}
+.toc a{display:flex;align-items:center;min-height:44px;padding-top:0;padding-bottom:0}
