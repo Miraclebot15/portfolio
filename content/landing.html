@@ -21,11 +21,11 @@
 <div>
 <p class="kicker">The approach</p>
 <h2 id="st-h">Not just a screen. <span class="it">A whole system.</span></h2>
-<p class="lead">A model can suggest. Something else has to decide. I design the part in between, so what ships is controlled, auditable and dependable.</p>
+<p class="lead">A model can suggest. Something else has to decide. I design the layer in between: explicit trust boundaries, deterministic policy and an execution path that leaves evidence, so what ships is controlled, auditable and dependable.</p>
 <ol class="steps">
-<li class="step on"><b>01</b><h3>Propose</h3><p>A model drafts a plan: what should happen, and in what order.</p></li>
-<li class="step"><b>02</b><h3>Authorize</h3><p>Policy decides what is allowed. Sensitive actions wait for approval.</p></li>
-<li class="step"><b>03</b><h3>Run</h3><p>Approved steps execute in a controlled layer, and every result is recorded.</p></li>
+<li class="step on"><b>01</b><h3>Propose</h3><p>A model emits a candidate plan. It is treated as untrusted input, so it carries no authority.</p></li>
+<li class="step"><b>02</b><h3>Authorize</h3><p>A deterministic policy layer evaluates each step. Sensitive actions are held until an approval arrives from outside the model.</p></li>
+<li class="step"><b>03</b><h3>Run</h3><p>Approved steps execute through a constrained tool layer, and each decision and result is written to an audit record.</p></li>
 </ol>
 </div>
 <div class="flow" data-s="0" aria-hidden="true"><svg viewBox="0 0 400 440"><text class="lab" x="20" y="26">Propose</text><rect class="box" x="110" y="40" width="180" height="64" rx="8"/><path class="gate" d="M20 200H380"/><path class="gate" d="M60 192v16M120 192v16M180 192v16M240 192v16M300 192v16M360 192v16" stroke-width="1.5"/><text class="lab g" x="380" y="182" text-anchor="end">Authorize</text><circle class="ring" cx="200" cy="200" r="60"/><rect class="box run" x="110" y="320" width="180" height="64" rx="8"/><text class="lab" x="20" y="424">Run</text><rect class="tok" x="188" y="60" width="24" height="24" rx="5"/></svg></div>

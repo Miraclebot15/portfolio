@@ -26,7 +26,7 @@ $$('a',menu).forEach(function(a){a.addEventListener('click',function(){setMenu(f
 /* Give inner pages the same staged entrance as the home page */
 (function(){var seen=new Map();function stag(sel){$$(sel).forEach(function(el){if(el.classList.contains('rv')||el.closest('.tw'))return;var p=el.parentNode,i=seen.get(p)||0;seen.set(p,i+1);el.classList.add('rv');el.style.setProperty('--i',Math.min(i,7))})}
 stag('.phead .eyebrow,.phead .kicker,.phead .lede,.phead .lead,.phead .filters,.phead .count,.phead .chips,.phead .cap,.phead .cta,.phead .back,.about2-head .lead,.tags2');
-stag('.plist>li');stag('.crow');stag('.plain>li');stag('.note-card');stag('.pgrid .side');stag('.h3s');stag('.nextp');stag('.prose>*');stag('.stk .tag,.tags .tag')})();
+stag('.plist>li');stag('.crow');stag('.plain>li');stag('.eng>li');stag('.pgrid .lede');stag('.note-card');stag('.pgrid .side');stag('.h3s');stag('.nextp');stag('.prose>*');stag('.stk .tag,.tags .tag')})();
 
 /* Reveal on scroll */
 var targets=$$('.rv,.gate,.motifbox,.mo,.pipe,.pcard,.ph,.rcard');
@@ -139,6 +139,19 @@ $$('.rcard',rail).forEach(function(c){c.addEventListener('pointermove',function(
 new MutationObserver(kill).observe(document.body,{childList:true,attributes:true,attributeFilter:['style']});kill()})();
 
 var pr=document.getElementById('print');if(pr)pr.addEventListener('click',function(){window.print()});
+
+/* Section markers: scroll-linked rotation, idle motion in CSS, and a reaction when scrolling starts and stops */
+(function(){var ms=$$('.mk');if(!ms.length||reduce||!('IntersectionObserver' in window))return;
+var io=new IntersectionObserver(function(es){es.forEach(function(e){e.target._v=e.isIntersecting})},{rootMargin:'120px'});
+ms.forEach(function(m,i){m._o=i*53;m._r=m.querySelector('.mrot');io.observe(m)});
+var tick=false,timer=0,root=document.documentElement;
+function upd(){tick=false;var y=scrollY;ms.forEach(function(m){if(m._v&&m._r)m._r.style.transform='rotate('+(((y*.4)+m._o)%360).toFixed(1)+'deg)'})}
+addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(upd)}root.classList.add('scrolling');clearTimeout(timer);timer=setTimeout(function(){root.classList.remove('scrolling')},220)},{passive:true});upd()})();
+
+/* Table of contents: highlight the section being read */
+(function(){var links=$$('.toc a');if(!links.length||!('IntersectionObserver' in window))return;var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on')});var a=map[e.target.id];if(a)a.classList.add('on')}})},{rootMargin:'-18% 0px -72% 0px'});
+$$('.prose h2[id]').forEach(function(h){io.observe(h)})})();
 
 /* Contact links are assembled here, not written in the HTML */
 var m=['miracleagbebaku122','gmail.com'],w='2349021637905',x='MiracleTechX',ig='miracle001992',gh='Miraclebot15';

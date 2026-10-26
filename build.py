@@ -18,6 +18,7 @@ def ic(n, cls="ic"):
     n = ALIAS.get(n, n)
     return f'<svg class="{cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="{ICONS[n]}"/></svg>'
 def esc(s): return html.escape(s, quote=True)
+def fmt(s): return re.sub(r"\*\*(.+?)\*\*", r'<mark class="kw">\1</mark>', esc(s))
 def write(fn, s): open(os.path.join(ROOT, fn), "w", encoding="utf-8").write(s)
 def chip(state, check=None):
     c = f' data-check="{check}" aria-live="polite"' if check else ""
@@ -63,7 +64,7 @@ def page(fn, title, key, desc, body, nav=None, prog=False):
     p = '<span class="prog" aria-hidden="true"></span>' if prog else ""
     theme = ("<script>try{var t=localStorage.getItem('t');document.documentElement.dataset.theme=t||"
              "(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark')}catch(e){}</script>")
-    write(fn, f'''<!DOCTYPE html>
+    _page = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -96,7 +97,22 @@ def page(fn, title, key, desc, body, nav=None, prog=False):
 <div id="google_translate_element" hidden></div><script>function googleTranslateElementInit(){{if(window.google&&google.translate){{new google.translate.TranslateElement({{pageLanguage:"en",includedLanguages:"af,sq,am,ar,hy,az,eu,be,bn,bs,bg,ca,ceb,zh-CN,zh-TW,hr,cs,da,nl,eo,et,fi,fr,gl,ka,de,el,gu,ht,ha,he,hi,hu,is,id,ga,it,ja,jv,kn,kk,km,ko,ku,ky,lo,la,lv,lt,mk,ms,ml,mt,mi,mr,mn,my,ne,no,ps,fa,pl,pt,pa,ro,ru,sr,si,sk,sl,so,es,su,sw,sv,tg,ta,te,th,tr,uk,ur,uz,vi,cy,yi,yo,zu",autoDisplay:false}},"google_translate_element");}}}}</script><script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script><script src="app.js"></script>
 </body>
 </html>
-''')
+'''
+    write(fn, add_markers(_page))
+
+# ---- animated section markers (replace the old dash before labels) -------
+MARKERS = [
+ '<svg viewBox="0 0 32 32" class="v0"><g class="mrot"><circle class="ln" cx="16" cy="16" r="12.5" stroke-dasharray="2 3.2"/><g class="idle orb"><circle class="pt" cx="16" cy="3.5" r="2.5"/></g></g><g class="st"><rect class="ln idle brt" x="11" y="11" width="10" height="10" rx="2"/></g></svg>',
+ '<svg viewBox="0 0 32 32" class="v1"><g class="mrot"><path class="ln tri" d="M16 5 27 24H5Z"/><circle class="pt n1" cx="16" cy="5" r="2.4"/><circle class="pt n2" cx="27" cy="24" r="2.4"/><circle class="pt n3" cx="5" cy="24" r="2.4"/></g></svg>',
+ '<svg viewBox="0 0 32 32" class="v2"><g class="mrot"><path class="ln" d="M3 16H29M9 11v10M16 11v10M23 11v10"/></g><g class="st"><rect class="pt tok" x="5" y="12.5" width="7" height="7" rx="1.6"/></g></svg>',
+ '<svg viewBox="0 0 32 32" class="v3"><g class="mrot"><path class="ln hexp" d="M16 3 27 9.5V22.5L16 29 5 22.5V9.5Z"/></g><g class="st"><circle class="pt hb" cx="16" cy="16" r="3.2"/></g></svg>']
+def add_markers(h):
+    h = h.replace('<span class="dot"></span>', "")
+    n = [0]
+    def rep(m):
+        s = MARKERS[n[0] % len(MARKERS)]; n[0] += 1
+        return m.group(1) + f'<span class="mk" aria-hidden="true">{s}</span>'
+    return re.sub(r'(<p class="(?:eyebrow|kicker)"[^>]*>)', rep, h)
 
 def letters(name):
     out, n = "", 0
@@ -194,8 +210,14 @@ for i, p in enumerate(PROJECTS):
     nxt = PROJECTS[(i + 1) % len(PROJECTS)]
     live = f'<a class="btn pri up" href="{p["url"]}" target="_blank" rel="noopener noreferrer">{esc(p.get("link_label","Open live"))} {ic("ext")}<span class="sr">(opens in a new tab)</span></a>' if p.get("url") else ""
     pts = "".join(f"<li>{esc(x)}</li>" for x in p["points"])
+    summ = "".join(f'<p class="lede" style="font-size:18px">{fmt(x)}</p>' for x in p["summary"].split("\n\n"))
+    built = ("<h2 class=\"h3s\">Built with</h2>" + tech_tags(p["tech"])) if p.get("tech") else ""
+    eng = ""
+    if p.get("engineering"):
+        items = "".join(f'<li class="st" style="--i:{k}"><button class="hb" aria-expanded="{"true" if k == 0 else "false"}" aria-controls="e{k}"><span class="en">{k+1:02d}</span><span class="et">{esc(e["t"])}</span>{ic("right")}</button><div class="dt" id="e{k}"><div><p>{fmt(e["d"])}</p></div></div></li>' for k, e in enumerate(p["engineering"]))
+        eng = f'<h2 class="h3s">Engineering concerns</h2><p class="lede" style="font-size:16px">{esc(p["eng_intro"])}</p><ol class="eng">{items}</ol>'
     body = f'''<div class="wrap phead"><a class="back" href="projects.html">{ic("right")}Projects</a><p class="eyebrow" style="display:flex">{pnum(i)}</p><h1 style="view-transition-name:p-{p["slug"]}"><span class="ml"><span class="mw">{esc(p["name"])}</span></span></h1><div class="chips" style="margin-bottom:{"6px" if p.get("check") else "18px"}">{chip(p["state"], p.get("check"))}</div>{"<p class=\"cap\" style=\"margin:0 0 18px\">" + esc(p.get("check_note", "Live status checks whether the deployed website responds.")) + "</p>" if p.get("check") else ""}<p class="lede">{esc(p["purpose"])}</p><div class="cta" style="margin-top:6px">{live}</div></div>
-<div class="wrap pgrid"><div><h2 class="h3s" style="margin-top:20px">About</h2><p class="lede" style="font-size:18px">{esc(p["summary"])}</p><h2 class="h3s">What it’s for</h2><ul class="plain">{pts}</ul>{("<h2 class=\"h3s\">Built with</h2>" + tech_tags(p["tech"])) if p.get("tech") else ""}{flow(p["flow"]) if p.get("flow") else ""}</div>
+<div class="wrap pgrid"><div><h2 class="h3s" style="margin-top:20px">About</h2>{summ}<h2 class="h3s">What it’s for</h2><ul class="plain">{pts}</ul>{flow(p["flow"]) if p.get("flow") else ""}{eng}{built}</div>
 <div class="side"><div class="motifbox" style="--pc:{p["color"]}">{motif(p["motif"])}</div></div></div>
 <div class="wrap" style="padding-bottom:50px"><a class="nextp" href="{nxt["slug"]}.html"><small>Next project</small><span>{esc(nxt["name"])}{ic("right")}</span></a></div>'''
     page(f'{p["slug"]}.html', f'{p["name"]} | {NAME}', "case", p["purpose"], body, nav="projects", prog=True)
@@ -213,6 +235,7 @@ about_markup = """
 <div class="wrap a2rows">
 <div class="a2row rv"><b>01</b><div><p class="kicker">What I build</p><h2>From model output to useful software.</h2></div><p>I work across AI and agentic systems, backend APIs, full-stack applications, conversational automation and developer tooling. The interface matters, but so do architecture, observability, security boundaries and recovery when something breaks.</p></div>
 <div class="a2row rv"><b>02</b><div><p class="kicker">How I think</p><h2>Understand the failure path.</h2></div><div><p>I prefer to trace how a system actually behaves before changing it. I test assumptions, look for edge cases, and value reliable behavior over flashy demos. I’m building my foundations in computer science while exploring the deeper engineering behind intelligent systems.</p><a class="btn mag" href="projects.html">Explore the projects {ARROW}</a></div></div>
+<div class="a2row rv"><b>03</b><div><p class="kicker">Principles</p><h2>Make failure legible.</h2></div><ul class="plain"><li>Prefer invariants that code enforces over rules people remember.</li><li>Keep state explicit and observable, so behavior can be explained after the fact.</li><li>Draw boundaries where trust changes, and validate everything that crosses them.</li><li>Make changes small and reversible, and treat a passing demo as weak evidence.</li><li>Have systems state only what they can verify about themselves.</li></ul></div>
 </div>
 <div class="wrap">
 <p class="kicker">Try it</p>
@@ -252,18 +275,29 @@ page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku: s
  ph("Resume", "Resume", "Read it here, or take it with you.") +
  f'''<div class="wrap" style="padding-bottom:80px"><div class="cta rv" style="margin:0 0 34px"><a class="btn pri mag" href="{RESUME_PDF}" download>Download PDF {ic("download")}</a><a class="btn mag" href="{RESUME_PDF}" target="_blank" rel="noopener noreferrer">Open PDF {ic("ext")}<span class="sr">(opens in a new tab)</span></a><button class="btn mag" id="print" type="button">Print</button></div>{paper}</div>''')
 NOTES = json.load(open(os.path.join(ROOT, "content/notes.json"), encoding="utf-8"))
-note_cards = "".join(f'''<a class="note-card" href="{n["slug"]}.html"><span class="mono">Design note · {n["read"]}</span><h3>{esc(n["title"])}</h3><p>{esc(n["lede"])}</p><span class="note-go">Read {ic("right")}</span></a>''' for n in NOTES)
-page("engineering.html", f"Engineering | {NAME}", "engineering", "Design notes on how my AI systems are built.",
- ph("Journal", "Engineering", "Short design notes on the ideas behind the projects.") +
+def figure(f):
+    lis, k = "", 0
+    for idx, l in enumerate(f["labels"]):
+        if l.startswith("BOUNDARY:"):
+            lis += f'<li class="fb" style="--i:{idx}"><span>{esc(l[9:])}</span></li>'
+        else:
+            k += 1
+            lis += f'<li class="fs" style="--i:{idx}"><b>{k:02d}</b><span>{esc(l)}</span></li>'
+    return f'<figure class="fig rv"><ol class="fig-st">{lis}</ol><figcaption>{esc(f["caption"])}</figcaption></figure>'
+note_cards = "".join(f'''<a class="note-card" href="{n["slug"]}.html"><span class="mono">{n["kind"]} · {n["read"]}</span><h3>{esc(n["title"])}</h3><p>{esc(n["lede"])}</p><span class="note-go">Read {ic("right")}</span></a>''' for n in NOTES)
+page("engineering.html", f"Engineering | {NAME}", "engineering", "Design and implementation notes on the systems behind the projects.",
+ ph("Journal", "Engineering", "Design intent and implementation notes: trust boundaries, routing, availability checks and how this site is built.") +
  f'<div class="wrap" style="padding-bottom:90px"><div class="notes">{note_cards}</div></div>')
 for k, n in enumerate(NOTES):
     nxt = NOTES[(k + 1) % len(NOTES)]
-    proj = next(p for p in PROJECTS if p["slug"] == n["project"])
-    secs = "".join(f'<h2>{esc(s["h"])}</h2>' + "".join(f"<p>{esc(t)}</p>" for t in s["p"]) for s in n["sections"])
+    proj = next((p for p in PROJECTS if p["slug"] == n["project"]), None)
+    toc = "".join(f'<li><a href="#s{m+1}">{esc(s["h"])}</a></li>' for m, s in enumerate(n["sections"]))
+    secs = "".join(f'<h2 id="s{m+1}"><span class="sn">{m+1:02d}</span>{esc(s["h"])}</h2>' + "".join(f"<p>{fmt(t)}</p>" for t in s["p"]) for m, s in enumerate(n["sections"]))
+    cta = (f'<a class="btn mag" href="{proj["slug"]}.html">About {esc(proj["name"])} {ic("right")}</a>' if proj else f'<a class="btn mag" href="projects.html">See the projects {ic("right")}</a>')
     page(f'{n["slug"]}.html', f'{n["title"]} | {NAME}', "engineering", n["lede"],
-     ph("Design note · " + n["read"], esc(n["title"]), esc(n["lede"])) +
-     f'''<div class="wrap" style="padding-bottom:40px"><article class="prose">{secs}<p><a class="btn mag" href="{proj["slug"]}.html">About {esc(proj["name"])} {ic("right")}</a></p></article>
-<a class="nextp" href="{nxt["slug"]}.html"><small>Next note</small><span>{esc(nxt["title"])}</span></a></div>''', nav="engineering")
+     ph(f'{n["kind"]} · {n["read"]}', esc(n["title"]), esc(n["lede"])) +
+     f'''<div class="wrap note-wrap"><aside class="toc" aria-label="On this page"><p class="mono">On this page</p><ol>{toc}</ol></aside><div><article class="prose">{figure(n["figure"])}{secs}<p>{cta}</p></article>
+<a class="nextp" href="{nxt["slug"]}.html"><small>Next note</small><span>{esc(nxt["title"])}</span></a></div></div>''', nav="engineering", prog=True)
 page("contact.html", f"Contact | {NAME}", "contact", "Ways to contact Miracle Agbebaku.",
  ph("Contact", "Say hello", "The fastest way to reach me is WhatsApp. The other channels work too.") +
  '<div class="wrap" style="padding-bottom:80px">' + "".join(f'<a class="crow" data-c="{k}" href="#">{ic(k)}<b>{l}</b>{ic("ext")}</a>' for k, l in [("wa", "WhatsApp"), ("mail", "Email"), ("x", "X"), ("ig", "Instagram"), ("gh", "GitHub")]) + '</div>')

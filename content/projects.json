@@ -7,14 +7,14 @@
   "link_label": "Open live UI",
   "motif": "nexus",
   "purpose": "A governance-first AI orchestration system where models propose plans and separate controls decide what is allowed to run.",
-  "summary": "NEXUS CORE coordinates AI models, tools and specialized engines through a controlled execution architecture. A model may propose what should happen, but the system independently decides whether an action is permitted and how it is carried out. The aim is AI agents that are controllable, auditable and reliable, instead of agents that act on whatever a model outputs.",
+  "summary": "NEXUS CORE is a governance-first orchestration layer for AI agents. It treats the language model as an untrusted, probabilistic component and places authority in deterministic code that does not depend on model behavior. A planner proposes, a policy engine decides, a constrained executor acts, and every decision is written to an audit record.\n\nThe motivating problem is that a fluent response is not evidence that an action was authorized or that it happened. The architecture separates intelligence, authority and execution so each can be reasoned about, tested and audited on its own.",
   "points": [
-   "Planning is kept separate from authorization and execution.",
-   "Sensitive operations, including financial actions, are designed to need approval.",
-   "Audit hashes and execution records support traceability.",
-   "Sandboxed tools run supported operations in a controlled way.",
-   "A coordinator directs specialized engines across capabilities.",
-   "Includes authentication, streaming responses and file uploads."
+   "Separates planning, authorization and execution into distinct stages with distinct failure modes.",
+   "Evaluates every proposed step against explicit policy before anything runs, and holds sensitive operations, including financial actions, for approval.",
+   "Executes approved work only, through sandboxed tools with a declared surface.",
+   "Records decisions and executions with audit hashes so the history can be reconstructed and verified.",
+   "Coordinates specialized engines through a coordinator, then synthesizes their results into one response.",
+   "Includes authentication, streaming responses and file uploads around the core pipeline."
   ],
   "tech": [
    "Python",
@@ -24,37 +24,68 @@
   ],
   "flow": {
    "title": "How a request moves",
-   "note": "Open a stage to read its role. An overview of the design.",
+   "note": "Open a stage to read its role and the invariant it exists to protect.",
    "steps": [
     [
-     "ELLA Planner",
-     "Plans how a request should be handled."
+     "Planner",
+     "Decomposes a request into candidate steps. Its output is untrusted data and carries no authority."
     ],
     [
      "BOUNDARY",
      "Authorization boundary"
     ],
     [
-     "Governance Engine",
-     "Applies policy and execution controls, including approval for sensitive operations."
+     "Governance engine",
+     "Evaluates each step against policy and returns a decision. Sensitive operations are held for approval instead of proceeding."
     ],
     [
-     "JANE Corrector",
-     "Helps identify and correct errors in the execution process."
+     "Corrector",
+     "Reviews execution and intermediate results for errors. Proposed repairs re-enter governance."
     ],
     [
      "Sandboxed tools",
-     "Provide controlled execution of supported operations."
+     "Perform approved steps through a narrow, declared interface and return results as data."
     ],
     [
      "Synthesis",
-     "Combines results into a final response."
+     "Combines results into one response and links it to the audit record."
     ]
    ]
   },
   "check": "/api/nexus-status",
   "check_note": "Live status checks the deployed interface.",
-  "color": "#ff5a36"
+  "color": "#ff5a36",
+  "engineering": [
+   {
+    "t": "Untrusted by default",
+    "d": "The model is a probabilistic function of its context, and anything that reaches that context can influence it: files, links and conversation text. Its output is therefore a proposal, never an instruction. Authority lives in code that does not vary with model phrasing."
+   },
+   {
+    "t": "Deterministic policy evaluation",
+    "d": "Each proposed step is evaluated against explicit rules and yields a decision. The same plan under the same policy produces the same decision, which makes the control unit-testable and reviewable instead of a matter of prompt wording."
+   },
+   {
+    "t": "Approval as a recorded state",
+    "d": "Sensitive operations are designed to enter a held state. Leaving it requires an approval event that originates outside the model, so a persuasive response cannot stand in for authorization."
+   },
+   {
+    "t": "Constrained execution",
+    "d": "Tools run behind a sandboxed layer with a narrow, declared surface. The executor performs approved steps and returns results as data, which keeps the blast radius of a bad plan bounded."
+   },
+   {
+    "t": "Tamper-evident audit trail",
+    "d": "Decisions and executions are recorded with audit hashes. Chaining records makes silent modification detectable, so the history is something to verify rather than trust."
+   },
+   {
+    "t": "Bounded correction",
+    "d": "A corrector stage inspects execution results and intermediate state. Repairs it proposes re-enter the same governance path, so recovery never becomes a second, unreviewed route to authority."
+   },
+   {
+    "t": "Hostile input",
+    "d": "Misleading and manipulative input is part of the threat model. Defenses are designed in at the pipeline level because every file, URL and message is untrusted data."
+   }
+  ],
+  "eng_intro": "Design intent for this class of system. The stages above are what the architecture is organised around."
  },
  {
   "slug": "ella",
@@ -64,12 +95,14 @@
   "link_label": "Open live app",
   "motif": "ella",
   "purpose": "An AI assistant for WhatsApp that holds natural, context-aware conversations instead of rigid helpdesk replies.",
-  "summary": "ELLA is built for natural conversation inside WhatsApp, in individual and group chats. It is designed to understand Nigerian English and Pidgin, keep context, and route each message to the right handler instead of forcing everything into a fixed script.",
+  "summary": "ELLA is a conversational assistant built for WhatsApp. It models a chat as ordered context, not as isolated commands, and routes each message to a handler based on intent and conversation state. It is designed for individual and group chats and for the way people actually write: fragments, abbreviations, Nigerian English and Pidgin.\n\nThe engineering emphasis is on routing correctness and honest failure. A message that merely resembles a command should not run it, an ambiguous reference should produce a question, and an operation should be reported as complete only when it completed.",
   "points": [
-   "Context-aware replies in individual and group chats.",
-   "Awareness of Nigerian English and Pidgin.",
-   "Intent routing, so a message is not sent to a feature just because a few words match.",
-   "A developer console and settings for operating the assistant."
+   "Maintains conversation context across individual and group chats.",
+   "Routes messages by intent and state, so partial keyword matches do not trigger specialized handlers.",
+   "Asks a short clarifying question when a reference is ambiguous, instead of guessing.",
+   "Understands Nigerian English and Pidgin as part of routing, not only tone.",
+   "Reports provider and integration failures as failures.",
+   "Keeps developer and administrative controls separate from the user-facing surface."
   ],
   "tech": [
    "Node.js",
@@ -77,32 +110,59 @@
   ],
   "flow": {
    "title": "How a message is handled",
-   "note": "Open a step to read its role. An overview of the design.",
+   "note": "Open a step to read its role and the failure it guards against.",
    "steps": [
     [
      "Message in",
-     "A message arrives from an individual or group chat."
+     "An event from an individual or group chat, with sender and chat metadata. Treated as untrusted text."
     ],
     [
      "Context",
-     "The conversation so far shapes the reply."
+     "Recent conversation state used to resolve references, group addressing and language."
     ],
     [
      "Intent routing",
-     "Decides which handler the message belongs to."
+     "Chooses a handler from intent and context. Ambiguity produces a clarifying question, not a guess."
     ],
     [
      "Handler or AI reply",
-     "A specialized handler or a general AI-written reply."
+     "A specialized handler, or a general model-written reply when no handler fits."
     ],
     [
      "Reply",
-     "The answer goes back to the chat."
+     "Sent only after the underlying operation has succeeded. Failures are reported as failures."
     ]
    ]
   },
   "check": "/api/ella-status",
-  "color": "#7b6cff"
+  "color": "#7b6cff",
+  "engineering": [
+   {
+    "t": "Conversation as state",
+    "d": "Messages arrive as short, out-of-order, multilingual events. Treating the conversation as ordered context lets the assistant resolve references that single-message matching cannot."
+   },
+   {
+    "t": "Routing as classification",
+    "d": "Handler selection uses intent and state. Lexical overlap is weak evidence, and a false positive has an asymmetric cost because it executes behavior the user never requested."
+   },
+   {
+    "t": "Ambiguity policy",
+    "d": "When a reference cannot be resolved, the choice is to ask or to guess. A clarifying question costs one round trip, a wrong action costs trust, so the design prefers the question when the ambiguity changes which handler runs."
+   },
+   {
+    "t": "Group semantics",
+    "d": "Groups introduce addressing and threading problems: whether the assistant is being spoken to, which message a reply refers to, and how much shared context is relevant."
+   },
+   {
+    "t": "Failure honesty",
+    "d": "The assistant depends on third-party services that fail. The contract is that success is reported only on success, because a confident message about something that did not happen is worse than a plain error."
+   },
+   {
+    "t": "Environment separation",
+    "d": "Experimental work, such as voice, is maintained apart from production behavior and is not presented as available until verified. Operational controls sit behind their own interface."
+   }
+  ],
+  "eng_intro": "Design intent for a conversational assistant on a messaging platform."
  },
  {
   "slug": "carecore",
@@ -112,12 +172,14 @@
   "link_label": "Open dashboard",
   "motif": "carecore",
   "purpose": "A configurable AI customer-care platform for conversations, orders and payments, with approvals before sensitive actions.",
-  "summary": "CareCore helps a business run customer care through an AI agent configured for its tone, products and policies. An admin dashboard gives the business a ledger of activity, an approvals queue and settings for how the agent behaves.",
+  "summary": "CareCore is a configurable customer-care platform in which an AI agent handles conversations, orders and payments under the rules a business defines. Tone, scope, refund policy, escalation and the product catalog are configuration, and an authenticated dashboard gives operators a ledger of activity, an approvals queue and the settings that shape agent behavior.\n\nThe engineering emphasis is control around consequential actions. Anything with financial effect is designed to pass through an approval gate, conversations the agent should not handle are escalated to a human with context, and payment outcomes are treated as asynchronous events that must be handled safely.",
   "points": [
-   "Configurable tone, scope handling, refund policy and escalation.",
-   "Approvals before sensitive actions, such as sending a payment link.",
-   "Escalation to a human by email, Slack webhook or SMS.",
-   "A product catalog and custom instructions for the agent."
+   "Configures tone, scope handling, autonomy level, refund policy and escalation per business.",
+   "Holds sensitive actions, such as sending a payment link, in an approvals queue until a human signs off.",
+   "Escalates to a person by email, Slack webhook or SMS.",
+   "Keeps a product catalog and custom instructions the agent can draw on.",
+   "Provides an authenticated dashboard with a ledger, approvals and configuration.",
+   "Integrates payments and language-model access behind replaceable interfaces."
   ],
   "tech": [
    "Python",
@@ -126,7 +188,34 @@
    "Stripe"
   ],
   "check": "/api/carecore-status",
-  "color": "#1fc9a1"
+  "color": "#1fc9a1",
+  "engineering": [
+   {
+    "t": "Configuration as data",
+    "d": "Agent behavior derives from business configuration instead of code branches. That keeps behavior inspectable, changeable without a deploy and attributable to a setting."
+   },
+   {
+    "t": "Approval gates on money movement",
+    "d": "Actions with financial consequence are designed to wait for explicit human approval. The gate is a state in the system, which makes the decision recorded and reviewable."
+   },
+   {
+    "t": "Escalation paths",
+    "d": "A good agent knows its limits. Out-of-scope or risky conversations are handed to a human through a configured channel with the context needed to continue."
+   },
+   {
+    "t": "Idempotent payment webhooks",
+    "d": "Payment providers report outcomes asynchronously, and deliveries can repeat or arrive out of order. Handlers must verify origin and be idempotent so a repeated event cannot double-apply."
+   },
+   {
+    "t": "Authenticated control plane",
+    "d": "The dashboard is an administrative surface protected by an admin credential and kept apart from the customer-facing conversation flow."
+   },
+   {
+    "t": "Provider isolation",
+    "d": "Language-model access sits behind an interface, so the provider can change without rewriting conversation logic."
+   }
+  ],
+  "eng_intro": "Design concerns for a customer-care agent that touches orders and payments."
  },
  {
   "slug": "atelier",
@@ -134,13 +223,37 @@
   "state": "In development",
   "motif": "atelier",
   "purpose": "A conversational studio that turns a written interface brief into a UI concept you can refine.",
-  "summary": "Atelier explores AI-assisted interface creation. You describe the interface you want, review the result, and refine it through conversation, with the goal of speeding up frontend development.",
+  "summary": "Atelier is a conversational studio for interface generation. A written brief becomes an interface concept the user can inspect, and refinement happens by conversation, with the aim of shortening the distance between design intent and a usable frontend starting point.\n\nThe design problem is controllability. Generation is easy to start and hard to steer, so the system is organised around an inspectable intermediate result and small, local changes instead of full regeneration.",
   "points": [
-   "From design intent to a usable interface concept.",
-   "Refinement through conversation.",
-   "Aimed at accelerating frontend work."
+   "Turns a written brief into an interface concept.",
+   "Refines the concept through conversation.",
+   "Produces output intended to serve as a starting implementation.",
+   "Targets faster frontend iteration, from intent to something that can be reviewed."
   ],
-  "color": "#ffb020"
+  "color": "#ffb020",
+  "engineering": [
+   {
+    "t": "Brief to structure",
+    "d": "Converting intent into an intermediate description before producing code makes the result inspectable and editable, instead of a one-shot artifact."
+   },
+   {
+    "t": "Refinement as deltas",
+    "d": "Each conversational change is applied as a delta against the current design, so earlier decisions persist and changes stay local."
+   },
+   {
+    "t": "Isolated preview",
+    "d": "Generated interface code must render in an isolated surface so a preview cannot reach the host application."
+   },
+   {
+    "t": "Accessible by baseline",
+    "d": "Generated UI inherits the same baseline as hand-written UI: semantic structure, contrast and keyboard operation."
+   },
+   {
+    "t": "Code quality as product",
+    "d": "Because output becomes a starting implementation, component structure and readability are part of what is being delivered."
+   }
+  ],
+  "eng_intro": "Design concerns for AI-assisted interface generation."
  },
  {
   "slug": "engine",
@@ -148,13 +261,37 @@
   "state": "In development",
   "motif": "engine",
   "purpose": "A UI and 3D-oriented library for building interactive interfaces and visual experiences.",
-  "summary": "Engine is a reusable foundation for interface work: building blocks for interactive UIs and 3D-oriented visual experiences, rather than a standalone app.",
+  "summary": "Engine is a UI and 3D-oriented foundation for interactive interfaces and visual experiences. It is a library of building blocks, not an application, so its design is judged by how cleanly other projects can consume it.\n\nThe constraints that shape it are the ones every interactive rendering library shares: a small public contract, a frame-time budget, graceful degradation and accessibility as a built-in property.",
   "points": [
-   "Reusable building blocks for interactive interfaces.",
-   "Support for 3D-oriented visual experiences.",
-   "A foundation other projects can build on."
+   "Provides reusable building blocks for interactive interfaces.",
+   "Supports 3D-oriented visual experiences.",
+   "Serves as a foundation other projects build on.",
+   "Aims to stay small, documented and dependency-light."
   ],
-  "color": "#35a8ff"
+  "color": "#35a8ff",
+  "engineering": [
+   {
+    "t": "Small public contract",
+    "d": "Each component exposes a minimal, documented API and avoids hidden global state, so it can be embedded in different applications without surprises."
+   },
+   {
+    "t": "Frame-time budget",
+    "d": "Interactive and 3D components share one hard constraint: the frame. Work is scheduled so interaction stays responsive on modest hardware."
+   },
+   {
+    "t": "Progressive enhancement",
+    "d": "Components fall back to usable static presentations when motion, WebGL or scripting is unavailable."
+   },
+   {
+    "t": "Accessibility built in",
+    "d": "Keyboard operation, focus management and reduced-motion handling are part of each component, not a later pass."
+   },
+   {
+    "t": "Dependency discipline",
+    "d": "A foundation library's dependencies become every consumer's dependencies, so the surface is kept deliberately small."
+   }
+  ],
+  "eng_intro": "Design concerns for a reusable interactive UI library."
  },
  {
   "slug": "ultimate-agentic-ai",
@@ -162,13 +299,37 @@
   "state": "In development",
   "motif": "agent",
   "purpose": "An agentic AI project for completing multi-step tasks with tools.",
-  "summary": "Ultimate Agentic AI explores systems that go beyond single answers: planning a task, using tools, handling errors and checking results as they work toward a goal.",
+  "summary": "Ultimate Agentic AI explores autonomous, multi-step task execution. Instead of answering a single prompt, the system plans a task, selects tools, acts, observes the result and decides what to do next until a goal is met or a limit is reached.\n\nThe engineering interest is in the control loop around the model: explicit tool contracts, termination conditions, error handling that treats failure as information, and verification before a result is reported as done.",
   "points": [
-   "Multi-step task planning and execution.",
-   "Tool use inside AI-driven workflows.",
-   "Error handling and result checking."
+   "Plans and executes multi-step tasks.",
+   "Uses tools inside AI-driven workflows.",
+   "Handles errors and retries with limits.",
+   "Checks results against the goal before reporting completion."
   ],
-  "color": "#c85bff"
+  "color": "#c85bff",
+  "engineering": [
+   {
+    "t": "Plan, act, observe",
+    "d": "Execution is a loop: decompose the goal, choose a tool, act, observe the outcome and pick the next step."
+   },
+   {
+    "t": "Tool contracts",
+    "d": "Tools declare inputs, outputs and side effects, so calls can be validated and the agent can be constrained to what each tool allows."
+   },
+   {
+    "t": "Explicit termination",
+    "d": "An autonomous loop needs stopping conditions: goal reached, budget exhausted, or confidence too low to continue."
+   },
+   {
+    "t": "Failure as information",
+    "d": "Retries, backoff and replanning are separate behaviors. A step that keeps failing should end the run, not repeat indefinitely."
+   },
+   {
+    "t": "Verification before completion",
+    "d": "Results are checked against the goal, so completion is a verified state and not the model's claim."
+   }
+  ],
+  "eng_intro": "Design concerns for an autonomous task-execution loop."
  },
  {
   "slug": "lagoon",
@@ -176,18 +337,42 @@
   "state": "Live",
   "motif": "lagoon",
   "purpose": "A social and communication platform that brings messaging, stories, short video and communities into one app.",
-  "summary": "Lagoon aims to combine several kinds of digital interaction in one experience instead of spreading them across separate apps. Its backend API is deployed and provides the foundation, and the full application is in development.",
+  "summary": "Lagoon aims to combine several kinds of digital interaction in one experience instead of spreading them across separate apps: direct and group messaging, stories, short video and communities. Its backend API is deployed and provides the foundation, and the full application is in development.\n\nA product that combines messaging, ephemeral content and media is mostly a distributed-systems problem, so the design concerns are delivery semantics, content lifetime, fan-out cost and the media path.",
   "points": [
    "Direct and group messaging.",
    "Stories and temporary updates.",
    "Short-form video.",
-   "Communities and shared spaces."
+   "Communities and shared spaces.",
+   "A deployed backend API, monitored by a live status check on this site."
   ],
   "color": "#ff4f9a",
   "url": "https://lagoon-api.fiyin.workers.dev/",
   "link_label": "Open API",
   "check": "/api/lagoon-status",
-  "check_note": "Live status checks the deployed API."
+  "check_note": "Live status checks the deployed API.",
+  "engineering": [
+   {
+    "t": "Delivery semantics",
+    "d": "Messaging needs ordering, delivery state and idempotent sends, because networks drop and repeat messages."
+   },
+   {
+    "t": "Content with a lifetime",
+    "d": "Stories and temporary updates are data with an expiry. The system must enforce that expiry, not only hide content in the client."
+   },
+   {
+    "t": "Fan-out cost",
+    "d": "A group or community message multiplies per recipient. When and where that multiplication happens drives cost and latency."
+   },
+   {
+    "t": "The media path",
+    "d": "Short video needs upload, processing and delivery stages, each with its own failure modes and retry behavior."
+   },
+   {
+    "t": "Observable availability",
+    "d": "The deployed API is covered by an availability check, so its state is visible instead of assumed."
+   }
+  ],
+  "eng_intro": "Design concerns for a combined messaging, stories and video platform."
  },
  {
   "slug": "aurora",
@@ -195,12 +380,31 @@
   "state": "Coming soon",
   "motif": "aurora",
   "purpose": "An AI video-editing model designed to support a broad range of visual styles.",
-  "summary": "AURORA is aimed at flexible AI-assisted video creation and editing, so creators are not limited to a small set of fixed templates or aesthetics.",
+  "summary": "AURORA is a planned AI video-editing model that aims to support a broad range of visual styles. The goal is flexible, AI-assisted editing and creative transformation, so creators are not limited to a small set of fixed templates or aesthetics.\n\nIt is at the design stage. The questions it has to answer are structural: what representation of an edit an AI can reason about, how style becomes a controllable input, and how to keep editing non-destructive.",
   "points": [
    "Broad visual-style support.",
    "AI-assisted editing and creative transformation.",
-   "Flexible visual direction."
+   "Flexible visual direction instead of fixed templates."
   ],
-  "color": "#8dffcf"
+  "color": "#8dffcf",
+  "engineering": [
+   {
+    "t": "An inspectable edit model",
+    "d": "Video editing is a timeline of clips, effects and transitions. An AI-assisted editor needs a structured representation of that timeline, not only pixels."
+   },
+   {
+    "t": "Style as a parameter",
+    "d": "Supporting many visual styles means treating style as a controllable input to an edit, not a closed set of templates."
+   },
+   {
+    "t": "Non-destructive operations",
+    "d": "Source media stays untouched and every transformation is reversible, which keeps experimentation cheap."
+   },
+   {
+    "t": "Preview versus final render",
+    "d": "Previews and final renders have different quality and latency targets, and that split shapes the whole pipeline."
+   }
+  ],
+  "eng_intro": "Planned design concerns. Nothing here is implemented yet."
  }
 ]
