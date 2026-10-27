@@ -1,6 +1,6 @@
 // Vercel serverless endpoint: checks the public ELLA deployment from the server,
 // avoiding browser CORS restrictions. Two probes reduce transient false-down results.
-const TARGET = "https://ella-bot-ng2x.onrender.com/";
+const TARGET = "https://ella-bot-er0d.onrender.com/";
 const TIMEOUT_MS = 9000;
 
 async function probe() {
