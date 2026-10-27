@@ -1,7 +1,7 @@
 // Public website availability check for CareCore.
 // This checks whether the deployed dashboard page responds, not whether its backend features work.
 // Same logic as the ELLA and NEXUS CORE checks: two probes reduce transient false-down results.
-const TARGET = "https://carecore-huok.onrender.com/dashboard-app/";
+const TARGET = "https://carecore-rne8.onrender.com/";
 const TIMEOUT_MS = 9000;
 
 async function probe() {
