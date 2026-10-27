@@ -75,6 +75,32 @@ with sync_playwright() as p:
     labels = page.evaluate("[...document.querySelectorAll('[data-check] .lbl')].map(e => e.textContent)")
     if not labels or any(l != "Status unavailable" for l in labels):
         problems.append(f"status endpoint error: expected 'Status unavailable', got {labels}")
+
+    # Pause control: pauses every animation, resumes them, and is not defeated by touch hover
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True)
+    page = ctx.new_page()
+    page.goto(BASE + "index.html")
+    page.wait_for_timeout(900)
+    states = "[...document.querySelectorAll('.row2,.tape .tk,.mk .orb,.badge svg')].map(e => getComputedStyle(e).animationPlayState)"
+    page.evaluate("document.getElementById('pause').scrollIntoView({block:'center',behavior:'instant'})")
+    page.tap("#pause"); page.wait_for_timeout(250)
+    if set(page.evaluate(states)) != {"paused"}:
+        problems.append(f"pause: not every animation paused: {set(page.evaluate(states))}")
+    page.reload(); page.wait_for_timeout(700)
+    if "Play" not in page.text_content("#pause"):
+        problems.append("pause: state was not remembered after reload")
+    page.evaluate("document.getElementById('pause').scrollIntoView({block:'center',behavior:'instant'})")
+    page.tap("#pause"); page.wait_for_timeout(250)
+    if set(page.evaluate(states)) != {"running"}:
+        problems.append(f"resume: animations did not resume: {set(page.evaluate(states))}")
+    ctx.close()
+    page = browser.new_page(viewport={"width": 1280, "height": 900})
+    page.goto(BASE + "index.html"); page.wait_for_timeout(700)
+    page.evaluate("document.querySelector('.mq').scrollIntoView({block:'center',behavior:'instant'})")
+    page.hover(".mq"); page.wait_for_timeout(200)
+    if page.evaluate("getComputedStyle(document.querySelector('.row2')).animationPlayState") != "paused":
+        problems.append("hover: marquee should pause under a mouse pointer")
+    page.close()
     browser.close()
 
 server.shutdown()
