@@ -88,7 +88,8 @@ h1.name{font-size:clamp(48px,7.2vw,112px);line-height:.9;margin:6px 0 24px}
 .band span{font:700 clamp(48px,9vw,118px)/1 var(--f-display);letter-spacing:-.03em;color:transparent;-webkit-text-stroke:1.5px var(--mute);padding-right:.55em;white-space:nowrap}
 .band span::after{content:"/";-webkit-text-stroke:0;color:var(--acc);padding-left:.55em}
 @keyframes slide{to{transform:translateX(-50%)}}
-.paused .track,.paused .row2,.tech:hover .row2{animation-play-state:paused}
+.paused .track,.paused .row2{animation-play-state:paused}
+@media (hover:hover) and (pointer:fine){.mq:hover .row2{animation-play-state:paused}}
 .tech{position:relative}
 .mq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
 .row2{display:flex;width:max-content;animation:slide 48s linear infinite;margin:12px 0}
@@ -708,3 +709,23 @@ main{padding:0!important}.wrap{padding:0!important;max-width:none!important}
 .eng .hb{grid-template-columns:34px minmax(0,1fr) auto}.eng .dt p{padding-left:44px}}
 @media (prefers-reduced-motion:reduce){.kw{background-size:100% .16em;transition:none}.fig-st li::before{transform:scaleX(1)}.js .fig-st li>*{opacity:1;transform:none}}
 .toc a{display:flex;align-items:center;min-height:44px;padding-top:0;padding-bottom:0}
+
+/* Pause control reaches every animation on the page, not just the marquees */
+.paused *,.paused *::before,.paused *::after{animation-play-state:paused!important}
+/* More motion in a few areas */
+.tape{translate:var(--tx,0px) 0}
+.prow{--pc:var(--acc)}
+.prow:hover h3,.prow:focus-visible h3{color:var(--pc)}
+.prow .pm{width:76px;flex:none;opacity:0;transform:translateX(16px) rotate(-10deg) scale(.82);transition:opacity .45s var(--ease-out),transform .7s var(--ease-out);color:var(--ink)}
+.prow .pm .motif{max-width:76px}.prow .pm .motif .a{stroke:var(--pc)}
+.prow:hover .pm,.prow:focus-visible .pm{opacity:1;transform:none}
+@media (max-width:900px){.prow .pm{display:none}}
+.crow b{transition:transform .45s var(--ease-out)}
+.crow:hover b,.crow:focus-visible b{transform:translateX(12px)}
+.crow>.ic:first-child{transition:transform .5s var(--ease-out)}
+.crow:hover>.ic:first-child,.crow:focus-visible>.ic:first-child{transform:rotate(-12deg) scale(1.2)}
+.crow>.ic:last-child{transition:transform .5s var(--ease-out)}
+.crow:hover>.ic:last-child{transform:translate(6px,-6px)}
+.a2row h2{transition:color var(--d-med)}.a2row:hover h2{color:var(--acc)}
+.a2row b{transition:letter-spacing .5s var(--ease-out)}.a2row:hover b{letter-spacing:.35em}
+@media (prefers-reduced-motion:reduce){.tape{translate:none}.prow .pm,.crow b,.crow>.ic{transition:none}}
