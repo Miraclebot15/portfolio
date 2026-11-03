@@ -4,11 +4,12 @@
 Edit content/*.json (and content/snippets/*), then run:  python3 build.py
 Contact details are NOT in this file or in the HTML: they are assembled in app.js.
 """
-import html, json, os, re
+import html, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 def load(p): return json.load(open(os.path.join(ROOT, p), encoding="utf-8"))
 SITE, PROJECTS, ICONS = load("content/site.json"), load("content/projects.json"), load("content/icons.json")
+NOTES = load("content/notes.json")
 DOMAIN, NAME = SITE["domain"], SITE["name"]
 STACK = SITE["stack"]
 STACK_ITEMS = [it for c in STACK for it in c["items"]]
@@ -16,12 +17,6 @@ STACK_ICON = {it["name"]: it["i"] for it in STACK_ITEMS if "i" in it}
 STACK_LOGOS = [(it["name"], it["i"]) for it in STACK_ITEMS if "i" in it]
 STACK_NAMES = [it["name"] for c in STACK if c.get("kind") != "concepts" for it in c["items"]]
 BANNED_TECH = ("gemini", "qwen", "groq", "openrouter", "openai", "anthropic", "claude", "gpt", "llama", "mistral", "deepseek")
-for _c in STACK:
-    for _it in _c["items"]:
-        if any(b in _it["name"].lower() for b in BANNED_TECH):
-            raise SystemExit("build failed: AI model or provider name in stack: " + _it["name"])
-        if "i" in _it and _it["i"] not in ICONS:
-            raise SystemExit("build failed: unknown icon id in stack: " + _it["i"])
 STATE_CLASS = {"Live": "live", "In development": "dev", "Coming soon": "soon"}
 
 ALIAS = {"wa": "whatsapp", "ig": "instagram", "gh": "github"}
@@ -30,7 +25,9 @@ def ic(n, cls="ic"):
     return f'<svg class="{cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="{ICONS[n]}"/></svg>'
 def esc(s): return html.escape(s, quote=True)
 def fmt(s): return re.sub(r"\*\*(.+?)\*\*", r'<mark class="kw">\1</mark>', esc(s))
-def write(fn, s): open(os.path.join(ROOT, fn), "w", encoding="utf-8").write(s)
+CHECK = "--check" in sys.argv
+OUTPUTS = {}
+def write(fn, s): OUTPUTS[fn] = s
 def chip(state, check=None):
     c = f' data-check="{check}" aria-live="polite"' if check else ""
     return f'<span class="chip {STATE_CLASS[state]}"{c}><i></i><b class="lbl">{state}</b></span>'
@@ -62,6 +59,59 @@ MOTIFS = {
  "agent": [(circ(42,152,12),""),(circ(100,100,12),""),(circ(158,48,12),"a"),("M50 142l42-32M108 90l42-32",""),("M136 150l10 10 20-20","a")],
  "lagoon": [(circ(82,88,44),""),(circ(122,88,44),"a"),(circ(102,122,44),"")],
  "aurora": [("M24 56h92M24 86h138M24 116h64M24 146h112",""),("M112 32v140","a"),("M104 40l8-8 8 8","a")]}
+# ---- content validation: fail early, with a clear message -----------------
+SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+RESERVED = {"index", "portfolio", "projects", "about", "resume", "engineering", "contact", "404", "search"}
+NOTE_KINDS = {"Design intent", "Implementation note"}
+PROJECT_REQUIRED = ["slug", "name", "state", "motif", "purpose", "summary", "points", "color", "engineering", "eng_intro"]
+NOTE_REQUIRED = ["slug", "title", "lede", "read", "kind", "figure", "sections"]
+
+def validate_content():
+    errs = []
+    def bad_name(n): return any(b in n.lower() for b in BANNED_TECH)
+    seen = set()
+    for k, p in enumerate(PROJECTS):
+        w = f"projects.json[{k}] ({p.get('slug', '?')})"
+        for f in PROJECT_REQUIRED:
+            if not p.get(f): errs.append(f"{w}: missing field '{f}'")
+        sl = p.get("slug", "")
+        if not SLUG_RE.match(sl): errs.append(f"{w}: slug must be lowercase letters, digits and single hyphens")
+        if sl in seen or sl in RESERVED: errs.append(f"{w}: slug '{sl}' is duplicated or reserved")
+        seen.add(sl)
+        if p.get("state") not in STATE_CLASS: errs.append(f"{w}: state '{p.get('state')}' must be one of {', '.join(STATE_CLASS)}")
+        if p.get("motif") not in MOTIFS: errs.append(f"{w}: unknown motif '{p.get('motif')}'")
+        if not re.fullmatch(r"#[0-9a-fA-F]{6}", p.get("color", "")): errs.append(f"{w}: color must look like #ff5a36")
+        if p.get("url") and not p["url"].startswith("https://"): errs.append(f"{w}: url must start with https://")
+        if p.get("check"):
+            ck = p["check"]
+            if not (ck.startswith("/api/") and os.path.isfile(os.path.join(ROOT, "api", ck[5:] + ".js"))):
+                errs.append(f"{w}: check '{ck}' has no matching file in api/")
+        for t in p.get("tech", []):
+            if bad_name(t): errs.append(f"{w}: AI model or provider name in tech: {t}")
+    seen_n = set()
+    for k, n in enumerate(NOTES):
+        w = f"notes.json[{k}] ({n.get('slug', '?')})"
+        for f in NOTE_REQUIRED:
+            if not n.get(f): errs.append(f"{w}: missing field '{f}'")
+        sl = n.get("slug", "")
+        if not SLUG_RE.match(sl): errs.append(f"{w}: slug must be lowercase letters, digits and single hyphens")
+        if sl in seen_n or sl in seen or sl in RESERVED: errs.append(f"{w}: slug '{sl}' is duplicated or reserved")
+        seen_n.add(sl)
+        if n.get("kind") not in NOTE_KINDS: errs.append(f"{w}: kind must be one of {', '.join(sorted(NOTE_KINDS))}")
+        if n.get("project") and n["project"] not in seen: errs.append(f"{w}: project '{n['project']}' does not exist")
+        for m, sec in enumerate(n.get("sections", [])):
+            if not sec.get("h") or not sec.get("p"): errs.append(f"{w}: section {m + 1} needs 'h' and a non-empty 'p' list")
+    for c in STACK:
+        if not c.get("category") or not c.get("items"): errs.append(f"site.json stack: every category needs 'category' and 'items'")
+        for it in c.get("items", []):
+            if bad_name(it["name"]): errs.append(f"site.json stack: AI model or provider name: {it['name']}")
+            if "i" in it and it["i"] not in ICONS: errs.append(f"site.json stack: unknown icon id '{it['i']}' for {it['name']}")
+    for k, v in ICONS.items():
+        if not isinstance(v, str) or not v: errs.append(f"icons.json: '{k}' must be a path string")
+    if not DOMAIN.startswith("https://"): errs.append("site.json: domain must start with https://")
+    if errs:
+        raise SystemExit("build failed, content problems:\n  - " + "\n  - ".join(errs))
+validate_content()
 def motif(key, cls="motif"):
     ps = "".join(f'<path class="{c}" pathLength="1" style="--k:{i}" d="{d}"/>' for i, (d, c) in enumerate(MOTIFS[key]))
     return f'<svg class="{cls}" viewBox="0 0 200 200" aria-hidden="true" focusable="false">{ps}</svg>'
@@ -290,7 +340,6 @@ paper = f'''<article class="paper rv" aria-label="Resume of {NAME}"><header><h2 
 page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku: summary, focus, projects and technologies. View it here or download the PDF.",
  ph("Resume", "Resume", "Read it here, or take it with you.") +
  f'''<div class="wrap" style="padding-bottom:80px"><div class="cta rv" style="margin:0 0 34px"><a class="btn pri mag" href="{RESUME_PDF}" download>Download PDF {ic("download")}</a><a class="btn mag" href="{RESUME_PDF}" target="_blank" rel="noopener noreferrer">Open PDF {ic("ext")}<span class="sr">(opens in a new tab)</span></a><button class="btn mag" id="print" type="button">Print</button></div>{paper}</div>''')
-NOTES = json.load(open(os.path.join(ROOT, "content/notes.json"), encoding="utf-8"))
 def figure(f):
     lis, k = "", 0
     for idx, l in enumerate(f["labels"]):
@@ -320,19 +369,63 @@ page("contact.html", f"Contact | {NAME}", "contact", "Ways to contact Miracle Ag
 page("404.html", f"Not found | {NAME}", "none", "Page not found.", ph("404", "Not found", "That page doesn’t exist.") + f'<div class="wrap" style="padding-bottom:80px"><a class="btn pri" href="index.html">Back home {ic("right")}</a></div>')
 
 # ---- static files ------------------------------------------------------
-write("favicon.svg", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0e1114"/><path d="M14 48V16h6l12 20 12-20h6v32h-6V28L32 48 20 28v20z" fill="#6fe0c0"/></svg>')
-pages = [f for f in sorted(os.listdir(ROOT)) if f.endswith(".html") and f != "404.html"]
+write("favicon.svg", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0b0b0d"/><path d="M14 48V16h6l12 20 12-20h6v32h-6V28L32 48 20 28v20z" fill="#ff5a36"/></svg>')
+NOINDEX = {"404.html", "search.html"}
+pages = [f for f in sorted(OUTPUTS) if f.endswith(".html") and f not in NOINDEX]
 write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"  <url><loc>{DOMAIN}/{'' if f == 'index.html' else f}</loc></url>\n" for f in pages) + "</urlset>\n")
 write("robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
 write("vercel.json", json.dumps({"headers": [{"source": "/(.*)", "headers": [{"key": "X-Content-Type-Options", "value": "nosniff"}, {"key": "Referrer-Policy", "value": "strict-origin-when-cross-origin"}, {"key": "X-Frame-Options", "value": "DENY"}]}]}, indent=2) + "\n")
-print("built", len(pages) + 1, "pages")
 
-# ---- guard: no em or en dashes may ever ship in generated pages or content
-_bad = []
-for _f in sorted(os.listdir(ROOT)):
-    if _f.endswith((".html", ".xml", ".txt")):
-        _t = open(os.path.join(ROOT, _f), encoding="utf-8").read()
-        if "\u2014" in _t or "\u2013" in _t:
-            _bad.append(_f)
-if _bad:
-    raise SystemExit("build failed: em or en dash found in " + ", ".join(_bad))
+# ---- output validation: runs on everything before anything is written -----
+def validate_output():
+    errs = []
+    ids = {}
+    html_files = {f: t for f, t in OUTPUTS.items() if f.endswith(".html")}
+    for f, t in html_files.items():
+        ids[f] = re.findall(r'\sid="([^"]+)"', t)
+    def exists(path):
+        return path in OUTPUTS or os.path.isfile(os.path.join(ROOT, path))
+    for f, t in OUTPUTS.items():
+        if "\u2014" in t or "\u2013" in t: errs.append(f"{f}: em or en dash found")
+    for f, t in html_files.items():
+        if len(re.findall(r"<h1[\s>]", t)) != 1: errs.append(f"{f}: needs exactly one h1")
+        m = re.search(r"<title>([^<]*)</title>", t)
+        if not m or not m.group(1).strip(): errs.append(f"{f}: missing title")
+        d = re.search(r'<meta name="description" content="([^"]*)"', t)
+        if not d or not d.group(1).strip(): errs.append(f"{f}: missing meta description")
+        elif len(html.unescape(d.group(1))) > 200: errs.append(f"{f}: meta description is longer than 200 characters")
+        for ph in re.findall(r"\{[A-Z][A-Z_]{2,}\}", t): errs.append(f"{f}: unreplaced placeholder {ph}")
+        dup = {i for i in ids[f] if ids[f].count(i) > 1}
+        if dup: errs.append(f"{f}: duplicate ids: {', '.join(sorted(dup))}")
+        for u in re.findall(r'\b(?:href|src)="([^"]*)"', t):
+            if not u or re.match(r"(https?:|mailto:|tel:|data:|javascript:|//)", u): continue
+            path, _, frag = u.partition("#")
+            path = path.split("?")[0]
+            if not path:
+                if frag and frag not in ids[f]: errs.append(f"{f}: anchor #{frag} not found on this page")
+                continue
+            if not exists(path): errs.append(f"{f}: broken link or asset '{u}'"); continue
+            if frag and path.endswith(".html") and frag not in ids.get(path, []): errs.append(f"{f}: anchor '{u}' not found")
+    if errs:
+        raise SystemExit("build failed, output problems:\n  - " + "\n  - ".join(errs[:40]) + (f"\n  ... and {len(errs) - 40} more" if len(errs) > 40 else ""))
+
+GENERATED_ROOT = re.compile(r".*\.html$")
+def read_disk(fn):
+    path = os.path.join(ROOT, fn)
+    return open(path, encoding="utf-8", newline="").read() if os.path.isfile(path) else None
+
+validate_output()
+if CHECK:
+    stale = [f for f, t in sorted(OUTPUTS.items()) if read_disk(f) != t]
+    orphans = [f for f in sorted(os.listdir(ROOT)) if GENERATED_ROOT.match(f) and f not in OUTPUTS]
+    if stale or orphans:
+        print("build --check failed")
+        for f in stale: print("  stale or missing:", f)
+        for f in orphans: print("  orphan (not generated any more):", f)
+        print("Run python3 build.py and commit the result.")
+        raise SystemExit(1)
+    print(f"OK: {len(OUTPUTS)} generated files are up to date")
+else:
+    for fn, t in OUTPUTS.items():
+        open(os.path.join(ROOT, fn), "w", encoding="utf-8").write(t)
+    print("built", len([f for f in OUTPUTS if f.endswith(".html")]), "pages")

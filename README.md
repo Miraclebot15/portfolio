@@ -284,3 +284,18 @@ Any static host works. After a custom domain is attached, update `domain` in `co
 - Icons: [Simple Icons](https://simpleicons.org) (CC0) and [Material Design Icons](https://pictogrammers.com/library/mdi/) (Apache 2.0). Brand logos remain the trademarks of their owners.
 - Fonts: Bricolage Grotesque and Hanken Grotesk through Google Fonts (SIL Open Font License).
 - No open-source license has been added to this repository.
+
+## Checks
+
+Run these before every commit. CI runs the same set.
+
+```
+python3 build.py             # validates content and output, then writes the files
+python3 build.py --check     # writes nothing; exits 1 and lists stale or orphan generated files
+python3 -m unittest discover -s tests -v    # generator tests, on throwaway copies of the repo
+node tests/api-check.js      # status functions
+python3 tests/budgets.py     # gzip size budgets for pages, CSS, JS and images
+python3 tests/smoke.py       # browser tests at four widths (needs Playwright)
+```
+
+The build checks content first (slugs, states, motifs, colors, https URLs, status function files, note kinds and project references, stack icons, AI provider names) and the generated pages second (one h1, title, description length, unique ids, links and anchors, no dashes). If anything fails, nothing is written.
