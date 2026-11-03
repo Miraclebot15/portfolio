@@ -63,81 +63,223 @@
   ]
  ],
  "stack": [
-  [
-   "Python",
-   "python"
-  ],
-  [
-   "FastAPI",
-   "fastapi"
-  ],
-  [
-   "Next.js",
-   "nextjs"
-  ],
-  [
-   "React",
-   "react"
-  ],
-  [
-   "TypeScript",
-   "typescript"
-  ],
-  [
-   "Node.js",
-   "nodejs"
-  ],
-  [
-   "Express",
-   "express"
-  ],
-  [
-   "Supabase",
-   "supabase"
-  ],
-  [
-   "PostgreSQL",
-   "postgresql"
-  ],
-  [
-   "SQLite",
-   "sqlite"
-  ],
-  [
-   "Stripe",
-   "stripe"
-  ],
-  [
-   "Tailwind CSS",
-   "tailwindcss"
-  ],
-  [
-   "Three.js",
-   "threejs"
-  ],
-  [
-   "JavaScript",
-   "javascript"
-  ],
-  [
-   "HTML5",
-   "html5"
-  ],
-  [
-   "Git",
-   "git"
-  ],
-  [
-   "GitHub",
-   "github"
-  ],
-  [
-   "Vercel",
-   "vercel"
-  ],
-  [
-   "Render",
-   "render"
-  ]
+  {
+   "category": "AI Systems Engineering",
+   "kind": "concepts",
+   "blurb": "The design ideas behind the agent work. Concepts, not products.",
+   "items": [
+    {
+     "name": "Agent orchestration"
+    },
+    {
+     "name": "Tool calling"
+    },
+    {
+     "name": "Workflow automation"
+    },
+    {
+     "name": "Model routing"
+    },
+    {
+     "name": "Policy and approval gates"
+    },
+    {
+     "name": "Audit trails"
+    },
+    {
+     "name": "Sandboxed execution"
+    },
+    {
+     "name": "Intent routing"
+    },
+    {
+     "name": "Streaming responses"
+    }
+   ]
+  },
+  {
+   "category": "Languages",
+   "items": [
+    {
+     "name": "Python",
+     "i": "python"
+    },
+    {
+     "name": "TypeScript",
+     "i": "typescript"
+    },
+    {
+     "name": "JavaScript",
+     "i": "javascript"
+    },
+    {
+     "name": "HTML5",
+     "i": "html5"
+    },
+    {
+     "name": "CSS",
+     "i": "css"
+    }
+   ]
+  },
+  {
+   "category": "Frontend",
+   "items": [
+    {
+     "name": "React",
+     "i": "react"
+    },
+    {
+     "name": "Next.js",
+     "i": "nextjs"
+    },
+    {
+     "name": "Vite",
+     "i": "vite"
+    },
+    {
+     "name": "React Router",
+     "i": "reactrouter"
+    },
+    {
+     "name": "Tailwind CSS",
+     "i": "tailwindcss"
+    },
+    {
+     "name": "Three.js",
+     "i": "threejs"
+    }
+   ]
+  },
+  {
+   "category": "Backend and APIs",
+   "items": [
+    {
+     "name": "FastAPI",
+     "i": "fastapi"
+    },
+    {
+     "name": "Pydantic",
+     "i": "pydantic"
+    },
+    {
+     "name": "Uvicorn"
+    },
+    {
+     "name": "Node.js",
+     "i": "nodejs"
+    },
+    {
+     "name": "Express",
+     "i": "express"
+    },
+    {
+     "name": "Zod",
+     "i": "zod"
+    },
+    {
+     "name": "Webhooks"
+    }
+   ]
+  },
+  {
+   "category": "Realtime and Edge",
+   "items": [
+    {
+     "name": "Cloudflare Workers",
+     "i": "cloudflareworkers"
+    },
+    {
+     "name": "Durable Objects"
+    },
+    {
+     "name": "WebSockets"
+    },
+    {
+     "name": "Server-sent events"
+    }
+   ]
+  },
+  {
+   "category": "Data and Auth",
+   "items": [
+    {
+     "name": "PostgreSQL",
+     "i": "postgresql"
+    },
+    {
+     "name": "SQLite",
+     "i": "sqlite"
+    },
+    {
+     "name": "Supabase",
+     "i": "supabase"
+    },
+    {
+     "name": "Clerk",
+     "i": "clerk"
+    }
+   ]
+  },
+  {
+   "category": "Payments and Messaging",
+   "items": [
+    {
+     "name": "Stripe",
+     "i": "stripe"
+    },
+    {
+     "name": "WhatsApp",
+     "i": "whatsapp"
+    }
+   ]
+  },
+  {
+   "category": "Testing and Quality",
+   "items": [
+    {
+     "name": "Playwright",
+     "i": "playwright"
+    },
+    {
+     "name": "Vitest",
+     "i": "vitest"
+    },
+    {
+     "name": "GitHub Actions",
+     "i": "githubactions"
+    }
+   ]
+  },
+  {
+   "category": "Media",
+   "items": [
+    {
+     "name": "FFmpeg",
+     "i": "ffmpeg"
+    }
+   ]
+  },
+  {
+   "category": "Delivery",
+   "items": [
+    {
+     "name": "Git",
+     "i": "git"
+    },
+    {
+     "name": "GitHub",
+     "i": "github"
+    },
+    {
+     "name": "Vercel",
+     "i": "vercel"
+    },
+    {
+     "name": "Render",
+     "i": "render"
+    }
+   ]
+  }
  ]
 }
