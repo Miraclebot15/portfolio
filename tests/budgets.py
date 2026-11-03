@@ -8,9 +8,10 @@ import glob, gzip, os, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KB = 1024
-PAGE_GZ = {"index.html": 45 * KB, "portfolio.html": 45 * KB}
+PAGE_GZ = {"index.html": 45 * KB, "portfolio.html": 45 * KB, "stack.html": 24 * KB}
 DEFAULT_PAGE_GZ = 16 * KB
 CSS_GZ, JS_GZ = 22 * KB, 20 * KB
+STACK_CSS_GZ, STACK_JS_GZ = 6 * KB, 5 * KB
 IMAGE_MAX = {".webp": 120 * KB, ".jpg": 200 * KB, ".png": 40 * KB}
 IMAGES_TOTAL = 700 * KB
 
@@ -29,6 +30,8 @@ def main():
         check(n + " (gzip)", gz(f), PAGE_GZ.get(n, DEFAULT_PAGE_GZ))
     check("styles.css (gzip)", gz(os.path.join(ROOT, "styles.css")), CSS_GZ)
     check("app.js (gzip)", gz(os.path.join(ROOT, "app.js")), JS_GZ)
+    check("stack.css (gzip)", gz(os.path.join(ROOT, "stack.css")), STACK_CSS_GZ)
+    check("stack.js (gzip)", gz(os.path.join(ROOT, "stack.js")), STACK_JS_GZ)
     total = 0
     for f in sorted(glob.glob(os.path.join(ROOT, "assets", "images", "*"))):
         size = os.path.getsize(f); total += size
