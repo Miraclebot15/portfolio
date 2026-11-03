@@ -10,7 +10,18 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 def load(p): return json.load(open(os.path.join(ROOT, p), encoding="utf-8"))
 SITE, PROJECTS, ICONS = load("content/site.json"), load("content/projects.json"), load("content/icons.json")
 DOMAIN, NAME = SITE["domain"], SITE["name"]
-STACK_ICON = {n: i for n, i in SITE["stack"]}
+STACK = SITE["stack"]
+STACK_ITEMS = [it for c in STACK for it in c["items"]]
+STACK_ICON = {it["name"]: it["i"] for it in STACK_ITEMS if "i" in it}
+STACK_LOGOS = [(it["name"], it["i"]) for it in STACK_ITEMS if "i" in it]
+STACK_NAMES = [it["name"] for c in STACK if c.get("kind") != "concepts" for it in c["items"]]
+BANNED_TECH = ("gemini", "qwen", "groq", "openrouter", "openai", "anthropic", "claude", "gpt", "llama", "mistral", "deepseek")
+for _c in STACK:
+    for _it in _c["items"]:
+        if any(b in _it["name"].lower() for b in BANNED_TECH):
+            raise SystemExit("build failed: AI model or provider name in stack: " + _it["name"])
+        if "i" in _it and _it["i"] not in ICONS:
+            raise SystemExit("build failed: unknown icon id in stack: " + _it["i"])
 STATE_CLASS = {"Live": "live", "In development": "dev", "Coming soon": "soon"}
 
 ALIAS = {"wa": "whatsapp", "ig": "instagram", "gh": "github"}
@@ -142,7 +153,7 @@ gate_svg = f'''<figure class="gate" aria-label="Illustration: a model proposes a
 names2 = "".join(f"<span>{esc(p['name'])}</span>" for p in PROJECTS)
 band = f'<div class="band" aria-hidden="true"><div class="track"><div>{names2}</div><div class="dup">{names2}</div></div></div>'
 def tech_row(rev):
-    g = "".join(f'<span class="tc">{ic(i)}{esc(n)}</span>' for n, i in (SITE["stack"][::-1] if rev else SITE["stack"]))
+    g = "".join(f'<span class="tc">{ic(i)}{esc(n)}</span>' for n, i in (STACK_LOGOS[::-1] if rev else STACK_LOGOS))
     return f'<div class="row2{" rev" if rev else ""}"><div>{g}</div><div aria-hidden="true">{g}</div></div>'
 hero = f'''<section class="wrap hero heroWrap"><div><p class="eyebrow">Software engineer</p>
 <h1 class="name" aria-label="{NAME}">{letters(NAME)}</h1>
@@ -162,9 +173,15 @@ code = f'''<section class="wrap sec" style="padding-top:0"><div class="stm"><div
 C++ version:
 {esc(snip["cpp"])}</pre></div><p class="cap">An illustration of the idea, not NEXUS CORE’s source code.</p></div></div></section>'''
 work = f'''<section class="wrap sec" style="padding-top:0"><p class="eyebrow rv">Selected work</p><h2 class="rv">Projects.</h2><div class="cards">{"".join(pcard(i, p) for i, p in enumerate(PROJECTS[:4]))}</div><p class="cta"><a class="btn mag" href="projects.html">All projects {ic("right")}</a></p></section>'''
+def stack_card(k, c):
+    wide = c.get("kind") == "concepts"
+    chips = "".join(f'<li class="sc{"" if "i" in it else " pl"}">{ic(it["i"]) if "i" in it else ""}{esc(it["name"])}</li>' for it in c["items"])
+    blurb = f'<p>{esc(c["blurb"])}</p>' if c.get("blurb") else ""
+    return f'<section class="stkc rv{" wide" if wide else ""}" style="--i:{k % 4}" aria-labelledby="stk{k}"><h3 id="stk{k}">{esc(c["category"])}</h3>{blurb}<ul>{chips}</ul></section>'
+stack_grid = '<div class="stkg">' + "".join(stack_card(k, c) for k, c in enumerate(STACK)) + '</div>'
 tech = f'''<section class="sec tech" style="padding-top:0"><div class="wrap"><p class="eyebrow rv">Technologies</p><h2 class="rv">The tools behind the work.</h2></div>
 <div class="mq" role="group" aria-label="Technologies used across my projects">{tech_row(False)}{tech_row(True)}</div>
-<div class="wrap"><button class="btn pz" id="pause" aria-pressed="false">{ic("pause","ic pa")}{ic("play","ic pl")}<span class="lbl">Pause motion</span></button></div></section>'''
+<div class="wrap">{stack_grid}<button class="btn pz" id="pause" aria-pressed="false">{ic("pause","ic pa")}{ic("play","ic pl")}<span class="lbl">Pause motion</span></button></div></section>'''
 cta = f'''<section class="wrap sec" style="padding-top:0"><h2 class="ctaBig rv">Let’s build something.</h2><div class="cta"><a class="btn pri mag up" data-c="wa" href="#">{ic("wa")}Message on WhatsApp</a><a class="btn mag up" data-c="mail" href="#">{ic("mail")}Send an email</a></div></section>'''
 page("portfolio.html", f"Portfolio | {NAME}", "portfolio", "Selected software projects and engineering work by Miracle Agbebaku.", hero + band + build + code + work + tech + cta)
 
@@ -260,7 +277,6 @@ about_markup = """
 """
 PROJECT_JSON = json.dumps([{"name": p["name"], "slug": p["slug"], "state": p["state"]} for p in PROJECTS]).replace("</", "<\\/")
 page("about.html", f"About | {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup.replace("{ABOUT_PHOTO}", ABOUT_PHOTO).replace("{ARROW}", ic("right")).replace("{PROJECT_JSON}", PROJECT_JSON))
-stack_chips = "".join(f'<span class="tag">{ic(i)}{esc(n)}</span>' for n, i in SITE["stack"])
 RESUME_PDF = "assets/Miracle-Agbebaku-Resume.pdf"
 SUMMARY = "Software developer working on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet."
 FOCUS = ["AI agents and orchestration", "Backend, APIs and integrations", "Frontend with React, Next.js and TypeScript", "Messaging automation and developer tooling"]
@@ -270,7 +286,7 @@ paper = f'''<article class="paper rv" aria-label="Resume of {NAME}"><header><h2 
 <section><h3>Summary</h3><p>{SUMMARY}</p></section>
 <section><h3>Focus</h3><ul>{"".join(f"<li>{x}</li>" for x in FOCUS)}</ul></section>
 <section><h3>Selected projects</h3><dl>{paper_projects}</dl></section>
-<section><h3>Technologies</h3><p>{", ".join(n for n, _ in SITE["stack"])}</p></section></article>'''
+<section><h3>Technologies</h3><p>{", ".join(STACK_NAMES)}</p></section></article>'''
 page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku: summary, focus, projects and technologies. View it here or download the PDF.",
  ph("Resume", "Resume", "Read it here, or take it with you.") +
  f'''<div class="wrap" style="padding-bottom:80px"><div class="cta rv" style="margin:0 0 34px"><a class="btn pri mag" href="{RESUME_PDF}" download>Download PDF {ic("download")}</a><a class="btn mag" href="{RESUME_PDF}" target="_blank" rel="noopener noreferrer">Open PDF {ic("ext")}<span class="sr">(opens in a new tab)</span></a><button class="btn mag" id="print" type="button">Print</button></div>{paper}</div>''')

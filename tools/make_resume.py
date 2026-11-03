@@ -39,7 +39,7 @@ story += [Paragraph(t, bullet, bulletText="•") for t in FOCUS]
 story.append(Paragraph("SELECTED PROJECTS", h))
 for p in projects:
     story.append(KeepTogether([Paragraph(f'{p["name"]} <font color="#5d584f" size="8.5">· {p["state"]}</font>', pname), Paragraph(p["purpose"], pdesc)]))
-story += [Paragraph("TECHNOLOGIES", h), Paragraph(", ".join(n for n, _ in site["stack"]), body)]
+story += [Paragraph("TECHNOLOGIES", h), Paragraph(", ".join(i["name"] for c in site["stack"] if c.get("kind") != "concepts" for i in c["items"]), body)]
 
 out = os.path.join(ROOT, "assets/Miracle-Agbebaku-Resume.pdf")
 doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=19*mm, rightMargin=19*mm, topMargin=17*mm, bottomMargin=16*mm,

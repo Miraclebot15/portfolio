@@ -129,7 +129,7 @@ Then run `python3 build.py` and commit.
 
 ### Technologies in the marquee
 
-Edit the `stack` list in `content/site.json` as `["Display name", "icon-id"]`. The icon id must exist in `content/icons.json`.
+Edit `stack` in `content/site.json` as a list of categories: `{"category": "...", "kind": "concepts" (optional), "blurb": "..." (optional), "items": [{"name": "...", "i": "icon-id" (optional)}]}`. Items with an `i` appear in the marquee and as logo chips, and the id must exist in `content/icons.json`. Items without one render as plain text chips. The build fails if a name contains an AI model or provider name.
 
 ### The typed code panel
 
