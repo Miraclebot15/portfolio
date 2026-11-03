@@ -1,0 +1,73 @@
+/* Stack page. Loaded only on stack.html. Animations use transform and opacity only. */
+.stats{display:flex;flex-wrap:wrap;gap:16px 44px;margin-top:32px}
+.stats b{display:block;font:500 clamp(44px,9vw,72px)/1 var(--f-display);font-variant-numeric:tabular-nums}
+.stats span{color:var(--mute);font-size:15px}
+
+.frail{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 14px;margin:40px 0 12px;scrollbar-width:none;scroll-snap-type:x proximity}
+.frail::-webkit-scrollbar{display:none}
+.fp{flex:none;scroll-snap-align:start;min-height:44px;padding:0 18px;border:1px solid var(--rule);border-radius:999px;background:var(--card);color:var(--ink);font:inherit;font-size:15px;cursor:pointer;transition:background .35s,color .35s,border-color .35s,transform .45s var(--ease)}
+.fp:hover{transform:translateY(-2px)}
+.fp:active{transform:scale(.94)}
+.fp[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.stkg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin:12px 0 8px;overflow-x:clip}
+@media (min-width:720px){.stkc.wide{grid-column:1/-1}}
+.stkc{--sx:-56px}
+.stkc:nth-child(even){--sx:56px}
+.js .stkc.rv{opacity:0;transform:translateX(var(--sx));transition:opacity .9s var(--ease),transform 1.1s cubic-bezier(.2,.9,.25,1.1);transition-delay:calc(var(--i,0)*90ms)}
+.js .stkc.rv.in{opacity:1;transform:none}
+
+.stkc-i{position:relative;height:100%;overflow:hidden;background:var(--card);border:1px solid var(--rule);border-radius:24px;padding:24px;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .6s var(--ease),opacity .5s,filter .5s,border-color .4s,box-shadow .5s;will-change:transform}
+.stkc-i.mv{transition:transform .08s linear,opacity .5s,filter .5s,border-color .4s,box-shadow .5s}
+.stkc-i::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(420px circle at var(--gx,50%) var(--gy,0%),rgba(255,90,54,.16),transparent 60%);opacity:0;transition:opacity .4s}
+.stkc-i:hover{border-color:var(--acc);box-shadow:0 28px 60px -34px rgba(0,0,0,.65)}
+.stkc-i:hover::after{opacity:1}
+.stkc.dim .stkc-i{opacity:.22;filter:saturate(.3);transform:scale(.95)}
+.stkc.wide .stkc-i{border-color:var(--acc)}
+.stkc h3{position:relative;margin:0 0 6px;font:500 20px/1.2 var(--f-display)}
+.stkc p{position:relative;margin:0 0 14px;color:var(--mute);font-size:15px}
+.stkc ul{position:relative;list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.stkc p+ul{margin-top:0}
+
+.js .stkc:not(.in) li{opacity:0;transform:translateY(16px)}
+.js .stkc.in li{animation:chipin .7s cubic-bezier(.2,.9,.25,1.3) both;animation-delay:calc(var(--i,0)*90ms + var(--j)*45ms)}
+.js .stkc.in .sb .ic{animation:sbob var(--bd,6s) ease-in-out calc(1.6s + var(--j)*220ms) infinite}
+@keyframes chipin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes sbob{50%{transform:translateY(-2px) rotate(9deg)}}
+
+.sb{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--rule);border-radius:999px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer;transition:transform .35s var(--ease),border-color .3s}
+.sb .ic{width:18px;height:18px}
+.sb.nl{color:var(--mute)}
+.sb:hover,.sb:focus-visible{transform:translateY(-3px) scale(1.06);border-color:var(--acc)}
+.sb:active{transform:scale(.94)}
+.sb.cn{border-style:dashed;color:var(--mute);cursor:default}
+.sb.cn:hover{transform:none;border-color:var(--rule)}
+.pop .sb{animation:pop .5s cubic-bezier(.2,.9,.25,1.4)}
+@keyframes pop{40%{transform:scale(1.2)}}
+.bt{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--acc);pointer-events:none;animation:burst .7s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes burst{from{opacity:1;transform:translate(0,0) scale(1)}to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+
+.sorb{position:absolute;right:-70px;top:-70px;width:240px;height:240px;color:var(--mute);opacity:.5;pointer-events:none;animation:sspin 48s linear infinite}
+@keyframes sspin{to{transform:rotate(360deg)}}
+
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;margin:0 auto;max-width:520px;padding:24px 24px calc(24px + env(safe-area-inset-bottom,0px));background:var(--card);border:1px solid var(--rule);border-bottom:0;border-radius:28px 28px 0 0;box-shadow:0 -30px 80px -20px rgba(0,0,0,.6);transform:translateY(110%);visibility:hidden;transition:transform .6s cubic-bezier(.2,.9,.25,1.05),visibility 0s .6s}
+.sheet.open{transform:none;visibility:visible;transition:transform .6s cubic-bezier(.2,.9,.25,1.05),visibility 0s}
+.sh-x{position:absolute;right:12px;top:12px;width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}
+.sh-x .ic{width:20px;height:20px}
+.sh-ic{width:56px;height:56px;margin-bottom:12px}
+.sh-ic svg{width:56px;height:56px}
+.sh-ic.mono{display:grid;place-items:center;font:500 44px/1 var(--f-display)}
+.sh-cat{margin:0;color:var(--mute);font-size:14px}
+.sheet h2{margin:2px 0 14px;font:500 32px/1.1 var(--f-display)}
+.sh-lbl{margin:0 0 8px;color:var(--mute);font-size:15px}
+.sh-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.sh-list a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--rule);border-radius:999px;color:var(--ink);text-decoration:none}
+.sh-list a:hover{border-color:var(--acc)}
+
+.paused .stkc li,.paused .stkc .ic,.paused .sorb,.paused .pop .sb{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){
+.js .stkc.rv,.js .stkc.rv.in{opacity:1;transform:none;transition:none}
+.js .stkc:not(.in) li,.js .stkc.in li,.js .stkc.in .sb .ic{opacity:1;transform:none;animation:none}
+.sorb,.pop .sb,.bt{animation:none}.bt{display:none}
+.stkc-i,.sheet,.sb,.fp{transition:none}
+}

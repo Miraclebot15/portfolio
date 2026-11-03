@@ -52,6 +52,25 @@ class BuildTest(unittest.TestCase):
         self.assertNotIn("404.html", sm)
         self.assertIn("nexus-core.html", sm)
 
+    def test_stack_is_not_replicated(self):
+        marquee, grids = [], []
+        for f in sorted(os.listdir(self.repo)):
+            if not f.endswith(".html"): continue
+            t = read(os.path.join(self.repo, f))
+            if 'class="tc"' in t: marquee.append(f)
+            if 'class="stkg"' in t: grids.append(f)
+        self.assertEqual(marquee, ["index.html"])
+        self.assertEqual(grids, ["stack.html"])
+
+    def test_stack_page_is_wired_up(self):
+        stack = read(os.path.join(self.repo, "stack.html"))
+        self.assertIn('href="stack.css"', stack)
+        self.assertIn('src="stack.js"', stack)
+        self.assertIn('id="stack-usage"', stack)
+        self.assertIn('aria-current="page" href="portfolio.html"', stack.replace('<a data-p="portfolio" href="portfolio.html" aria-current="page">', 'aria-current="page" href="portfolio.html"'))
+        self.assertIn('href="stack.html"', read(os.path.join(self.repo, "portfolio.html")))
+        self.assertIn("stack.html", read(os.path.join(self.repo, "sitemap.xml")))
+
     # ---- --check ----------------------------------------------------------
     def test_check_flags_stale_file(self):
         with open(os.path.join(self.repo, "about.html"), "a", encoding="utf-8") as f: f.write("\n<!-- edited by hand -->")

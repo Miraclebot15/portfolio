@@ -61,7 +61,7 @@ MOTIFS = {
  "aurora": [("M24 56h92M24 86h138M24 116h64M24 146h112",""),("M112 32v140","a"),("M104 40l8-8 8 8","a")]}
 # ---- content validation: fail early, with a clear message -----------------
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-RESERVED = {"index", "portfolio", "projects", "about", "resume", "engineering", "contact", "404", "search"}
+RESERVED = {"index", "stack", "portfolio", "projects", "about", "resume", "engineering", "contact", "404", "search"}
 NOTE_KINDS = {"Design intent", "Implementation note"}
 PROJECT_REQUIRED = ["slug", "name", "state", "motif", "purpose", "summary", "points", "color", "engineering", "eng_intro"]
 NOTE_REQUIRED = ["slug", "title", "lede", "read", "kind", "figure", "sections"]
@@ -117,8 +117,10 @@ def motif(key, cls="motif"):
     return f'<svg class="{cls}" viewBox="0 0 200 200" aria-hidden="true" focusable="false">{ps}</svg>'
 
 # ---- shared page chrome ------------------------------------------------
-def page(fn, title, key, desc, body, nav=None, prog=False):
+def page(fn, title, key, desc, body, nav=None, prog=False, css=None, js=None):
     nav = nav or key
+    css_tag = f'\n<link rel="stylesheet" href="{css}">' if css else ""
+    js_tag = f'<script src="{js}" defer></script>\n' if js else ""
     links = "".join(f'<a data-p="{k}" href="{h}"{" aria-current=\"page\"" if k == nav else ""}>{l}</a>' for k, h, l in SITE["nav"])
     big = "".join(f'<a class="big" style="--i:{i}" href="{h}"{" aria-current=\"page\"" if k == nav else ""}>{l}</a>' for i, (k, h, l) in enumerate(SITE["nav"]))
     soc = "".join(f'<a class="soc" data-c="{k}" href="#" aria-label="{l}" title="{l}">{ic(k)}</a>' for k, l in SITE["social"])
@@ -142,7 +144,7 @@ def page(fn, title, key, desc, body, nav=None, prog=False):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 {theme}
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css">{css_tag}
 </head>
 <body data-page="{key}">
 <a class="skip" href="#main">Skip to content</a>{p}
@@ -156,7 +158,7 @@ def page(fn, title, key, desc, body, nav=None, prog=False):
 <div class="wrap"><footer class="ft"><span>© {SITE["year"]} {NAME}</span><div class="socs" role="group" aria-label="Contact links">{soc}</div></footer></div>
 <noscript><p style="text-align:center;color:var(--mute)">Contact links need JavaScript enabled.</p></noscript>
 <div id="google_translate_element" hidden></div><script>function googleTranslateElementInit(){{if(window.google&&google.translate){{new google.translate.TranslateElement({{pageLanguage:"en",includedLanguages:"af,sq,am,ar,hy,az,eu,be,bn,bs,bg,ca,ceb,zh-CN,zh-TW,hr,cs,da,nl,eo,et,fi,fr,gl,ka,de,el,gu,ht,ha,he,hi,hu,is,id,ga,it,ja,jv,kn,kk,km,ko,ku,ky,lo,la,lv,lt,mk,ms,ml,mt,mi,mr,mn,my,ne,no,ps,fa,pl,pt,pa,ro,ru,sr,si,sk,sl,so,es,su,sw,sv,tg,ta,te,th,tr,uk,ur,uz,vi,cy,yi,yo,zu",autoDisplay:false}},"google_translate_element");}}}}</script><script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script><script src="app.js"></script>
-</body>
+{js_tag}</body>
 </html>
 '''
     write(fn, add_markers(_page))
@@ -223,17 +225,12 @@ code = f'''<section class="wrap sec" style="padding-top:0"><div class="stm"><div
 C++ version:
 {esc(snip["cpp"])}</pre></div><p class="cap">An illustration of the idea, not NEXUS CORE’s source code.</p></div></div></section>'''
 work = f'''<section class="wrap sec" style="padding-top:0"><p class="eyebrow rv">Selected work</p><h2 class="rv">Projects.</h2><div class="cards">{"".join(pcard(i, p) for i, p in enumerate(PROJECTS[:4]))}</div><p class="cta"><a class="btn mag" href="projects.html">All projects {ic("right")}</a></p></section>'''
-def stack_card(k, c):
-    wide = c.get("kind") == "concepts"
-    chips = "".join(f'<li class="sc{"" if "i" in it else " pl"}">{ic(it["i"]) if "i" in it else ""}{esc(it["name"])}</li>' for it in c["items"])
-    blurb = f'<p>{esc(c["blurb"])}</p>' if c.get("blurb") else ""
-    return f'<section class="stkc rv{" wide" if wide else ""}" style="--i:{k % 4}" aria-labelledby="stk{k}"><h3 id="stk{k}">{esc(c["category"])}</h3>{blurb}<ul>{chips}</ul></section>'
-stack_grid = '<div class="stkg">' + "".join(stack_card(k, c) for k, c in enumerate(STACK)) + '</div>'
 tech = f'''<section class="sec tech" style="padding-top:0"><div class="wrap"><p class="eyebrow rv">Technologies</p><h2 class="rv">The tools behind the work.</h2></div>
 <div class="mq" role="group" aria-label="Technologies used across my projects">{tech_row(False)}{tech_row(True)}</div>
-<div class="wrap">{stack_grid}<button class="btn pz" id="pause" aria-pressed="false">{ic("pause","ic pa")}{ic("play","ic pl")}<span class="lbl">Pause motion</span></button></div></section>'''
+<div class="wrap" style="display:flex;flex-wrap:wrap;gap:12px"><button class="btn pz" id="pause" aria-pressed="false">{ic("pause","ic pa")}{ic("play","ic pl")}<span class="lbl">Pause motion</span></button><a class="btn" style="margin-top:16px" href="stack.html">Explore the full stack{ic("right")}</a></div></section>'''
+stack_band = f'''<section class="sec tech" style="padding-top:0"><div class="wrap"><p class="eyebrow rv">Technologies</p><h2 class="rv">The tools behind the work.</h2><p class="lede rv">Every tool I build with, grouped by category, with the project pages that list each one.</p><a class="btn pri rv" href="stack.html">Explore the full stack{ic("right")}</a></div></section>'''
 cta = f'''<section class="wrap sec" style="padding-top:0"><h2 class="ctaBig rv">Let’s build something.</h2><div class="cta"><a class="btn pri mag up" data-c="wa" href="#">{ic("wa")}Message on WhatsApp</a><a class="btn mag up" data-c="mail" href="#">{ic("mail")}Send an email</a></div></section>'''
-page("portfolio.html", f"Portfolio | {NAME}", "portfolio", "Selected software projects and engineering work by Miracle Agbebaku.", hero + band + build + code + work + tech + cta)
+page("portfolio.html", f"Portfolio | {NAME}", "portfolio", "Selected software projects and engineering work by Miracle Agbebaku.", hero + band + build + code + work + stack_band + cta)
 
 
 # ---- photos (responsive WebP with JPEG fallback) -------------------------
@@ -291,6 +288,45 @@ for i, p in enumerate(PROJECTS):
 
 # ---- other pages -------------------------------------------------------
 def ph(eyebrow, h, lede=""): return f'<div class="wrap phead"><p class="eyebrow">{eyebrow}</p><h1><span class="ml"><span class="mw">{h}</span></span></h1>{f"<p class=\"lede\">{lede}</p>" if lede else ""}</div>'
+
+# ---- Stack page: the only place the full categorized stack is shown -------
+USAGE = {}
+for _p in PROJECTS:
+    for _t in _p.get("tech", []):
+        USAGE.setdefault(_t.lower(), []).append({"n": _p["name"], "h": _p["slug"] + ".html"})
+USAGE = {k: v for k, v in USAGE.items() if k in {n.lower() for n in STACK_NAMES}}
+
+def stack_card(k, c):
+    concepts = c.get("kind") == "concepts"
+    items = ""
+    for j, it in enumerate(c["items"]):
+        n = esc(it["name"])
+        if concepts:
+            inner = f'<span class="sb cn">{n}</span>'
+        else:
+            inner = f'<button class="sb{"" if "i" in it else " nl"}" type="button" data-n="{n}" data-c="{esc(c["category"])}" aria-haspopup="dialog">{ic(it["i"]) if "i" in it else ""}<span>{n}</span></button>'
+        items += f'<li style="--j:{j};--bd:{5 + (j * 7) % 4}s">{inner}</li>'
+    orb = '<svg class="sorb" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="86" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 7"/><circle cx="100" cy="100" r="56" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 9"/><circle cx="186" cy="100" r="5" fill="var(--acc)"/><circle cx="44" cy="148" r="4" fill="currentColor"/><circle cx="120" cy="44" r="3" fill="currentColor"/></svg>' if concepts else ""
+    blurb = f'<p>{esc(c["blurb"])}</p>' if c.get("blurb") else ""
+    return (f'<section class="stkc rv{" wide" if concepts else ""}" style="--i:{k % 4}" data-k="{k}" aria-labelledby="stk{k}">'
+            f'<div class="stkc-i">{orb}<h3 id="stk{k}">{esc(c["category"])}</h3>{blurb}<ul>{items}</ul></div></section>')
+
+_tools = sum(1 for c in STACK if c.get("kind") != "concepts" for _ in c["items"])
+_linked = len(USAGE)
+_stats = "".join(f'<div><b data-count="{n}">{n}</b><span>{l}</span></div>' for n, l in ((len(STACK), "categories"), (_tools, "tools"), (_linked, "listed on project pages")))
+_rail = '<div class="frail" role="group" aria-label="Filter by category"><button class="fp" type="button" data-f="all" aria-pressed="true">All</button>' + "".join(f'<button class="fp" type="button" data-f="{k}" aria-pressed="false">{esc(c["category"])}</button>' for k, c in enumerate(STACK)) + '</div>'
+_head = ph("Stack", "The full stack.", "Every tool I build with, grouped by what it does. Tap a tool to see which of my project pages list it.")
+assert _head.startswith('<div class="wrap phead">') and _head.endswith("</div>")
+_head = _head.replace('<div class="wrap phead">', f'<div class="wrap phead"><a class="back" href="portfolio.html">{ic("right")}Portfolio</a>', 1)[:-6] + f'<div class="stats rv">{_stats}</div></div>'
+_sheet = (f'<div class="sheet" id="sheet" role="dialog" aria-labelledby="sh-name" aria-modal="false"><button class="sh-x" id="sh-x" type="button" aria-label="Close details">{ic("close")}</button>'
+          '<div class="sh-ic" id="sh-ic" aria-hidden="true"></div><p class="sh-cat" id="sh-cat"></p><h2 id="sh-name"></h2>'
+          '<p class="sh-lbl" id="sh-lbl"></p><ul class="sh-list" id="sh-list"></ul></div>')
+_usage = json.dumps(USAGE, ensure_ascii=False).replace("</", "<\\/")
+page("stack.html", f"The full stack | {NAME}", "stack", "Every tool I build with, grouped by category, and which of my project pages list each one.",
+     _head + '<div class="wrap">' + _rail + '<div class="stkg">' + "".join(stack_card(k, c) for k, c in enumerate(STACK)) + '</div>'
+     f'<button class="btn pz" id="pause" aria-pressed="false">{ic("pause", "ic pa")}{ic("play", "ic pl")}<span class="lbl">Pause motion</span></button></div>'
+     + _sheet + f'<script type="application/json" id="stack-usage">{_usage}</script>',
+     nav="portfolio", css="stack.css", js="stack.js")
 about_markup = """
 <div class="wrap about2-head">
 <div><p class="kicker"><span class="dot"></span>About the developer</p>
