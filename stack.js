@@ -24,13 +24,14 @@
   }
 
   function openSheet(btn) {
-    var name = btn.getAttribute('data-n'), list = usage[name.toLowerCase()] || [];
+    var name = btn.getAttribute('data-n'), d = usage[name.toLowerCase()] || { p: [], t: '', h: 'stack.html' }, list = d.p;
     var ic = $('#sh-ic'), svg = $('svg', btn);
     ic.innerHTML = ''; ic.className = 'sh-ic';
-    if (svg) ic.appendChild(svg.cloneNode(true)); else { ic.className = 'sh-ic mono'; ic.textContent = name.charAt(0); }
+    if (svg) ic.appendChild(svg.cloneNode(true)); else { ic.className = 'sh-ic tmono'; ic.textContent = name.charAt(0); }
     $('#sh-cat').textContent = btn.getAttribute('data-c');
     $('#sh-name').textContent = name;
-    $('#sh-lbl').textContent = list.length ? 'Listed on these project pages' : 'No project page lists this yet.';
+    $('#sh-tag').textContent = d.t; $('#sh-go').href = d.h;
+    $('#sh-lbl').textContent = list.length ? 'Listed on these project pages' : btn.classList.contains('cn') ? 'A design idea rather than a tool.' : 'No project page lists this yet.';
     var ul = $('#sh-list'); ul.innerHTML = '';
     list.forEach(function (p) {
       var li = document.createElement('li'), a = document.createElement('a');
@@ -47,7 +48,8 @@
 
   grid.addEventListener('click', function (e) {
     var btn = e.target.closest('.sb[data-n]');
-    if (!btn) return;
+    if (!btn || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    e.preventDefault();
     burst(btn.parentNode); openSheet(btn);
   });
   $('#sh-x').addEventListener('click', closeSheet);

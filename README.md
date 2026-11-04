@@ -129,7 +129,25 @@ Then run `python3 build.py` and commit.
 
 ### Technologies in the marquee
 
-Edit `stack` in `content/site.json` as a list of categories: `{"category": "...", "kind": "concepts" (optional), "blurb": "..." (optional), "items": [{"name": "...", "i": "icon-id" (optional)}]}`. Items with an `i` appear in the marquee and as logo chips, and the id must exist in `content/icons.json`. Items without one render as plain text chips. The marquee appears only on the welcome page. The categorized cards appear only on `stack.html` (own `stack.css` and `stack.js`), and Portfolio links to it. Tapping a tool there lists the project pages whose `tech` includes it, so keep `tech` accurate in `content/projects.json`. The build fails if a name contains an AI model or provider name.
+Edit `stack` in `content/site.json` as a list of categories: `{"category": "...", "kind": "concepts" (optional), "blurb": "..." (optional), "items": [{"name": "...", "i": "icon-id" (optional)}]}`. Items with an `i` appear in the marquee and as logo chips, and the id must exist in `content/icons.json`. Items without one render as plain text chips. The marquee appears only on the welcome page. The categorized cards appear only on `stack.html` (own `stack.css` and `stack.js`), and Portfolio links to it. Tapping a tool there lists the project pages whose `tech` includes it, so keep `tech` accurate in `content/projects.json`.
+
+### Deep-dive pages
+
+Every stack item (tools and design concepts) gets its own page, `stack-<name>.html`, with four layers: Overview, How it works, Example, In my work. The text lives in `content/tools.json`, keyed by the exact item name in `site.json`:
+
+```json
+"Python": {
+  "tag": "One-line summary shown in the sheet and under the title.",
+  "what": "Two sentences: what it is.",
+  "uses": ["Exactly", "three", "short uses"],
+  "how": "Two or three sentences on the mechanics.",
+  "lang": "python", "et": "Example title", "code": "the example code", "en": "One line about the example.",
+  "pairs": ["Names of other stack items that go with it"],
+  "notes": ["optional engineering note slugs, such as note-site-architecture"]
+}
+```
+
+The build fails if an item has no entry, an entry has no item, `uses` is not exactly three, `lang` is unknown, a `pairs` name or note slug does not exist, or the text names an AI model or provider. The "In my work" layer only shows project pages whose `tech` list includes the item and the notes you list here, so nothing is claimed that the data does not say. Use plain hyphens, never dashes. The build fails if a name contains an AI model or provider name.
 
 ### The typed code panel
 
