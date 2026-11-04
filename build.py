@@ -10,6 +10,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 def load(p): return json.load(open(os.path.join(ROOT, p), encoding="utf-8"))
 SITE, PROJECTS, ICONS = load("content/site.json"), load("content/projects.json"), load("content/icons.json")
 NOTES = load("content/notes.json")
+TOOLS = load("content/tools.json")
 DOMAIN, NAME = SITE["domain"], SITE["name"]
 STACK = SITE["stack"]
 STACK_ITEMS = [it for c in STACK for it in c["items"]]
@@ -63,6 +64,8 @@ MOTIFS = {
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 RESERVED = {"index", "stack", "portfolio", "projects", "about", "resume", "engineering", "contact", "404", "search"}
 NOTE_KINDS = {"Design intent", "Implementation note"}
+LANG_LABEL = {"python": "Python", "ts": "TypeScript", "js": "JavaScript", "jsx": "JSX", "html": "HTML", "css": "CSS", "bash": "Shell", "sql": "SQL", "yaml": "YAML", "json": "JSON"}
+def tool_slug(n): return re.sub(r"[^a-z0-9]+", "-", n.lower()).strip("-")
 PROJECT_REQUIRED = ["slug", "name", "state", "motif", "purpose", "summary", "points", "color", "engineering", "eng_intro"]
 NOTE_REQUIRED = ["slug", "title", "lede", "read", "kind", "figure", "sections"]
 
@@ -109,6 +112,26 @@ def validate_content():
     for k, v in ICONS.items():
         if not isinstance(v, str) or not v: errs.append(f"icons.json: '{k}' must be a path string")
     if not DOMAIN.startswith("https://"): errs.append("site.json: domain must start with https://")
+    names = [it["name"] for c in STACK for it in c["items"]]
+    slugs = [tool_slug(n) for n in names]
+    for sl in {x for x in slugs if slugs.count(x) > 1}: errs.append(f"site.json stack: two items share the page name stack-{sl}.html")
+    note_slugs = {n["slug"] for n in NOTES}
+    ban = re.compile(r"\b(" + "|".join(BANNED_TECH) + r")\b", re.I)
+    for n in names:
+        t = TOOLS.get(n)
+        if not t: errs.append(f"tools.json: missing entry for '{n}'"); continue
+        for f in ("tag", "what", "how", "lang", "et", "code", "en"):
+            if not t.get(f): errs.append(f"tools.json['{n}']: missing field '{f}'")
+        if not (isinstance(t.get("uses"), list) and len(t["uses"]) == 3 and all(t["uses"])): errs.append(f"tools.json['{n}']: 'uses' needs exactly 3 entries")
+        if t.get("lang") not in LANG_LABEL: errs.append(f"tools.json['{n}']: lang must be one of {', '.join(LANG_LABEL)}")
+        for q in t.get("pairs", []):
+            if q not in names or q == n: errs.append(f"tools.json['{n}']: pairs entry '{q}' is not another item in the stack")
+        for q in t.get("notes", []):
+            if q not in note_slugs: errs.append(f"tools.json['{n}']: note '{q}' does not exist")
+        if ban.search(" ".join([t.get("tag", ""), t.get("what", ""), t.get("how", ""), t.get("en", "")] + list(t.get("uses", [])))):
+            errs.append(f"tools.json['{n}']: AI model or provider name in the text")
+    for n in TOOLS:
+        if n not in names: errs.append(f"tools.json: '{n}' is not in the stack")
     if errs:
         raise SystemExit("build failed, content problems:\n  - " + "\n  - ".join(errs))
 validate_content()
@@ -289,22 +312,27 @@ for i, p in enumerate(PROJECTS):
 # ---- other pages -------------------------------------------------------
 def ph(eyebrow, h, lede=""): return f'<div class="wrap phead"><p class="eyebrow">{eyebrow}</p><h1><span class="ml"><span class="mw">{h}</span></span></h1>{f"<p class=\"lede\">{lede}</p>" if lede else ""}</div>'
 
-# ---- Stack page: the only place the full categorized stack is shown -------
-USAGE = {}
+# ---- Stack pages: the map (stack.html) and one deep-dive page per item ----
+ORDER = [it["name"] for c in STACK for it in c["items"]]
+CAT_OF = {it["name"]: c["category"] for c in STACK for it in c["items"]}
+KIND_OF = {it["name"]: c.get("kind") for c in STACK for it in c["items"]}
+TOOL_FILE = {n: f"stack-{tool_slug(n)}.html" for n in ORDER}
+NOTE_BY = {n["slug"]: n for n in NOTES}
+PROJ_OF = {}
 for _p in PROJECTS:
     for _t in _p.get("tech", []):
-        USAGE.setdefault(_t.lower(), []).append({"n": _p["name"], "h": _p["slug"] + ".html"})
-USAGE = {k: v for k, v in USAGE.items() if k in {n.lower() for n in STACK_NAMES}}
+        PROJ_OF.setdefault(_t.lower(), []).append({"n": _p["name"], "h": _p["slug"] + ".html"})
+
+def tool_icon(n):
+    return ic(STACK_ICON[n]) if n in STACK_ICON else f'<span class="tmono" aria-hidden="true">{esc(n[0])}</span>'
 
 def stack_card(k, c):
     concepts = c.get("kind") == "concepts"
     items = ""
     for j, it in enumerate(c["items"]):
         n = esc(it["name"])
-        if concepts:
-            inner = f'<span class="sb cn">{n}</span>'
-        else:
-            inner = f'<button class="sb{"" if "i" in it else " nl"}" type="button" data-n="{n}" data-c="{esc(c["category"])}" aria-haspopup="dialog">{ic(it["i"]) if "i" in it else ""}<span>{n}</span></button>'
+        cls = "sb" + (" cn" if concepts else "") + ("" if "i" in it or concepts else " nlg")
+        inner = f'<a class="{cls}" href="{TOOL_FILE[it["name"]]}" data-n="{n}" data-c="{esc(c["category"])}">{ic(it["i"]) if "i" in it else ""}<span>{n}</span></a>'
         items += f'<li style="--j:{j};--bd:{5 + (j * 7) % 4}s">{inner}</li>'
     orb = '<svg class="sorb" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="86" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 7"/><circle cx="100" cy="100" r="56" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 9"/><circle cx="186" cy="100" r="5" fill="var(--acc)"/><circle cx="44" cy="148" r="4" fill="currentColor"/><circle cx="120" cy="44" r="3" fill="currentColor"/></svg>' if concepts else ""
     blurb = f'<p>{esc(c["blurb"])}</p>' if c.get("blurb") else ""
@@ -312,21 +340,66 @@ def stack_card(k, c):
             f'<div class="stkc-i">{orb}<h3 id="stk{k}">{esc(c["category"])}</h3>{blurb}<ul>{items}</ul></div></section>')
 
 _tools = sum(1 for c in STACK if c.get("kind") != "concepts" for _ in c["items"])
-_linked = len(USAGE)
+_linked = sum(1 for n in STACK_NAMES if PROJ_OF.get(n.lower()))
 _stats = "".join(f'<div><b data-count="{n}">{n}</b><span>{l}</span></div>' for n, l in ((len(STACK), "categories"), (_tools, "tools"), (_linked, "listed on project pages")))
 _rail = '<div class="frail" role="group" aria-label="Filter by category"><button class="fp" type="button" data-f="all" aria-pressed="true">All</button>' + "".join(f'<button class="fp" type="button" data-f="{k}" aria-pressed="false">{esc(c["category"])}</button>' for k, c in enumerate(STACK)) + '</div>'
-_head = ph("Stack", "The full stack.", "Every tool I build with, grouped by what it does. Tap a tool to see which of my project pages list it.")
+_head = ph("Stack", "The full stack.", "Every tool and design idea behind my work, grouped by what it does. Tap one for a quick look, then open the deep dive for how it works and an example.")
 assert _head.startswith('<div class="wrap phead">') and _head.endswith("</div>")
 _head = _head.replace('<div class="wrap phead">', f'<div class="wrap phead"><a class="back" href="portfolio.html">{ic("right")}Portfolio</a>', 1)[:-6] + f'<div class="stats rv">{_stats}</div></div>'
 _sheet = (f'<div class="sheet" id="sheet" role="dialog" aria-labelledby="sh-name" aria-modal="false"><button class="sh-x" id="sh-x" type="button" aria-label="Close details">{ic("close")}</button>'
-          '<div class="sh-ic" id="sh-ic" aria-hidden="true"></div><p class="sh-cat" id="sh-cat"></p><h2 id="sh-name"></h2>'
+          '<div class="sh-ic" id="sh-ic" aria-hidden="true"></div><p class="sh-cat" id="sh-cat"></p><h2 id="sh-name"></h2><p class="sh-tag" id="sh-tag"></p>'
+          f'<a class="btn pri sh-go" id="sh-go" href="stack.html">Open the deep dive{ic("right")}</a>'
           '<p class="sh-lbl" id="sh-lbl"></p><ul class="sh-list" id="sh-list"></ul></div>')
-_usage = json.dumps(USAGE, ensure_ascii=False).replace("</", "<\\/")
-page("stack.html", f"The full stack | {NAME}", "stack", "Every tool I build with, grouped by category, and which of my project pages list each one.",
+_usage = json.dumps({n.lower(): {"p": PROJ_OF.get(n.lower(), []), "t": TOOLS[n]["tag"], "h": TOOL_FILE[n]} for n in ORDER}, ensure_ascii=False).replace("</", "<\\/")
+page("stack.html", f"The full stack | {NAME}", "stack", "Every tool and design idea behind my work, grouped by category, with a deep dive for each: what it is, how it works, an example and where it appears.",
      _head + '<div class="wrap">' + _rail + '<div class="stkg">' + "".join(stack_card(k, c) for k, c in enumerate(STACK)) + '</div>'
      f'<button class="btn pz" id="pause" aria-pressed="false">{ic("pause", "ic pa")}{ic("play", "ic pl")}<span class="lbl">Pause motion</span></button></div>'
      + _sheet + f'<script type="application/json" id="stack-usage">{_usage}</script>',
      nav="portfolio", css="stack.css", js="stack.js")
+
+LAYERS = [("overview", "Overview"), ("how", "How it works"), ("example", "Example"), ("work", "In my work")]
+
+def chip_link(n):
+    return f'<li><a class="tchip" href="{TOOL_FILE[n]}">{ic(STACK_ICON[n]) if n in STACK_ICON else ""}{esc(n)}</a></li>'
+
+def nx(k):
+    return f'<button class="nx" type="button" data-go="{LAYERS[k + 1][0]}">Next layer: {LAYERS[k + 1][1]}</button>' if k < len(LAYERS) - 1 else ""
+
+def tool_page(i, n):
+    t, cat = TOOLS[n], CAT_OF[n]
+    concept = KIND_OF[n] == "concepts"
+    uses = "".join(f'<li style="--j:{j}">{esc(u)}</li>' for j, u in enumerate(t["uses"]))
+    lines = "".join(f'<span class="cl" style="--l:{j}">{esc(l) if l else chr(8203)}</span>' for j, l in enumerate(t["code"].split("\n")))
+    pairs = "".join(chip_link(q) for q in t["pairs"])
+    projects = PROJ_OF.get(n.lower(), [])
+    if projects:
+        work = '<h2 class="lh">Listed on these project pages</h2><ul class="tchips">' + "".join(f'<li><a class="tchip" href="{x["h"]}">{esc(x["n"])}</a></li>' for x in projects) + '</ul>'
+    elif concept:
+        work = '<p class="tbig">This is a design idea rather than a product, so it is not tied to a project\u2019s tech list.' + (' The engineering notes below show it applied.' if t["notes"] else '') + '</p>'
+    else:
+        work = '<p class="tbig">No project page lists this yet.</p>'
+    if t["notes"]:
+        work += '<h2 class="lh">Related engineering notes</h2><ul class="tchips">' + "".join(f'<li><a class="tchip" href="{q}.html">{esc(NOTE_BY[q]["title"])}</a></li>' for q in t["notes"]) + '</ul>'
+    sibs = [q for q in ORDER if CAT_OF[q] == cat and q != n]
+    if sibs: work += f'<h2 class="lh">More in {esc(cat)}</h2><ul class="tchips">' + "".join(chip_link(q) for q in sibs) + '</ul>'
+    tabs = "".join(f'<button class="ltab" type="button" role="tab" id="t-{k}" aria-controls="{k}" aria-selected="{"true" if j == 0 else "false"}" tabindex="{0 if j == 0 else -1}" data-l="{k}"><b>{j + 1}</b><span>{v}</span></button>' for j, (k, v) in enumerate(LAYERS))
+    panels = (
+        f'<section class="lp shown" id="overview" role="tabpanel" aria-labelledby="t-overview"><p class="tbig">{esc(t["what"])}</p><h2 class="lh">What you use it for</h2><ul class="uses">{uses}</ul>{nx(0)}</section>'
+        f'<section class="lp" id="how" role="tabpanel" aria-labelledby="t-how"><p class="tbig">{esc(t["how"])}</p><h2 class="lh">Pairs well with</h2><ul class="tchips">{pairs}</ul>{nx(1)}</section>'
+        f'<section class="lp" id="example" role="tabpanel" aria-labelledby="t-example"><h2 class="lh">{esc(t["et"])}</h2>'
+        f'<div class="cb" data-code="{esc(t["code"])}"><div class="ch"><span>{LANG_LABEL[t["lang"]]}</span><button class="cp" type="button" aria-label="Copy the example">Copy</button></div><pre tabindex="0"><code>{lines}</code></pre></div><p class="cnote">{esc(t["en"])}</p>{nx(2)}</section>'
+        f'<section class="lp" id="work" role="tabpanel" aria-labelledby="t-work">{work}</section>')
+    prev_n, next_n = ORDER[i - 1], ORDER[(i + 1) % len(ORDER)]
+    nav_ = (f'<nav class="tnav" aria-label="More from the stack"><a class="tn" href="{TOOL_FILE[prev_n]}"><span>Previous</span><b>{esc(prev_n)}</b></a>'
+            f'<a class="tn nxt" href="{TOOL_FILE[next_n]}"><span>Next</span><b>{esc(next_n)}</b></a></nav>')
+    head = (f'<div class="wrap phead tp"><a class="back" href="stack.html">{ic("right")}The full stack</a><p class="eyebrow">{esc(cat)}</p>'
+            f'<div class="thd"><span class="tic">{tool_icon(n)}</span><h1><span class="ml"><span class="mw">{esc(n)}</span></span></h1></div><p class="lede">{esc(t["tag"])}</p></div>')
+    page(TOOL_FILE[n], f"{n} | The full stack | {NAME}", "stack", f'{t["tag"]} Overview, how it works, a worked example and where it appears in my projects.',
+         head + f'<div class="wrap tool"><div class="lay" role="tablist" aria-label="Layers of detail">{tabs}</div>{panels}{nav_}</div>',
+         nav="portfolio", css="stack.css", js="tool.js")
+
+for _i, _n in enumerate(ORDER):
+    tool_page(_i, _n)
 about_markup = """
 <div class="wrap about2-head">
 <div><p class="kicker"><span class="dot"></span>About the developer</p>

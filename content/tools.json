@@ -1,0 +1,908 @@
+{
+ "Python": {
+  "tag": "A readable general-purpose language for backends, scripts and AI work.",
+  "what": "Python is a general-purpose language known for code that reads close to plain English. It runs everything from small automation scripts to web backends and data pipelines, and it has the largest ecosystem for data and AI work.",
+  "uses": [
+   "Backend APIs and services",
+   "Scripts that automate repetitive jobs",
+   "Data processing and AI tooling"
+  ],
+  "how": "You write .py files and an interpreter runs them line by line. Libraries install with pip and are imported by name, so a few lines can pull in a web framework, a database driver or a test runner. Type hints are optional, but editors and validators use them to check your code.",
+  "lang": "python",
+  "et": "Read a JSON file and count items by state",
+  "code": "import json\nfrom collections import Counter\n\nwith open(\"projects.json\") as f:\n    projects = json.load(f)\n\ncounts = Counter(p[\"state\"] for p in projects)\nprint(counts)  # Counter({'Live': 3, 'Building': 2})",
+  "en": "Standard library only, nothing to install. Counter groups and counts in one line.",
+  "pairs": [
+   "FastAPI",
+   "Pydantic",
+   "SQLite"
+  ],
+  "notes": [
+   "note-site-architecture"
+  ]
+ },
+ "TypeScript": {
+  "tag": "JavaScript with types, so mistakes show up before the code runs.",
+  "what": "TypeScript adds a static type system on top of JavaScript. You describe the shape of your data, and the compiler flags mismatches while you type, long before a user hits them.",
+  "uses": [
+   "Large frontends and Node services",
+   "Types shared between client and server",
+   "Safer refactoring"
+  ],
+  "how": "You write .ts files, the compiler checks the types, then removes them and outputs plain JavaScript. Types exist only at build time, so data that arrives from outside still needs runtime validation with a tool like Zod.",
+  "lang": "ts",
+  "et": "A typed function that rejects bad input at compile time",
+  "code": "type Project = { name: string; state: \"Live\" | \"Building\" };\n\nfunction label(p: Project): string {\n  return `${p.name} (${p.state})`;\n}\n\nlabel({ name: \"Ella\", state: \"Live\" });\nlabel({ name: \"Ella\", state: \"Done\" }); // compile error",
+  "en": "The last line never reaches users: the compiler rejects it.",
+  "pairs": [
+   "JavaScript",
+   "React",
+   "Zod"
+  ],
+  "notes": []
+ },
+ "JavaScript": {
+  "tag": "The language of the web, running in every browser and on servers.",
+  "what": "JavaScript is the programming language that browsers run. It makes pages interactive, and with Node.js it also runs on servers and in command-line tools.",
+  "uses": [
+   "Interactive pages: menus, forms, animation",
+   "Calling APIs and updating the page",
+   "Servers and tooling through Node.js"
+  ],
+  "how": "The browser parses your script and runs it on an event loop: something happens (a click, a network reply), a function runs, then control returns. Slow work should be asynchronous with promises and async/await so the page stays responsive.",
+  "lang": "js",
+  "et": "Fetch data and update the page without reloading",
+  "code": "async function loadStatus() {\n  const res = await fetch(\"/api/status\");\n  const data = await res.json();\n  document.querySelector(\"#chip\").textContent = data.state;\n}\nloadStatus();",
+  "en": "await pauses this function only, not the whole page.",
+  "pairs": [
+   "TypeScript",
+   "Node.js",
+   "HTML5"
+  ],
+  "notes": []
+ },
+ "HTML5": {
+  "tag": "The structure of every page: headings, links, forms and media.",
+  "what": "HTML is the markup that gives a page its structure and meaning. HTML5 added semantic elements such as header, main, nav and article, plus native audio, video, canvas and form controls.",
+  "uses": [
+   "Page structure and headings",
+   "Links, forms and buttons that work without scripts",
+   "Accessibility through correct semantics"
+  ],
+  "how": "The browser reads your tags and builds a tree called the DOM. CSS styles that tree and JavaScript changes it. Using the right element, such as a real button instead of a clickable div, gives you keyboard support and screen reader behavior for free.",
+  "lang": "html",
+  "et": "An accessible form field",
+  "code": "<form action=\"/subscribe\" method=\"post\">\n  <label for=\"email\">Email</label>\n  <input id=\"email\" name=\"email\" type=\"email\" required>\n  <button type=\"submit\">Subscribe</button>\n</form>",
+  "en": "The label, the type and required give validation and assistive support with no JavaScript.",
+  "pairs": [
+   "CSS",
+   "JavaScript"
+  ],
+  "notes": []
+ },
+ "CSS": {
+  "tag": "Controls how every element looks, from color to layout and motion.",
+  "what": "CSS describes presentation: color, type, spacing, layout and animation. It is how the same HTML can look different on a phone and on a wide desktop screen.",
+  "uses": [
+   "Responsive layout with grid and flexbox",
+   "Themes with custom properties, such as dark and light",
+   "Transitions and animation"
+  ],
+  "how": "A rule pairs a selector with declarations. The browser works out which rules apply to each element, settles conflicts by specificity and order, then lays out and paints the page. Animating transform and opacity is cheapest because the browser can hand that work to the GPU.",
+  "lang": "css",
+  "et": "A card grid that adapts without media queries",
+  "code": ".cards {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));\n  gap: 16px;\n}\n.card:hover { transform: translateY(-4px); transition: transform .3s; }",
+  "en": "Columns appear and disappear as space allows.",
+  "pairs": [
+   "HTML5",
+   "Tailwind CSS"
+  ],
+  "notes": []
+ },
+ "React": {
+  "tag": "A library for building interfaces from small reusable components.",
+  "what": "React lets you describe a screen as a tree of components. Each component is a function that returns what should be shown for the current data, and when the data changes React updates only the parts of the page that need it.",
+  "uses": [
+   "Interactive apps and dashboards",
+   "Reusable interface pieces",
+   "State that drives what the screen shows"
+  ],
+  "how": "A component takes props (inputs) and keeps state (data that changes). Calling a state setter makes React run the component again, compare the new output with the old, and apply only the difference to the real page. Hooks such as useState and useEffect give function components state and side effects.",
+  "lang": "jsx",
+  "et": "A counter component",
+  "code": "import { useState } from \"react\";\n\nexport function Counter() {\n  const [n, setN] = useState(0);\n  return <button onClick={() => setN(n + 1)}>Clicked {n} times</button>;\n}",
+  "en": "Clicking changes state, state changes the text, and React patches only that button.",
+  "pairs": [
+   "Next.js",
+   "Vite",
+   "TypeScript"
+  ],
+  "notes": []
+ },
+ "Next.js": {
+  "tag": "A React framework with routing, server rendering and API routes built in.",
+  "what": "Next.js is a framework on top of React that adds file-based routing, server-side rendering, static generation and backend routes. It decides how and where each page is rendered so you do not wire that up yourself.",
+  "uses": [
+   "Sites that need fast loading and search visibility",
+   "Pages that mix server data with interactive parts",
+   "Full-stack apps with API routes"
+  ],
+  "how": "Files in the app folder become routes. Server components run on the server and send ready HTML, while client components load in the browser for interactivity. Data can be fetched per request or at build time and cached.",
+  "lang": "ts",
+  "et": "A route that fetches data on the server",
+  "code": "// app/projects/page.tsx\nexport default async function Projects() {\n  const res = await fetch(\"https://api.example.com/projects\");\n  const projects = await res.json();\n  return <ul>{projects.map((p) => <li key={p.id}>{p.name}</li>)}</ul>;\n}",
+  "en": "The fetch runs on the server, so the browser receives finished HTML.",
+  "pairs": [
+   "React",
+   "Vercel",
+   "TypeScript"
+  ],
+  "notes": []
+ },
+ "Vite": {
+  "tag": "A very fast dev server and bundler for modern frontends.",
+  "what": "Vite is a build tool that starts a development server almost instantly and bundles your app for production. It is a common starting point for React and other single-page apps.",
+  "uses": [
+   "Local development with instant updates",
+   "Production builds that are minified and split into chunks",
+   "Plugins for frameworks, TypeScript and CSS"
+  ],
+  "how": "In development Vite serves your source files as native ES modules, so the browser loads only what a page imports and a saved change swaps in without a full reload. For production it bundles and optimizes everything into a few static files.",
+  "lang": "bash",
+  "et": "Create and run a project",
+  "code": "npm create vite@latest my-app -- --template react\ncd my-app\nnpm install\nnpm run dev",
+  "en": "The last command prints a local address and reloads on every save.",
+  "pairs": [
+   "React",
+   "Vitest",
+   "TypeScript"
+  ],
+  "notes": []
+ },
+ "React Router": {
+  "tag": "Page navigation for React apps, without full page reloads.",
+  "what": "React Router maps URLs to components in a React app. Moving between pages swaps components instead of loading a new document, so navigation feels instant.",
+  "uses": [
+   "Multiple pages inside a single-page app",
+   "Nested layouts and dynamic URLs such as /projects/42",
+   "Loading data before a page renders"
+  ],
+  "how": "You declare routes as a list of paths and the components they show. Links update the address bar through the History API, and the router renders the matching component. Nested routes keep a shared layout on screen while the inner page changes.",
+  "lang": "jsx",
+  "et": "Two routes, one with a parameter",
+  "code": "import { createBrowserRouter, RouterProvider } from \"react-router-dom\";\n\nconst router = createBrowserRouter([\n  { path: \"/\", element: <Home /> },\n  { path: \"/projects/:id\", element: <Project /> },\n]);\n\nexport default () => <RouterProvider router={router} />;",
+  "en": ":id becomes a parameter the Project component can read.",
+  "pairs": [
+   "React",
+   "Vite"
+  ],
+  "notes": []
+ },
+ "Tailwind CSS": {
+  "tag": "Utility classes you compose in markup instead of writing custom CSS.",
+  "what": "Tailwind is a CSS framework made of small single-purpose classes such as flex, p-4 and text-lg. You style an element by listing classes on it, rather than naming it and writing a separate rule.",
+  "uses": [
+   "Fast, consistent interface styling",
+   "Responsive and dark mode variants with prefixes",
+   "Design tokens through a shared config"
+  ],
+  "how": "A build step scans your files for class names and generates only the CSS you actually used, so the stylesheet stays small. Prefixes like md: and dark: apply a class only at a breakpoint or in dark mode.",
+  "lang": "html",
+  "et": "A responsive card",
+  "code": "<div class=\"rounded-2xl border p-6 shadow md:flex md:gap-6 dark:bg-zinc-900\">\n  <h3 class=\"text-xl font-medium\">Stack</h3>\n  <p class=\"text-zinc-500\">Utilities compose into a layout.</p>\n</div>",
+  "en": "md: switches to a row on medium screens and up, and dark: restyles it in dark mode.",
+  "pairs": [
+   "CSS",
+   "React"
+  ],
+  "notes": []
+ },
+ "Three.js": {
+  "tag": "A JavaScript library for 3D graphics in the browser.",
+  "what": "Three.js wraps the browser's WebGL graphics API (and the newer WebGPU) so you can build 3D scenes from objects, cameras and lights instead of writing raw GPU code.",
+  "uses": [
+   "Interactive 3D hero sections and product views",
+   "Data visualizations in 3D",
+   "Games and visual experiments"
+  ],
+  "how": "You create a scene, add meshes (a geometry plus a material), place a camera, and give a renderer a canvas. An animation loop redraws the scene every frame, updating positions or rotations each time.",
+  "lang": "js",
+  "et": "A spinning cube",
+  "code": "const scene = new THREE.Scene();\nconst camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);\ncamera.position.z = 3;\nconst cube = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshNormalMaterial());\nscene.add(cube);\n\nconst renderer = new THREE.WebGLRenderer({ antialias: true });\nrenderer.setSize(innerWidth, innerHeight);\ndocument.body.appendChild(renderer.domElement);\n\nrenderer.setAnimationLoop(() => {\n  cube.rotation.y += 0.01;\n  renderer.render(scene, camera);\n});",
+  "en": "Scene, camera, mesh, renderer and a loop: every Three.js project starts from this shape.",
+  "pairs": [
+   "JavaScript",
+   "React"
+  ],
+  "notes": []
+ },
+ "FastAPI": {
+  "tag": "A modern Python framework for fast, well-documented APIs.",
+  "what": "FastAPI builds web APIs from ordinary Python functions. It reads your type hints to validate requests, convert data and generate interactive documentation automatically.",
+  "uses": [
+   "REST and JSON APIs",
+   "Async endpoints and streaming",
+   "Backends for web apps and AI services"
+  ],
+  "how": "You declare an endpoint with a decorator. FastAPI checks the incoming path, query and body against the types you wrote (using Pydantic), calls your function, and turns the return value into JSON. Visiting /docs shows a live API explorer built from the same declarations. It runs on an ASGI server such as Uvicorn.",
+  "lang": "python",
+  "et": "An endpoint that validates its input",
+  "code": "from fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\nclass Task(BaseModel):\n    title: str\n    done: bool = False\n\n@app.post(\"/tasks\")\ndef create_task(task: Task):\n    return {\"saved\": task.title}",
+  "en": "Send a body without a title and FastAPI replies with a clear 422 error before your code runs.",
+  "pairs": [
+   "Pydantic",
+   "Uvicorn",
+   "SQLite"
+  ],
+  "notes": []
+ },
+ "Pydantic": {
+  "tag": "Data validation for Python using type hints.",
+  "what": "Pydantic turns type hints into runtime validation. You describe a model once, and it parses and checks incoming data, converts types where sensible, and explains exactly what was wrong.",
+  "uses": [
+   "Validating API request and response data",
+   "Loading configuration from environment variables",
+   "Parsing messy JSON into clean objects"
+  ],
+  "how": "A model is a class with annotated fields. Creating an instance runs validation, and bad data raises an error that lists each failing field. Models can be turned back into dicts or JSON, and fields can enforce ranges or patterns.",
+  "lang": "python",
+  "et": "Reject an invalid payment",
+  "code": "from pydantic import BaseModel, Field, ValidationError\n\nclass Payment(BaseModel):\n    amount: int = Field(gt=0)\n    currency: str = Field(min_length=3, max_length=3)\n\ntry:\n    Payment(amount=-5, currency=\"NGN\")\nexcept ValidationError as e:\n    print(e.errors()[0][\"loc\"])  # ('amount',)",
+  "en": "The error points at the exact field that failed.",
+  "pairs": [
+   "FastAPI",
+   "Zod"
+  ],
+  "notes": []
+ },
+ "Uvicorn": {
+  "tag": "The server process that runs async Python web apps.",
+  "what": "Uvicorn is a lightweight ASGI server. It listens for HTTP and WebSocket connections and hands each request to your Python app, such as a FastAPI application.",
+  "uses": [
+   "Running FastAPI in development and production",
+   "Serving WebSocket connections",
+   "Automatic reload while you edit code"
+  ],
+  "how": "ASGI is the standard interface between async Python web servers and apps. Uvicorn accepts the connection, parses the request, calls your app as an async function and writes the response back. In production it is often run with several worker processes behind a proxy.",
+  "lang": "bash",
+  "et": "Install and run an app",
+  "code": "pip install fastapi uvicorn\nuvicorn main:app --reload --port 8000",
+  "en": "main:app means the app object inside main.py. --reload restarts on every code change.",
+  "pairs": [
+   "FastAPI",
+   "WebSockets"
+  ],
+  "notes": []
+ },
+ "Node.js": {
+  "tag": "Runs JavaScript outside the browser, for servers and tooling.",
+  "what": "Node.js is a runtime that executes JavaScript on your machine or a server using the V8 engine. It lets one language cover both frontend and backend, and it powers most JavaScript build tools.",
+  "uses": [
+   "HTTP servers and APIs",
+   "Command-line tools and scripts",
+   "Build tooling for frontend projects"
+  ],
+  "how": "Node runs your script on a single-threaded event loop and hands slow work such as file and network access to the system, so thousands of connections can wait cheaply. npm installs packages, and modules load with import or require.",
+  "lang": "js",
+  "et": "A tiny HTTP server with no dependencies",
+  "code": "import http from \"node:http\";\n\nhttp.createServer((req, res) => {\n  res.setHeader(\"content-type\", \"application/json\");\n  res.end(JSON.stringify({ ok: true, path: req.url }));\n}).listen(3000);",
+  "en": "Save it as server.mjs, run node server.mjs and open localhost:3000.",
+  "pairs": [
+   "Express",
+   "JavaScript",
+   "Zod"
+  ],
+  "notes": [
+   "note-status-checks"
+  ]
+ },
+ "Express": {
+  "tag": "A minimal web framework for building APIs on Node.js.",
+  "what": "Express adds routing and middleware on top of Node's HTTP server. It stays small and lets you assemble exactly the pieces you need.",
+  "uses": [
+   "REST APIs",
+   "Webhook receivers",
+   "Small backends and proxies"
+  ],
+  "how": "Requests flow through a chain of middleware functions. Each one can read or change the request, send a response, or call next() to pass it on. Routes match a method and a path and run their handler.",
+  "lang": "js",
+  "et": "A route that saves a note",
+  "code": "import express from \"express\";\n\nconst app = express();\napp.use(express.json());\n\napp.post(\"/notes\", (req, res) => {\n  res.status(201).json({ saved: req.body.text });\n});\n\napp.listen(3000);",
+  "en": "express.json() is middleware that parses the body before the route runs.",
+  "pairs": [
+   "Node.js",
+   "Zod",
+   "Webhooks"
+  ],
+  "notes": []
+ },
+ "Zod": {
+  "tag": "Schema validation for TypeScript, with types inferred from the schema.",
+  "what": "Zod lets you define a schema in code and validate unknown data against it. The TypeScript type is inferred from the same schema, so the check and the type never drift apart.",
+  "uses": [
+   "Validating API input and form data",
+   "Parsing environment variables",
+   "Typing data that comes from outside your code"
+  ],
+  "how": "You build a schema from primitives and objects. Calling safeParse returns a result that is either the cleaned data or a structured list of issues. TypeScript types vanish at runtime, so this is what actually protects the boundary.",
+  "lang": "ts",
+  "et": "Validate a signup",
+  "code": "import { z } from \"zod\";\n\nconst Signup = z.object({\n  email: z.string().email(),\n  age: z.number().int().min(13),\n});\ntype Signup = z.infer<typeof Signup>;\n\nconst result = Signup.safeParse({ email: \"a@b.co\", age: 9 });\nconsole.log(result.success); // false",
+  "en": "age failed the minimum, and result.error says which field.",
+  "pairs": [
+   "TypeScript",
+   "Express",
+   "Pydantic"
+  ],
+  "notes": []
+ },
+ "Webhooks": {
+  "tag": "An HTTP call a service makes to you when something happens.",
+  "what": "A webhook is a URL on your server that another service calls when an event occurs, such as a payment succeeding or a message arriving. Instead of polling for changes, you are told.",
+  "uses": [
+   "Payment confirmations",
+   "Incoming chat messages",
+   "Git and CI events"
+  ],
+  "how": "You publish an endpoint and register it with the sender. When the event fires, the sender POSTs a JSON body to it. Your endpoint should verify the signature, answer with a 2xx quickly, and do heavy work afterwards, because senders retry on failure.",
+  "lang": "python",
+  "et": "Verify a signature before trusting the payload",
+  "code": "import hmac, hashlib\n\ndef valid(body: bytes, signature: str, secret: bytes) -> bool:\n    expected = hmac.new(secret, body, hashlib.sha256).hexdigest()\n    return hmac.compare_digest(expected, signature)",
+  "en": "compare_digest avoids timing leaks. Reject the request when this returns False.",
+  "pairs": [
+   "Stripe",
+   "WhatsApp",
+   "Express"
+  ],
+  "notes": []
+ },
+ "Cloudflare Workers": {
+  "tag": "Small serverless functions that run close to your users.",
+  "what": "Cloudflare Workers run your JavaScript or TypeScript on Cloudflare's network of data centers around the world. Requests are handled at the location nearest the user, with no server for you to manage.",
+  "uses": [
+   "APIs and webhooks with low latency",
+   "Edge logic such as redirects and auth checks",
+   "Glue between services"
+  ],
+  "how": "A Worker exports a fetch handler that receives a Request and returns a Response. It starts in milliseconds because it uses lightweight isolates rather than containers. Bindings give the Worker access to storage, queues and Durable Objects.",
+  "lang": "js",
+  "et": "A Worker with one route",
+  "code": "export default {\n  async fetch(request) {\n    const url = new URL(request.url);\n    if (url.pathname === \"/ping\") {\n      return Response.json({ ok: true, at: new Date().toISOString() });\n    }\n    return new Response(\"Not found\", { status: 404 });\n  },\n};",
+  "en": "The same web-standard Request and Response objects you know from the browser.",
+  "pairs": [
+   "Durable Objects",
+   "WebSockets",
+   "Webhooks"
+  ],
+  "notes": []
+ },
+ "Durable Objects": {
+  "tag": "Stateful objects at the edge: one instance per name, with its own storage.",
+  "what": "Durable Objects are Cloudflare's way of giving a Worker memory and coordination. Each object has a unique name, lives in exactly one place at a time, and has its own storage, so everything that talks to it is handled in order.",
+  "uses": [
+   "Chat rooms and live collaboration",
+   "Per-user or per-session state",
+   "Rate limits and counters that must be exact"
+  ],
+  "how": "A Worker asks for an object by name or id, and Cloudflare routes every request for that name to the same instance. Because one instance handles them in order, you avoid race conditions without locks. The object can hold WebSocket connections and persist data.",
+  "lang": "js",
+  "et": "A counter that never double-counts",
+  "code": "export class Counter {\n  constructor(state) { this.state = state; }\n  async fetch() {\n    let n = (await this.state.storage.get(\"n\")) ?? 0;\n    await this.state.storage.put(\"n\", ++n);\n    return new Response(String(n));\n  }\n}",
+  "en": "Two simultaneous requests cannot both read the same number.",
+  "pairs": [
+   "Cloudflare Workers",
+   "WebSockets"
+  ],
+  "notes": []
+ },
+ "WebSockets": {
+  "tag": "A two-way connection that stays open between browser and server.",
+  "what": "A WebSocket is a persistent connection where either side can send messages at any time. It is what makes chat, live cursors and real-time dashboards feel instant.",
+  "uses": [
+   "Chat and notifications",
+   "Live collaboration",
+   "Streaming prices or telemetry"
+  ],
+  "how": "The browser starts with a normal HTTP request asking to upgrade, then the connection switches to the WebSocket protocol and stays open. Messages are small frames in both directions. You need to handle reconnects, because mobile networks drop connections.",
+  "lang": "js",
+  "et": "Connect, send, listen and reconnect",
+  "code": "function connect() {\n  const ws = new WebSocket(\"wss://example.com/live\");\n  ws.onopen = () => ws.send(JSON.stringify({ hello: \"world\" }));\n  ws.onmessage = (e) => console.log(\"server says\", e.data);\n  ws.onclose = () => setTimeout(connect, 1000);\n}\nconnect();",
+  "en": "The onclose handler retries, which is how real apps survive dropped connections.",
+  "pairs": [
+   "Server-sent events",
+   "Durable Objects",
+   "Uvicorn"
+  ],
+  "notes": []
+ },
+ "Server-sent events": {
+  "tag": "A one-way stream from server to browser over plain HTTP.",
+  "what": "Server-sent events let a server push a stream of text messages to the browser over a normal HTTP response that never ends. It is simpler than WebSockets when data only flows one way.",
+  "uses": [
+   "Live progress and notifications",
+   "Streaming text as it is generated",
+   "Dashboards that only listen"
+  ],
+  "how": "The browser opens an EventSource. The server replies with the content type text/event-stream and writes lines that start with data:, ending each message with a blank line. If the connection drops, the browser reconnects automatically.",
+  "lang": "js",
+  "et": "Listen in the browser",
+  "code": "const es = new EventSource(\"/api/stream\");\nes.onmessage = (e) => {\n  document.querySelector(\"#out\").textContent += e.data;\n};\nes.onerror = () => es.close();",
+  "en": "On the server, each message is a line like data: hello followed by a blank line.",
+  "pairs": [
+   "WebSockets",
+   "FastAPI",
+   "Streaming responses"
+  ],
+  "notes": []
+ },
+ "PostgreSQL": {
+  "tag": "A powerful open-source relational database.",
+  "what": "PostgreSQL stores data in tables with relationships, and you query it with SQL. It is known for correctness, strong transactions, and features such as JSON columns and full-text search.",
+  "uses": [
+   "Primary storage for apps and payments",
+   "Relational data with constraints",
+   "Reports and analytics queries"
+  ],
+  "how": "You define tables with typed columns and constraints, then insert and query rows. Transactions group several changes so they all succeed or none do. Indexes make lookups fast, and foreign keys keep related rows consistent.",
+  "lang": "sql",
+  "et": "A table with a rule, and a query",
+  "code": "CREATE TABLE orders (\n  id serial PRIMARY KEY,\n  customer text NOT NULL,\n  total_cents integer NOT NULL CHECK (total_cents > 0)\n);\n\nSELECT customer, sum(total_cents) / 100.0 AS spent\nFROM orders GROUP BY customer ORDER BY spent DESC;",
+  "en": "The CHECK constraint refuses bad rows at the database, whatever the app does.",
+  "pairs": [
+   "Supabase",
+   "FastAPI",
+   "SQLite"
+  ],
+  "notes": []
+ },
+ "SQLite": {
+  "tag": "A full SQL database in a single file, with nothing to run.",
+  "what": "SQLite is a database engine that lives inside your application and stores everything in one file. There is no separate server, which makes it ideal for small apps, local tools and prototypes.",
+  "uses": [
+   "Local and embedded data",
+   "Prototypes and small services",
+   "Test databases"
+  ],
+  "how": "Your program opens the file and reads and writes it directly through a library. SQLite supports most of SQL, transactions and indexes. Backups are a file copy, though heavy concurrent writing from many servers is where a server database fits better.",
+  "lang": "python",
+  "et": "Create, insert and count",
+  "code": "import sqlite3\n\ndb = sqlite3.connect(\"app.db\")\ndb.execute(\"CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, text TEXT)\")\ndb.execute(\"INSERT INTO notes (text) VALUES (?)\", (\"hello\",))\ndb.commit()\nprint(db.execute(\"SELECT count(*) FROM notes\").fetchone())",
+  "en": "The ? placeholder passes values safely, which prevents SQL injection.",
+  "pairs": [
+   "PostgreSQL",
+   "Python",
+   "FastAPI"
+  ],
+  "notes": []
+ },
+ "Supabase": {
+  "tag": "A hosted Postgres database with auth, storage and realtime built in.",
+  "what": "Supabase wraps a PostgreSQL database with ready-made services: user authentication, file storage, auto-generated APIs and realtime subscriptions. You get a backend without building each piece yourself.",
+  "uses": [
+   "A backend for apps that want SQL",
+   "User signup and login",
+   "Realtime updates and file uploads"
+  ],
+  "how": "Each project is a real Postgres database. Supabase generates a REST API from your tables and exposes it through a client library. Row Level Security policies in the database decide which rows each signed-in user may read or change, so access rules live next to the data.",
+  "lang": "js",
+  "et": "Read rows through the client",
+  "code": "import { createClient } from \"@supabase/supabase-js\";\n\nconst supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);\n\nconst { data, error } = await supabase\n  .from(\"notes\")\n  .select(\"id, text\")\n  .order(\"id\", { ascending: false });",
+  "en": "With Row Level Security on, this returns only the rows the signed-in user may see.",
+  "pairs": [
+   "PostgreSQL",
+   "Clerk",
+   "WebSockets"
+  ],
+  "notes": []
+ },
+ "Clerk": {
+  "tag": "Ready-made sign-in, sign-up and user management.",
+  "what": "Clerk is an authentication service. It provides sign-in screens, sessions, social login and user management, so you do not build and secure those flows yourself.",
+  "uses": [
+   "Sign up and sign in with email, phone or social accounts",
+   "Session handling and protected routes",
+   "Organizations and roles"
+  ],
+  "how": "You add Clerk's components and middleware to your app. After a user signs in, Clerk issues a session token, and your server verifies it on each request to know who is calling. User data lives in Clerk and can be read through its API.",
+  "lang": "jsx",
+  "et": "Show different UI to guests and signed-in users",
+  "code": "import { SignedIn, SignedOut, SignInButton, UserButton } from \"@clerk/clerk-react\";\n\nexport function Header() {\n  return (\n    <>\n      <SignedOut><SignInButton /></SignedOut>\n      <SignedIn><UserButton /></SignedIn>\n    </>\n  );\n}",
+  "en": "Guests see a sign in button, and signed-in users see a profile menu.",
+  "pairs": [
+   "Supabase",
+   "Next.js",
+   "React"
+  ],
+  "notes": []
+ },
+ "Stripe": {
+  "tag": "Payments infrastructure: take cards and subscriptions safely.",
+  "what": "Stripe is a payments platform with APIs for one-time charges, subscriptions, invoices and payouts. Card details go straight to Stripe, which keeps sensitive data off your own servers.",
+  "uses": [
+   "Checkout pages and one-time payments",
+   "Subscriptions and billing",
+   "Payouts and refunds"
+  ],
+  "how": "Your server creates a payment, for example a Checkout Session, and sends the customer to Stripe's hosted page. When the payment completes, Stripe calls your webhook with the result. Trust that webhook, not the browser redirect, before marking an order as paid.",
+  "lang": "python",
+  "et": "Create a Checkout Session",
+  "code": "import stripe\nstripe.api_key = \"sk_test_...\"\n\nsession = stripe.checkout.Session.create(\n    mode=\"payment\",\n    line_items=[{\"price\": \"price_123\", \"quantity\": 1}],\n    success_url=\"https://example.com/thanks\",\n    cancel_url=\"https://example.com/cart\",\n)\nprint(session.url)  # send the customer here",
+  "en": "Fulfil the order only after the webhook confirms the payment.",
+  "pairs": [
+   "Webhooks",
+   "FastAPI",
+   "PostgreSQL"
+  ],
+  "notes": []
+ },
+ "WhatsApp": {
+  "tag": "A messaging channel you can automate through its business platform.",
+  "what": "WhatsApp is a messaging app used by billions of people. Through the WhatsApp Business Platform, a service can receive messages and reply programmatically, which makes it a channel for assistants and notifications.",
+  "uses": [
+   "Customer support and assistants",
+   "Order and appointment notifications",
+   "Two-way chat with automation behind it"
+  ],
+  "how": "With the Cloud API, each incoming message arrives at your webhook as JSON. You read the text, decide what to do, and call an API to send a reply. Messages outside a recent conversation window must use approved templates.",
+  "lang": "python",
+  "et": "Handle an incoming message",
+  "code": "@app.post(\"/whatsapp\")\nasync def inbound(payload: dict):\n    msg = payload[\"entry\"][0][\"changes\"][0][\"value\"][\"messages\"][0]\n    text = msg[\"text\"][\"body\"]\n    sender = msg[\"from\"]\n    reply = route(text, sender)      # decide what to answer\n    await send_text(sender, reply)\n    return {\"ok\": True}",
+  "en": "route and send_text are your own functions: intent routing, and the call to the send API.",
+  "pairs": [
+   "Webhooks",
+   "FastAPI",
+   "Intent routing"
+  ],
+  "notes": []
+ },
+ "Playwright": {
+  "tag": "Automates real browsers to test how a site actually behaves.",
+  "what": "Playwright drives Chromium, Firefox and WebKit from code. It can click, type, wait for elements and take screenshots, so you can test a site the way a person uses it.",
+  "uses": [
+   "End-to-end tests",
+   "Responsive and accessibility checks",
+   "Screenshots and scraping"
+  ],
+  "how": "A script launches a browser, opens a page and uses locators to find elements. Actions wait automatically until an element is ready, which avoids flaky timing code. You can run many viewport sizes and capture console errors in the same run.",
+  "lang": "python",
+  "et": "A phone-sized smoke test",
+  "code": "from playwright.sync_api import sync_playwright\n\nwith sync_playwright() as p:\n    browser = p.chromium.launch()\n    page = browser.new_page(viewport={\"width\": 390, \"height\": 844})\n    page.goto(\"https://example.com\")\n    assert page.title() != \"\"\n    page.screenshot(path=\"home-390.png\")\n    browser.close()",
+  "en": "Open, assert, capture: the same loop works across every page and screen size.",
+  "pairs": [
+   "Vitest",
+   "GitHub Actions"
+  ],
+  "notes": [
+   "note-site-architecture"
+  ]
+ },
+ "Vitest": {
+  "tag": "A fast unit test runner that works with Vite and TypeScript.",
+  "what": "Vitest runs unit tests for JavaScript and TypeScript. It reuses your Vite config, understands TypeScript out of the box, and re-runs only the tests affected by a change.",
+  "uses": [
+   "Unit tests for functions and modules",
+   "Component tests with a DOM",
+   "Watch mode while you code"
+  ],
+  "how": "Test files declare cases with test and check results with expect. Vitest runs them in parallel workers and reports failures with a clear diff. In watch mode it reruns related tests on every save.",
+  "lang": "ts",
+  "et": "A unit test",
+  "code": "import { describe, expect, test } from \"vitest\";\nimport { slugify } from \"./slugify\";\n\ndescribe(\"slugify\", () => {\n  test(\"lowercases and joins with hyphens\", () => {\n    expect(slugify(\"Next.js Router\")).toBe(\"next-js-router\");\n  });\n});",
+  "en": "Run npx vitest and it keeps watching.",
+  "pairs": [
+   "Vite",
+   "TypeScript",
+   "Playwright"
+  ],
+  "notes": []
+ },
+ "GitHub Actions": {
+  "tag": "Automation that runs your checks on every push and pull request.",
+  "what": "GitHub Actions runs workflows defined in your repository. Each workflow reacts to an event, such as a push, and runs jobs on a fresh machine: build, test, lint or deploy.",
+  "uses": [
+   "Continuous integration on pull requests",
+   "Scheduled tasks",
+   "Deploy pipelines"
+  ],
+  "how": "A YAML file under .github/workflows lists triggers and jobs. Each job is a sequence of steps that run shell commands or reusable actions. If any step fails, the check turns red on the pull request, which can block merging.",
+  "lang": "yaml",
+  "et": "A minimal CI workflow",
+  "code": "name: CI\non: [pull_request]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: python build.py --check\n      - run: python -m unittest discover -s tests",
+  "en": "Every pull request now has to pass these two commands.",
+  "pairs": [
+   "Git",
+   "GitHub",
+   "Playwright"
+  ],
+  "notes": [
+   "note-site-architecture"
+  ]
+ },
+ "FFmpeg": {
+  "tag": "A command-line toolbox for converting and editing audio and video.",
+  "what": "FFmpeg reads almost any audio or video format and can convert, trim, resize, compress and extract from it. Many apps and services run it behind the scenes.",
+  "uses": [
+   "Converting formats, for example to MP4 or MP3",
+   "Compressing media for the web",
+   "Extracting audio or frames"
+  ],
+  "how": "You give it an input file, optional filters and an output file, and it decodes, processes and re-encodes the streams. Codec and quality options trade file size against quality, and it runs unattended in scripts and on servers.",
+  "lang": "bash",
+  "et": "Shrink a video and extract its audio",
+  "code": "# 720p, compressed for the web\nffmpeg -i input.mov -vf scale=-2:720 -c:v libx264 -crf 28 -c:a aac out.mp4\n\n# the audio track as MP3\nffmpeg -i input.mov -vn -q:a 2 audio.mp3",
+  "en": "A lower crf value means higher quality and a bigger file.",
+  "pairs": [
+   "Python",
+   "Node.js"
+  ],
+  "notes": []
+ },
+ "Git": {
+  "tag": "Version control: a full history of your code you can branch and rewind.",
+  "what": "Git records every change to your project as a commit, so you can see what changed, compare versions and go back. Branches let you work on a feature without touching the main line.",
+  "uses": [
+   "History and undo",
+   "Branches for features and fixes",
+   "Collaboration through merges"
+  ],
+  "how": "Each commit is a snapshot with a message and a link to its parent. A branch is a movable pointer to a commit. You work on a branch and merge it back, and remote copies on a host such as GitHub keep everyone in sync.",
+  "lang": "bash",
+  "et": "The everyday loop",
+  "code": "git checkout -b feat/new-page\ngit add -A\ngit commit -m \"Add the stack page\"\ngit push -u origin feat/new-page",
+  "en": "Branch, commit, push, then open a pull request.",
+  "pairs": [
+   "GitHub",
+   "GitHub Actions"
+  ],
+  "notes": []
+ },
+ "GitHub": {
+  "tag": "Hosts your Git repositories and the pull requests around them.",
+  "what": "GitHub is where Git repositories live online. It adds pull requests for review, issues for tracking work and Actions for automation.",
+  "uses": [
+   "Remote backup and sharing of code",
+   "Pull request review",
+   "Issues and project tracking"
+  ],
+  "how": "You push a branch, open a pull request, and reviewers or automated checks look at the diff. Required checks can block a merge until tests pass. Merging updates the main branch, which can trigger a deployment.",
+  "lang": "bash",
+  "et": "Open and merge a pull request from the terminal",
+  "code": "gh pr create --fill\ngh pr checks\ngh pr merge --merge",
+  "en": "gh is GitHub's command-line tool.",
+  "pairs": [
+   "Git",
+   "GitHub Actions",
+   "Vercel"
+  ],
+  "notes": [
+   "note-site-architecture"
+  ]
+ },
+ "Vercel": {
+  "tag": "Hosting that builds and deploys your site from every push.",
+  "what": "Vercel hosts websites and serverless functions. Connect a repository and it builds and deploys on every push, giving each branch its own preview URL.",
+  "uses": [
+   "Static sites and frameworks like Next.js",
+   "Preview links for every pull request",
+   "Serverless API functions"
+  ],
+  "how": "A push triggers a build. Vercel serves the output from a global CDN and runs files in an api folder as serverless functions. Merging to the production branch promotes that build to your main domain, and a vercel.json file customizes headers, redirects and routing.",
+  "lang": "json",
+  "et": "A vercel.json with a security header",
+  "code": "{\n  \"cleanUrls\": true,\n  \"headers\": [\n    {\n      \"source\": \"/(.*)\",\n      \"headers\": [{ \"key\": \"X-Content-Type-Options\", \"value\": \"nosniff\" }]\n    }\n  ]\n}",
+  "en": "cleanUrls serves /about instead of /about.html, and the header applies to every route.",
+  "pairs": [
+   "Next.js",
+   "GitHub",
+   "Cloudflare Workers"
+  ],
+  "notes": [
+   "note-site-architecture",
+   "note-status-checks"
+  ]
+ },
+ "Render": {
+  "tag": "Cloud hosting for web services, databases and scheduled jobs.",
+  "what": "Render runs backends, static sites, background workers, cron jobs and managed databases. It builds from a Git repository and keeps your services running.",
+  "uses": [
+   "Hosting Python and Node backends",
+   "Managed PostgreSQL",
+   "Cron jobs and background workers"
+  ],
+  "how": "You connect a repository, choose a build command and a start command, and Render builds and starts the service on each push. Environment variables hold secrets, health checks restart a service that stops responding, and a render.yaml file can describe the whole setup as code.",
+  "lang": "yaml",
+  "et": "A render.yaml for a Python API",
+  "code": "services:\n  - type: web\n    name: api\n    runtime: python\n    buildCommand: pip install -r requirements.txt\n    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT",
+  "en": "Binding to $PORT is required: Render tells the service which port to use.",
+  "pairs": [
+   "FastAPI",
+   "Uvicorn",
+   "PostgreSQL"
+  ],
+  "notes": []
+ },
+ "Agent orchestration": {
+  "tag": "Coordinating a model, its tools and its steps toward a goal.",
+  "what": "Agent orchestration is the layer that decides what happens next in an AI system: which step runs, which tool is called, when to ask the model again and when to stop. The model proposes, and the orchestrator drives the loop.",
+  "uses": [
+   "Multi-step tasks that need several tools",
+   "Retries, limits and stop conditions",
+   "Keeping state across steps"
+  ],
+  "how": "A loop sends the current state to the model, reads the decision it returns, runs the chosen step through a controlled function, adds the result to the state and repeats until the task is done or a limit is hit. Keeping the loop in ordinary code, not inside the model, makes behavior predictable and testable.",
+  "lang": "python",
+  "et": "A bounded agent loop",
+  "code": "def run(task, model, tools, max_steps=6):\n    state = [{\"role\": \"user\", \"content\": task}]\n    for _ in range(max_steps):\n        step = model(state)                  # decide: answer or call a tool\n        if step[\"type\"] == \"answer\":\n            return step[\"text\"]\n        result = tools[step[\"tool\"]](**step[\"args\"])\n        state.append({\"role\": \"tool\", \"content\": result})\n    return \"Stopped: step limit reached\"",
+  "en": "The loop, the limit and the tool list are ordinary code you control.",
+  "pairs": [
+   "Tool calling",
+   "Policy and approval gates",
+   "Workflow automation"
+  ],
+  "notes": [
+   "note-model-authority"
+  ]
+ },
+ "Tool calling": {
+  "tag": "Letting a model request actions through named, validated functions.",
+  "what": "Tool calling is how a model asks for something to be done. Instead of free text, it returns the name of a function and its arguments, and your code decides whether to run it.",
+  "uses": [
+   "Looking up data and calling APIs",
+   "Taking actions such as sending a message",
+   "Returning structured output"
+  ],
+  "how": "You describe each tool with a name, a purpose and a schema for its arguments. The model picks one and fills in the arguments. Your code validates them, runs the function and returns the result to the model. Validation matters because model output is untrusted input.",
+  "lang": "python",
+  "et": "A registry that only runs known tools",
+  "code": "TOOLS = {\n    \"get_status\": {\"args\": {\"project\": str}, \"run\": lambda project: f\"{project}: Live\"},\n}\n\ndef call(name, args):\n    spec = TOOLS[name]                      # an unknown tool raises KeyError\n    for key, kind in spec[\"args\"].items():\n        if not isinstance(args.get(key), kind):\n            raise ValueError(f\"bad argument: {key}\")\n    return spec[\"run\"](**args)",
+  "en": "Only tools you listed can run, and only with arguments of the right type.",
+  "pairs": [
+   "Agent orchestration",
+   "Policy and approval gates",
+   "Pydantic"
+  ],
+  "notes": []
+ },
+ "Workflow automation": {
+  "tag": "Turning repeatable multi-step work into a defined, reliable flow.",
+  "what": "Workflow automation connects steps so that a trigger sets off a chain of actions without someone doing each one by hand. It is the difference between a checklist a person follows and a flow the system runs.",
+  "uses": [
+   "Notifications and follow-ups",
+   "Moving data between systems",
+   "Scheduled jobs and approvals"
+  ],
+  "how": "Define a trigger (an event or a schedule), the ordered steps, what each step needs and what happens on failure. Good workflows are idempotent, meaning a retry does not repeat the effect, and they record where they stopped so they can resume.",
+  "lang": "python",
+  "et": "A workflow whose retries are safe",
+  "code": "def on_paid_order(order):\n    steps = [send_receipt, reserve_stock, notify_team]\n    for step in steps:\n        if already_done(order.id, step.__name__):   # makes retries safe\n            continue\n        step(order)\n        mark_done(order.id, step.__name__)",
+  "en": "If the job crashes halfway, running it again continues instead of repeating.",
+  "pairs": [
+   "Webhooks",
+   "Agent orchestration",
+   "Audit trails"
+  ],
+  "notes": []
+ },
+ "Model routing": {
+  "tag": "Choosing which model handles a request, based on the job.",
+  "what": "Model routing sends each request to the model best suited to it, by cost, speed or capability, instead of using one model for everything. A simple question can go to a small fast model while a hard one goes to a stronger model.",
+  "uses": [
+   "Controlling cost and latency",
+   "Fallback when one model is unavailable",
+   "Matching capability to difficulty"
+  ],
+  "how": "A router looks at the request, such as its length, its type or a quick classification, and picks from a list of configured options, with an ordered fallback if a call fails. Keeping the routing rules in one place makes them easy to change and test.",
+  "lang": "python",
+  "et": "A rule picks the model",
+  "code": "ROUTES = {\n    \"short_question\": \"small-fast-model\",\n    \"long_document\": \"large-context-model\",\n}\n\ndef pick(request):\n    kind = \"long_document\" if len(request.text) > 8000 else \"short_question\"\n    return ROUTES[kind]",
+  "en": "Real routers add fallbacks, but the principle is the same: a rule decides, not habit.",
+  "pairs": [
+   "Intent routing",
+   "Agent orchestration",
+   "Streaming responses"
+  ],
+  "notes": []
+ },
+ "Policy and approval gates": {
+  "tag": "Rules that decide whether an action may run or must wait for a human.",
+  "what": "A policy gate sits between a decision and its execution. It checks the proposed action against rules and either allows it, blocks it or pauses it for human approval. The model suggests, but it does not approve itself.",
+  "uses": [
+   "Blocking dangerous or out-of-scope actions",
+   "Human approval for risky steps",
+   "Different limits per user or role"
+  ],
+  "how": "Every action passes through one function that looks at who is asking, what the action is and how risky it is. Low-risk actions run, high-risk ones create an approval request, and anything not on the allow list is refused. Because the gate is separate code, a confused or manipulated model cannot talk its way past it.",
+  "lang": "python",
+  "et": "Default deny, with a human in the loop",
+  "code": "def gate(action, user):\n    if action.name not in ALLOWED:\n        return \"deny\"\n    if action.name in NEEDS_APPROVAL:\n        return \"ask_human\"\n    if user.role == \"viewer\" and action.writes:\n        return \"deny\"\n    return \"allow\"",
+  "en": "Anything not listed is refused.",
+  "pairs": [
+   "Tool calling",
+   "Audit trails",
+   "Sandboxed execution"
+  ],
+  "notes": [
+   "note-model-authority"
+  ]
+ },
+ "Audit trails": {
+  "tag": "A durable record of what happened, who did it and why.",
+  "what": "An audit trail is an append-only log of important events: who asked for what, what was decided and what ran. It lets you explain any outcome after the fact.",
+  "uses": [
+   "Debugging what an agent did",
+   "Showing who approved an action",
+   "Spotting misuse"
+  ],
+  "how": "Write one structured record per significant step, with a timestamp, the actor, the action, the decision and a reference to the inputs. Records are only added, never edited, and sensitive values are redacted. Because they are structured, you can search and replay them.",
+  "lang": "python",
+  "et": "One JSON line per event",
+  "code": "import json, time\n\ndef audit(actor, action, decision, **extra):\n    record = {\"t\": time.time(), \"actor\": actor, \"action\": action, \"decision\": decision, **extra}\n    with open(\"audit.log\", \"a\") as f:\n        f.write(json.dumps(record) + \"\\n\")\n\naudit(\"assistant\", \"send_message\", \"ask_human\", to=\"customer-42\")",
+  "en": "One line per event keeps the log easy to search and easy to ship elsewhere.",
+  "pairs": [
+   "Policy and approval gates",
+   "Workflow automation"
+  ],
+  "notes": []
+ },
+ "Sandboxed execution": {
+  "tag": "Running untrusted code or actions where the damage is limited.",
+  "what": "Sandboxing runs risky work, such as code a model wrote or a tool that touches files, inside a restricted environment. If something goes wrong, the harm stays inside the boundary.",
+  "uses": [
+   "Running generated code safely",
+   "Limiting file, network and CPU access",
+   "Trying actions before they touch real data"
+  ],
+  "how": "You restrict what the process can see and do: a separate container or process, a temporary directory, no network by default, and hard limits on time and memory. Only the results come back out. Combine it with an allow list of what the sandbox may use.",
+  "lang": "python",
+  "et": "A first step: scratch folder and timeout",
+  "code": "import subprocess, tempfile, sys\n\ndef run_untrusted(code: str):\n    with tempfile.TemporaryDirectory() as tmp:\n        return subprocess.run(\n            [sys.executable, \"-I\", \"-c\", code],\n            cwd=tmp, capture_output=True, text=True, timeout=5,\n        )",
+  "en": "This only adds a timeout and a scratch folder. Real sandboxes also remove network and filesystem access, for example with containers.",
+  "pairs": [
+   "Policy and approval gates",
+   "Tool calling"
+  ],
+  "notes": []
+ },
+ "Intent routing": {
+  "tag": "Working out what a message is asking for before acting on it.",
+  "what": "Intent routing classifies an incoming message, such as a question, a command or a request for a person, and sends it to the right handler. It is what stops a message that merely looks like a command from being executed as one.",
+  "uses": [
+   "Chat and WhatsApp assistants",
+   "Support triage",
+   "Separating commands from conversation"
+  ],
+  "how": "First decide the intent using rules, a classifier or a model, then dispatch to the handler registered for it. Handlers that can change something should also check who sent the message. Unknown or low-confidence intents fall back to a safe default such as asking a clarifying question.",
+  "lang": "python",
+  "et": "Dispatch with a safe default",
+  "code": "def route(text, sender):\n    t = text.strip().lower()\n    if t.startswith(\"/status\"):\n        return handle_status(sender)\n    if t in {\"human\", \"agent\", \"help me\"}:\n        return handoff_to_human(sender)\n    return answer_question(text)             # safe default",
+  "en": "Anything unrecognized lands on the safe default, not on an action.",
+  "pairs": [
+   "WhatsApp",
+   "Model routing",
+   "Policy and approval gates"
+  ],
+  "notes": [
+   "note-message-routing"
+  ]
+ },
+ "Streaming responses": {
+  "tag": "Sending output as it is produced, instead of waiting for all of it.",
+  "what": "Streaming returns a response in pieces as they are generated. For a long answer, the reader sees the first words in a fraction of a second instead of staring at a spinner.",
+  "uses": [
+   "Showing model text as it types",
+   "Progress for long jobs",
+   "Large downloads and logs"
+  ],
+  "how": "The server keeps the HTTP response open and writes chunks, commonly as server-sent events or over a WebSocket. The client appends each chunk as it arrives and should handle a stream that ends early or fails halfway.",
+  "lang": "python",
+  "et": "A streaming endpoint",
+  "code": "from fastapi import FastAPI\nfrom fastapi.responses import StreamingResponse\n\napp = FastAPI()\n\ndef words():\n    for w in \"streams arrive piece by piece\".split():\n        yield f\"data: {w}\\n\\n\"\n\n@app.get(\"/stream\")\ndef stream():\n    return StreamingResponse(words(), media_type=\"text/event-stream\")",
+  "en": "Pair it with an EventSource in the browser and each word appears as it is sent.",
+  "pairs": [
+   "Server-sent events",
+   "WebSockets",
+   "FastAPI"
+  ],
+  "notes": []
+ }
+}

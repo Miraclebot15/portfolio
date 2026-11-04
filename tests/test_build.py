@@ -71,6 +71,47 @@ class BuildTest(unittest.TestCase):
         self.assertIn('href="stack.html"', read(os.path.join(self.repo, "portfolio.html")))
         self.assertIn("stack.html", read(os.path.join(self.repo, "sitemap.xml")))
 
+    def test_every_stack_item_has_a_deep_dive_page(self):
+        import re
+        site = json.loads(read(os.path.join(self.repo, "content/site.json")))
+        sitemap = read(os.path.join(self.repo, "sitemap.xml"))
+        names = [i["name"] for c in site["stack"] for i in c["items"]]
+        self.assertGreaterEqual(len(names), 40)
+        for n in names:
+            f = "stack-" + re.sub(r"[^a-z0-9]+", "-", n.lower()).strip("-") + ".html"
+            html = read(os.path.join(self.repo, f))
+            self.assertIn(f, sitemap, f)
+            self.assertEqual(html.count("<h1"), 1, f)
+            for layer in ("overview", "how", "example", "work"):
+                self.assertIn(f'id="{layer}" role="tabpanel"', html, f + " " + layer)
+            self.assertNotIn('class="stkg"', html, f)
+
+    def test_rejects_missing_tool_entry(self):
+        self.edit_json("content/tools.json", lambda d: d.pop("Python"))
+        self.assert_fails(self.run_build(), "missing entry for 'Python'")
+
+    def test_rejects_orphan_tool_entry(self):
+        self.edit_json("content/tools.json", lambda d: d.update({"Ghost": d["Python"]}))
+        self.assert_fails(self.run_build(), "'Ghost' is not in the stack")
+
+    def test_rejects_bad_tool_pairs_and_notes(self):
+        def f(d): d["Python"]["pairs"] = ["Nope"]; d["Python"]["notes"] = ["note-missing"]
+        self.edit_json("content/tools.json", f)
+        r = self.run_build()
+        self.assert_fails(r, "pairs entry 'Nope'")
+        self.assertIn("note 'note-missing' does not exist", r.stdout + r.stderr)
+
+    def test_rejects_tool_with_wrong_uses_or_lang(self):
+        def f(d): d["Python"]["uses"] = ["only one"]; d["Python"]["lang"] = "cobol"
+        self.edit_json("content/tools.json", f)
+        r = self.run_build()
+        self.assert_fails(r, "'uses' needs exactly 3 entries")
+        self.assertIn("lang must be one of", r.stdout + r.stderr)
+
+    def test_rejects_provider_name_in_tool_text(self):
+        self.edit_json("content/tools.json", lambda d: d["Python"].update(what="Python is what OpenAI uses."))
+        self.assert_fails(self.run_build(), "AI model or provider name in the text")
+
     # ---- --check ----------------------------------------------------------
     def test_check_flags_stale_file(self):
         with open(os.path.join(self.repo, "about.html"), "a", encoding="utf-8") as f: f.write("\n<!-- edited by hand -->")
