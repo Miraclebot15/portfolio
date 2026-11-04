@@ -66,6 +66,219 @@
      "This note describes design intent. It makes no claim about test results or production readiness."
     ]
    }
+  ],
+  "topics": [
+   "AI agents",
+   "Trust boundaries"
+  ]
+ },
+ {
+  "slug": "note-nexus-core-architecture",
+  "title": "NEXUS CORE, end to end",
+  "lede": "How a request moves through a governance-first agent prototype: what is real, what is simulated and what is still planned.",
+  "read": "9 min read",
+  "kind": "Implementation note",
+  "project": "nexus-core",
+  "topics": [
+   "AI agents",
+   "Trust boundaries",
+   "Audit"
+  ],
+  "figure": {
+   "labels": [
+    "Request",
+    "Understand and plan",
+    "BOUNDARY:Governance, fails closed",
+    "Execute",
+    "Audit record"
+   ],
+   "caption": "The model proposes a plan. A separate, deterministic layer decides whether anything runs, and every stage leaves a record."
+  },
+  "sections": [
+   {
+    "h": "The principle, and the status",
+    "p": [
+     "NEXUS CORE treats a language model as an untrusted, probabilistic engine. The model can interpret a request, choose an approach, propose tool calls and revise a rejected plan. It cannot authorize its own proposal: every plan passes through a deterministic, **fail-closed** policy check before anything executes.",
+     "This note describes the current working prototype. It is a governance-first orchestration pipeline in active development, not a finished sandbox or a production-ready autonomous platform. Where something is simulated or only planned, the note says so."
+    ]
+   },
+   {
+    "h": "The layers",
+    "p": [
+     "The interface is a Next.js and React Command Center where users submit tasks, inspect conversations, watch pipeline events and review governance decisions. It reads a Server-Sent Events stream, so blocked decisions and the correction loop are visible instead of hidden behind a single answer.",
+     "A FastAPI backend exposes authentication, projects, conversations, messages, task streaming, artifacts and audit records. It validates request bodies, resolves who is calling and hands orchestration to one orchestrator. A demo identity exists for development. It is not an acceptable default for a multi-user deployment.",
+     "Before planning, the orchestrator passes up to the last 20 messages to a semantic understanding step that infers intent, task type, complexity, ambiguity and security signals, with a fallback if the model is unavailable. A separate pattern classifier checks the original input for instruction overrides, prompt extraction, fake system messages and obfuscation. These signals inform the plan and add defense in depth. They are evidence, not authorization.",
+     "A router maps the task to a category, model configuration and reasoning mode, using semantic hints with a keyword fallback. The planner agent, ELLA, then turns the request into a structured execution plan: a summary, a response mode and ordered steps, each with an action, a target, parameters and a rationale.",
+     "Governance evaluates that plan. If it is blocked, a correction agent, JANE, may revise it. Approved plans reach the execution layer, which dispatches supported actions and collects logs and artifacts. SQLite stores projects, conversations, messages, tasks, artifacts and the audit records."
+    ]
+   },
+   {
+    "h": "Life of a request",
+    "p": [
+     "A request starts in the frontend and opens a streaming endpoint. The orchestrator creates a task record, loads earlier messages and stores the new user message. Semantic understanding and the security classifier run, the router picks a category, and the planner proposes a structured plan that is parsed and validated against a shared schema.",
+     "Governance then evaluates the plan independently of the planner. A blocked plan may go to the correction agent, and the revised plan must pass governance again. Repeated rejection ends the task. An approved plan is executed, results and artifacts are collected, and the response and task state are saved. Each stage is streamed to the client as it completes and written to the audit record.",
+     "One honest edge: when a client disconnects, the pipeline stops advancing, but a model request that is already in flight cannot be guaranteed to stop immediately."
+    ]
+   },
+   {
+    "h": "A plan that parses is not a plan that is safe",
+    "p": [
+     "Model output goes through defensive JSON extraction and schema validation before it becomes a plan. That establishes structure only. A well-formed plan can still ask for something dangerous, which is why validation and authorization are separate steps.",
+     "The planner also has three response modes: answer directly, ask for clarification without inventing steps, or execute tools. The distinction keeps a vague request from being turned into confident-looking actions."
+    ]
+   },
+   {
+    "h": "Governance fails closed",
+    "p": [
+     "The governance layer is plain Python rules, not another model asked whether the plan seems safe. It inspects the flattened content of each step for dangerous system commands, destructive SQL, sensitive file paths, path traversal and secret exfiltration, and it rejects blocked action names. The result is a structured verdict: the decision, the rules that fired, the security signals and a reason.",
+     "If evaluation itself throws an exception, the verdict is **blocked**, never implicit approval. The same input and configuration give the same decision, and a rejection always names its reason.",
+     "The limit matters just as much: a pattern-based evaluator is only as complete as its patterns. It is not a full policy language and not proof of safety."
+    ]
+   },
+   {
+    "h": "Correction is not an override",
+    "p": [
+     "When a plan is blocked, the correction agent receives the rejected plan and the governance feedback and tries again. Its output is more model-generated data, so it is parsed, validated and evaluated exactly like the original. Without that rule, the correction path would be a bypass around the policy boundary.",
+     "The loop is bounded, with a default maximum of two correction attempts, so a stubborn plan ends in rejection instead of retrying forever. It does not provide human approval, rollback or protection against partial effects from future real integrations."
+    ]
+   },
+   {
+    "h": "What is simulated, and why it matters",
+    "p": [
+     "Most actions in the prototype are simulated. Read-only web search is the one documented real external tool. Importing a tool module does not mean its action has a production-safe execution path.",
+     "The distinction matters because a simulated file write shows orchestration behavior. It does not prove filesystem isolation, and a governance verdict is not a replacement for a separate permission check at the real tool boundary. The code also sanitizes search results and classifies known injection patterns. Those are supporting defenses, not proof that hostile content is neutralized."
+    ]
+   },
+   {
+    "h": "An audit trail with honest limits",
+    "p": [
+     "Each stage writes an append-oriented audit record: the task, stage, label, details, a timestamp, the previous record's hash and its own SHA-256 hash. The event stream carries the record hash, so the interface can show a hash-linked timeline and whether the chain verifies. Deleting a conversation or a message does not touch the audit tables, so the execution history can outlive the content.",
+     "Hash linking detects some kinds of tampering. It does not make the database immutable, because someone who can rewrite the records can recompute the chain. Stronger integrity would need independent checkpoints or signatures."
+    ]
+   },
+   {
+    "h": "A bug worth telling: timestamps that sort wrong",
+    "p": [
+     "Timestamps were stored as text, and Python's default ISO format drops the fractional seconds when the microseconds are exactly zero. Mixed representations then sort and compare unexpectedly as strings. That affects message order and any operation that deletes a message and everything after it.",
+     "The fix is to always serialize with explicit microsecond precision, so every stored timestamp has the same shape and text order matches time order. No separate regression test for this is claimed yet."
+    ]
+   },
+   {
+    "h": "Built, and not yet",
+    "p": [
+     "Built in the prototype: the API and Command Center, structured plans with shared schemas, semantic understanding and prompt classification, routing, the planner and correction agents, fail-closed governance, bounded correction with re-evaluation, SSE pipeline events, SQLite persistence, hash-linked audit records with chain verification, multi-turn context, full-text message search where the SQLite runtime supports it, and mostly simulated execution with one real read-only search path.",
+     "Still planned or incomplete: enforced production authentication with verified isolation between users, authorization enforced at each real tool boundary, a general human-approval workflow, real integrations with scoped permissions, complete automated security and regression tests, independent audit checkpoints, rate limiting and monitoring, and embedding-based memory in place of today's full-text search."
+    ]
+   },
+   {
+    "h": "What comes next",
+    "p": [
+     "The first priority is making authorization an execution invariant: a typed contract between governance and execution, so every real tool call traces back to the exact approved action, target and parameters, and anything unknown or malformed is rejected by default.",
+     "After that come reproducible security tests that record false positives and false negatives, lifecycle failure tests for timeouts, disconnects and corrupted audit chains, one narrowly scoped real integration with every allowed, blocked, denied and failed path tested, signed audit checkpoints, and reliability baselines before any scaling decisions. The longer plan is in the next note."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-nexus-core-roadmap",
+  "title": "Where NEXUS CORE goes next",
+  "lede": "A planned roadmap for durable missions, governed multi-agent work and approvals, with the safety primitives built first.",
+  "read": "6 min read",
+  "kind": "Design intent",
+  "project": "nexus-core",
+  "topics": [
+   "AI agents",
+   "Roadmap"
+  ],
+  "figure": {
+   "labels": [
+    "Execution boundary",
+    "Durable missions",
+    "Governed agents",
+    "Approvals and autonomy",
+    "Memory and tracing",
+    "Wider automation"
+   ],
+   "caption": "Safety and reliability primitives come first. Autonomy expands only inside enforceable authority."
+  },
+  "sections": [
+   {
+    "h": "Planned, not built",
+    "p": [
+     "Everything in this note is a planned extension. None of it is a claim about the current implementation, which is a request-and-response orchestration prototype. The architecture note says what exists today.",
+     "The principle does not change: models are **untrusted probabilistic engines**. Autonomy decides how independently a mission progresses. It never gives a model control over the rules that authorize its actions."
+    ]
+   },
+   {
+    "h": "Safety primitives first",
+    "p": [
+     "The order is deliberate. First come execution-boundary authorization and typed capability contracts. Then a durable mission runtime with checkpoints, cancellation and recovery. Then governed multi-agent coordination with independent verification, followed by approval workflows and explicit autonomy levels, then persistent memory and mission-wide tracing, and only then broader tool integrations.",
+     "The order may change as testing exposes dependencies. What should not change is the rule behind it: expand the ability to act only after the controls around acting are enforced and tested."
+    ]
+   },
+   {
+    "h": "Durable missions",
+    "p": [
+     "Today a task is one request and one plan. The plan is to move to missions with an explicit lifecycle: objectives, constraints, deadlines, completion criteria and cancellation. Work would be split into dependency-aware graphs, run by persistent workers with checkpoints, retries and timeouts.",
+     "A mission could pause for missing information, a policy decision or human approval, then resume from recorded state. Scheduled and event-triggered runs would carry bounded retries and resource budgets."
+    ]
+   },
+   {
+    "h": "Governed multi-agent work",
+    "p": [
+     "Specialized agents would handle planning, research, coding, testing, analysis, security review, execution and verification, coordinated by an agent that delegates work, tracks dependencies and decides when a mission is done. Contracts between agents would be typed, and one agent's output is treated as untrusted input to the next, even inside the same system.",
+     "Agents cannot grant themselves permissions or change their own authority boundaries. Specialization must never create an ungoverned execution path."
+    ]
+   },
+   {
+    "h": "A capability layer instead of wired-in tools",
+    "p": [
+     "Individually wired tools would give way to a registry and an execution gateway. Each capability declares its parameters, required permissions, side effects, risk class and limits. Authorization is enforced at the execution boundary, not only when the plan is made, with least-privilege credentials, target restrictions, quotas, timeouts and isolation per capability. Invocations are recorded with secrets redacted.",
+     "Having a tool never implies unrestricted authority to use it."
+    ]
+   },
+   {
+    "h": "Autonomy is not authority",
+    "p": [
+     "Four levels are planned. Advisory returns recommendations and executes nothing. Supervised prepares and validates plans, then asks for approval before designated actions. Bounded autonomous executes permitted actions within configured permissions, budgets and targets. Mission-based pursues a persistent objective through many governed steps and stops or asks for help when it reaches a boundary.",
+     "The exact permission model and the transitions between levels are still to be designed. Governance would judge the actual action, target, parameters and current authority, never the model's explanation of its intent."
+    ]
+   },
+   {
+    "h": "Approval that binds to what was reviewed",
+    "p": [
+     "An approval request would carry the proposed action, the affected resources, a risk class, the rationale and the evidence, with approve, reject, cancel, pause and resume. An approval would be bound to the exact plan version that was reviewed and invalidated when something material changes.",
+     "A rejection or a policy violation can never be quietly reinterpreted as permission to continue. A governance APPROVED verdict stays distinct from a human decision."
+    ]
+   },
+   {
+    "h": "Memory that stays untrusted",
+    "p": [
+     "Short-term conversation, mission state, long-term memory and retrieved reference material would be kept apart. Semantic retrieval with embeddings, and possibly graph relationships, would sit beside today's text search. Every stored item would carry provenance, ownership and access control, and the system would tell observed facts, user instructions, inferences and unverified agent output apart.",
+     "Memory can inform a decision. It must not silently expand authority or override a higher-priority control."
+    ]
+   },
+   {
+    "h": "Verification that does not trust the worker",
+    "p": [
+     "Acceptance criteria would be defined before execution where possible, checked by independent reviewers or deterministic validators. The system would ask for evidence of completion instead of accepting a successful tool response or a confident claim. Disagreement between planner, executor and verifier goes to correction or to a person.",
+     "Verification results would be stored separately from the claims of the agent that did the work, and adversarial tests would cover prompt injection, malicious tool results, parameter manipulation and attempts to bypass governance."
+    ]
+   },
+   {
+    "h": "Monitoring, audit and mission control",
+    "p": [
+     "JANE would grow from plan correction into security monitoring: correlating events across agents and missions, spotting repeated blocks, escalation attempts and abnormal resource use, and suspending a mission at configured thresholds. It could report and recommend, but it must not rewrite the rules that constrain it.",
+     "Audit would gain mission-wide traces, cost and latency tracking, and externally anchored or signed checkpoints, because hash links alone do not stop someone who can rewrite the database. The interface would grow from a conversation view into mission control: execution graphs, live traces, approval queues, permissions and budgets, showing what the system is doing and why."
+    ]
+   },
+   {
+    "h": "Further out",
+    "p": [
+     "Beyond that are controlled software-development and deployment workflows, browser and application automation, and, where proper safety systems exist, device control. Each needs its own threat model, tests and safeguards. None is implied by today's simulated tools.",
+     "The long-term goal is a persistent, multi-agent automation system that can plan, act, observe, verify, recover and keep working toward objectives inside explicit, enforceable authority boundaries."
+    ]
+   }
   ]
  },
  {
@@ -133,6 +346,9 @@
      "This note describes design priorities. It makes no claim about test results."
     ]
    }
+  ],
+  "topics": [
+   "Messaging"
   ]
  },
  {
@@ -197,6 +413,9 @@
      "The decision logic has unit tests that mock the network and cover live, down, timeout, mixed and rejected-method cases for each endpoint. A browser test serves the site, stubs the endpoints and asserts that every chip reads Live, Down and Status unavailable correctly, including when the endpoint itself fails."
     ]
    }
+  ],
+  "topics": [
+   "Reliability"
   ]
  },
  {
@@ -259,6 +478,9 @@
      "A push to a branch produces a Vercel preview. Merging to main publishes. The status functions deploy alongside the pages and are covered by their own unit tests."
     ]
    }
+  ],
+  "topics": [
+   "Tooling"
   ]
  }
 ]

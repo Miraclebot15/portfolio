@@ -18,7 +18,8 @@
    "SQLite"
   ],
   "notes": [
-   "note-site-architecture"
+   "note-site-architecture",
+   "note-nexus-core-architecture"
   ]
  },
  "TypeScript": {
@@ -39,7 +40,9 @@
    "React",
    "Zod"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "JavaScript": {
   "tag": "The language of the web, running in every browser and on servers.",
@@ -117,7 +120,9 @@
    "Vite",
    "TypeScript"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "Next.js": {
   "tag": "A React framework with routing, server rendering and API routes built in.",
@@ -137,7 +142,9 @@
    "Vercel",
    "TypeScript"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "Vite": {
   "tag": "A very fast dev server and bundler for modern frontends.",
@@ -195,7 +202,9 @@
    "CSS",
    "React"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "Three.js": {
   "tag": "A JavaScript library for 3D graphics in the browser.",
@@ -234,7 +243,9 @@
    "Uvicorn",
    "SQLite"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "Pydantic": {
   "tag": "Data validation for Python using type hints.",
@@ -253,7 +264,9 @@
    "FastAPI",
    "Zod"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "Uvicorn": {
   "tag": "The server process that runs async Python web apps.",
@@ -433,7 +446,9 @@
    "FastAPI",
    "Streaming responses"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "PostgreSQL": {
   "tag": "A powerful open-source relational database.",
@@ -473,7 +488,9 @@
    "Python",
    "FastAPI"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "Supabase": {
   "tag": "A hosted Postgres database with auth, storage and realtime built in.",
@@ -698,7 +715,8 @@
   ],
   "notes": [
    "note-site-architecture",
-   "note-status-checks"
+   "note-status-checks",
+   "note-nexus-core-architecture"
   ]
  },
  "Render": {
@@ -719,7 +737,9 @@
    "Uvicorn",
    "PostgreSQL"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  },
  "Agent orchestration": {
   "tag": "Coordinating a model, its tools and its steps toward a goal.",
@@ -740,7 +760,9 @@
    "Workflow automation"
   ],
   "notes": [
-   "note-model-authority"
+   "note-model-authority",
+   "note-nexus-core-architecture",
+   "note-nexus-core-roadmap"
   ]
  },
  "Tool calling": {
@@ -761,7 +783,10 @@
    "Policy and approval gates",
    "Pydantic"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture",
+   "note-nexus-core-roadmap"
+  ]
  },
  "Workflow automation": {
   "tag": "Turning repeatable multi-step work into a defined, reliable flow.",
@@ -781,7 +806,9 @@
    "Agent orchestration",
    "Audit trails"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-roadmap"
+  ]
  },
  "Model routing": {
   "tag": "Choosing which model handles a request, based on the job.",
@@ -822,7 +849,9 @@
    "Sandboxed execution"
   ],
   "notes": [
-   "note-model-authority"
+   "note-model-authority",
+   "note-nexus-core-architecture",
+   "note-nexus-core-roadmap"
   ]
  },
  "Audit trails": {
@@ -842,7 +871,10 @@
    "Policy and approval gates",
    "Workflow automation"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture",
+   "note-nexus-core-roadmap"
+  ]
  },
  "Sandboxed execution": {
   "tag": "Running untrusted code or actions where the damage is limited.",
@@ -861,7 +893,10 @@
    "Policy and approval gates",
    "Tool calling"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture",
+   "note-nexus-core-roadmap"
+  ]
  },
  "Intent routing": {
   "tag": "Working out what a message is asking for before acting on it.",
@@ -903,6 +938,8 @@
    "WebSockets",
    "FastAPI"
   ],
-  "notes": []
+  "notes": [
+   "note-nexus-core-architecture"
+  ]
  }
 }

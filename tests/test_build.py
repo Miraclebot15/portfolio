@@ -112,6 +112,39 @@ class BuildTest(unittest.TestCase):
         self.edit_json("content/tools.json", lambda d: d["Python"].update(what="Python is what OpenAI uses."))
         self.assert_fails(self.run_build(), "AI model or provider name in the text")
 
+    def test_engineering_page_has_path_and_filters(self):
+        notes = json.loads(read(os.path.join(self.repo, "content/notes.json")))
+        html = read(os.path.join(self.repo, "engineering.html"))
+        topics = []
+        for n in notes:
+            for t in n["topics"]:
+                if t not in topics: topics.append(t)
+        self.assertEqual(html.count('class="ef"'), len(topics) + 1)
+        self.assertEqual(html.count('class="note-card"'), len(notes))
+        pos = [html.index(f'<li style="--i:{k}"><a href="{n["slug"]}.html">') for k, n in enumerate(notes)]
+        self.assertEqual(pos, sorted(pos))
+        self.assertIn('href="eng.css"', html)
+        self.assertIn('src="eng.js"', html)
+
+    def test_nexus_notes_are_published_and_linked_to_the_stack(self):
+        arch = read(os.path.join(self.repo, "note-nexus-core-architecture.html"))
+        self.assertIn("fail-closed", arch)
+        self.assertIn('href="stack-fastapi.html"', arch)
+        road = read(os.path.join(self.repo, "note-nexus-core-roadmap.html"))
+        self.assertIn("Planned, not built", road)
+        self.assertIn("note-nexus-core-roadmap.html", read(os.path.join(self.repo, "sitemap.xml")))
+        tool = read(os.path.join(self.repo, "stack-audit-trails.html"))
+        self.assertIn('href="note-nexus-core-architecture.html"', tool)
+
+    def test_rejects_note_without_topics(self):
+        self.edit_json("content/notes.json", lambda d: d[0].pop("topics"))
+        self.assert_fails(self.run_build(), "'topics' needs 1 to 3 short labels")
+
+    def test_rejects_provider_name_in_note_text(self):
+        def f(d): d[0]["sections"][0]["p"][0] = "This note names OpenAI by mistake."
+        self.edit_json("content/notes.json", f)
+        self.assert_fails(self.run_build(), "AI model or provider name in the note text")
+
     # ---- --check ----------------------------------------------------------
     def test_check_flags_stale_file(self):
         with open(os.path.join(self.repo, "about.html"), "a", encoding="utf-8") as f: f.write("\n<!-- edited by hand -->")

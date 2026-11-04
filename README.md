@@ -147,7 +147,11 @@ Every stack item (tools and design concepts) gets its own page, `stack-<name>.ht
 }
 ```
 
-The build fails if an item has no entry, an entry has no item, `uses` is not exactly three, `lang` is unknown, a `pairs` name or note slug does not exist, or the text names an AI model or provider. The "In my work" layer only shows project pages whose `tech` list includes the item and the notes you list here, so nothing is claimed that the data does not say. Use plain hyphens, never dashes. The build fails if a name contains an AI model or provider name.
+The build fails if an item has no entry, an entry has no item, `uses` is not exactly three, `lang` is unknown, a `pairs` name or note slug does not exist, or the text names an AI model or provider. The "In my work" layer only shows project pages whose `tech` list includes the item and the notes you list here, so nothing is claimed that the data does not say. Use plain hyphens, never dashes.
+
+### Engineering notes
+
+Notes live in `content/notes.json`. The order of that list is the reading path shown on the Engineering page and the order of the "Next note" links. Each note needs `topics` (1 to 3 short labels, which become the filter buttons) besides the usual `slug`, `title`, `lede`, `read`, `kind`, `figure` and `sections`. Wrap a phrase in `**double asterisks**` to highlight it. A note's "Stack behind this note" list is built from the `notes` lists in `content/tools.json`, so link a tool to a note there. The build fails if a note has no topics or names an AI model or provider. Mark anything that is planned as planned, and keep claims to what the code does today. The build fails if a name contains an AI model or provider name.
 
 ### The typed code panel
 
