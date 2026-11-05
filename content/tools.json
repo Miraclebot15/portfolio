@@ -19,7 +19,8 @@
   ],
   "notes": [
    "note-site-architecture",
-   "note-nexus-core-architecture"
+   "note-nexus-core-architecture",
+   "note-lagoon-architecture"
   ]
  },
  "TypeScript": {
@@ -62,7 +63,10 @@
    "Node.js",
    "HTML5"
   ],
-  "notes": []
+  "notes": [
+   "note-lagoon-architecture",
+   "note-lagoon-trust-models"
+  ]
  },
  "HTML5": {
   "tag": "The structure of every page: headings, links, forms and media.",
@@ -81,7 +85,9 @@
    "CSS",
    "JavaScript"
   ],
-  "notes": []
+  "notes": [
+   "note-lagoon-architecture"
+  ]
  },
  "CSS": {
   "tag": "Controls how every element looks, from color to layout and motion.",
@@ -100,7 +106,9 @@
    "HTML5",
    "Tailwind CSS"
   ],
-  "notes": []
+  "notes": [
+   "note-lagoon-architecture"
+  ]
  },
  "React": {
   "tag": "A library for building interfaces from small reusable components.",
@@ -387,7 +395,13 @@
    "WebSockets",
    "Webhooks"
   ],
-  "notes": []
+  "notes": [
+   "note-lagoon-architecture",
+   "note-lagoon-trust-models",
+   "note-lagoon-assistant",
+   "note-lagoon-sandboxes",
+   "note-lagoon-safety"
+  ]
  },
  "Durable Objects": {
   "tag": "Stateful objects at the edge: one instance per name, with its own storage.",
@@ -406,7 +420,11 @@
    "Cloudflare Workers",
    "WebSockets"
   ],
-  "notes": []
+  "notes": [
+   "note-lagoon-architecture",
+   "note-lagoon-trust-models",
+   "note-lagoon-safety"
+  ]
  },
  "WebSockets": {
   "tag": "A two-way connection that stays open between browser and server.",
@@ -426,7 +444,10 @@
    "Durable Objects",
    "Uvicorn"
   ],
-  "notes": []
+  "notes": [
+   "note-lagoon-architecture",
+   "note-lagoon-trust-models"
+  ]
  },
  "Server-sent events": {
   "tag": "A one-way stream from server to browser over plain HTTP.",
@@ -590,7 +611,8 @@
    "GitHub Actions"
   ],
   "notes": [
-   "note-site-architecture"
+   "note-site-architecture",
+   "note-lagoon-architecture"
   ]
  },
  "Vitest": {
@@ -762,7 +784,9 @@
   "notes": [
    "note-model-authority",
    "note-nexus-core-architecture",
-   "note-nexus-core-roadmap"
+   "note-nexus-core-roadmap",
+   "note-lagoon-assistant",
+   "note-lagoon-roadmap"
   ]
  },
  "Tool calling": {
@@ -785,7 +809,9 @@
   ],
   "notes": [
    "note-nexus-core-architecture",
-   "note-nexus-core-roadmap"
+   "note-nexus-core-roadmap",
+   "note-lagoon-assistant",
+   "note-lagoon-roadmap"
   ]
  },
  "Workflow automation": {
@@ -807,7 +833,8 @@
    "Audit trails"
   ],
   "notes": [
-   "note-nexus-core-roadmap"
+   "note-nexus-core-roadmap",
+   "note-lagoon-roadmap"
   ]
  },
  "Model routing": {
@@ -851,7 +878,9 @@
   "notes": [
    "note-model-authority",
    "note-nexus-core-architecture",
-   "note-nexus-core-roadmap"
+   "note-nexus-core-roadmap",
+   "note-lagoon-assistant",
+   "note-lagoon-roadmap"
   ]
  },
  "Audit trails": {
@@ -873,7 +902,8 @@
   ],
   "notes": [
    "note-nexus-core-architecture",
-   "note-nexus-core-roadmap"
+   "note-nexus-core-roadmap",
+   "note-lagoon-safety"
   ]
  },
  "Sandboxed execution": {
@@ -895,7 +925,8 @@
   ],
   "notes": [
    "note-nexus-core-architecture",
-   "note-nexus-core-roadmap"
+   "note-nexus-core-roadmap",
+   "note-lagoon-sandboxes"
   ]
  },
  "Intent routing": {
@@ -917,7 +948,8 @@
    "Policy and approval gates"
   ],
   "notes": [
-   "note-message-routing"
+   "note-message-routing",
+   "note-lagoon-roadmap"
   ]
  },
  "Streaming responses": {
@@ -939,7 +971,8 @@
    "FastAPI"
   ],
   "notes": [
-   "note-nexus-core-architecture"
+   "note-nexus-core-architecture",
+   "note-lagoon-assistant"
   ]
  }
 }
