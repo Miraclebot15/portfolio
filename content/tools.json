@@ -42,7 +42,8 @@
    "Zod"
   ],
   "notes": [
-   "note-nexus-core-architecture"
+   "note-nexus-core-architecture",
+   "note-ella-architecture"
   ]
  },
  "JavaScript": {
@@ -129,7 +130,8 @@
    "TypeScript"
   ],
   "notes": [
-   "note-nexus-core-architecture"
+   "note-nexus-core-architecture",
+   "note-ella-architecture"
   ]
  },
  "Next.js": {
@@ -172,7 +174,9 @@
    "Vitest",
    "TypeScript"
   ],
-  "notes": []
+  "notes": [
+   "note-ella-architecture"
+  ]
  },
  "React Router": {
   "tag": "Page navigation for React apps, without full page reloads.",
@@ -314,7 +318,8 @@
    "Zod"
   ],
   "notes": [
-   "note-status-checks"
+   "note-status-checks",
+   "note-ella-architecture"
   ]
  },
  "Express": {
@@ -335,7 +340,9 @@
    "Zod",
    "Webhooks"
   ],
-  "notes": []
+  "notes": [
+   "note-ella-architecture"
+  ]
  },
  "Zod": {
   "tag": "Schema validation for TypeScript, with types inferred from the schema.",
@@ -468,7 +475,8 @@
    "Streaming responses"
   ],
   "notes": [
-   "note-nexus-core-architecture"
+   "note-nexus-core-architecture",
+   "note-ella-media-research"
   ]
  },
  "PostgreSQL": {
@@ -531,7 +539,9 @@
    "Clerk",
    "WebSockets"
   ],
-  "notes": []
+  "notes": [
+   "note-ella-architecture"
+  ]
  },
  "Clerk": {
   "tag": "Ready-made sign-in, sign-up and user management.",
@@ -591,7 +601,11 @@
    "FastAPI",
    "Intent routing"
   ],
-  "notes": []
+  "notes": [
+   "note-ella-architecture",
+   "note-ella-guest",
+   "note-ella-community"
+  ]
  },
  "Playwright": {
   "tag": "Automates real browsers to test how a site actually behaves.",
@@ -612,7 +626,8 @@
   ],
   "notes": [
    "note-site-architecture",
-   "note-lagoon-architecture"
+   "note-lagoon-architecture",
+   "note-ella-media-research"
   ]
  },
  "Vitest": {
@@ -674,7 +689,9 @@
    "Python",
    "Node.js"
   ],
-  "notes": []
+  "notes": [
+   "note-ella-media-research"
+  ]
  },
  "Git": {
   "tag": "Version control: a full history of your code you can branch and rewind.",
@@ -760,7 +777,8 @@
    "PostgreSQL"
   ],
   "notes": [
-   "note-nexus-core-architecture"
+   "note-nexus-core-architecture",
+   "note-ella-architecture"
   ]
  },
  "Agent orchestration": {
@@ -786,7 +804,8 @@
    "note-nexus-core-architecture",
    "note-nexus-core-roadmap",
    "note-lagoon-assistant",
-   "note-lagoon-roadmap"
+   "note-lagoon-roadmap",
+   "note-ella-authority"
   ]
  },
  "Tool calling": {
@@ -811,7 +830,8 @@
    "note-nexus-core-architecture",
    "note-nexus-core-roadmap",
    "note-lagoon-assistant",
-   "note-lagoon-roadmap"
+   "note-lagoon-roadmap",
+   "note-ella-authority"
   ]
  },
  "Workflow automation": {
@@ -834,7 +854,8 @@
   ],
   "notes": [
    "note-nexus-core-roadmap",
-   "note-lagoon-roadmap"
+   "note-lagoon-roadmap",
+   "note-ella-roadmap"
   ]
  },
  "Model routing": {
@@ -855,7 +876,9 @@
    "Agent orchestration",
    "Streaming responses"
   ],
-  "notes": []
+  "notes": [
+   "note-ella-models"
+  ]
  },
  "Policy and approval gates": {
   "tag": "Rules that decide whether an action may run or must wait for a human.",
@@ -880,7 +903,8 @@
    "note-nexus-core-architecture",
    "note-nexus-core-roadmap",
    "note-lagoon-assistant",
-   "note-lagoon-roadmap"
+   "note-lagoon-roadmap",
+   "note-ella-authority"
   ]
  },
  "Audit trails": {
@@ -903,7 +927,9 @@
   "notes": [
    "note-nexus-core-architecture",
    "note-nexus-core-roadmap",
-   "note-lagoon-safety"
+   "note-lagoon-safety",
+   "note-ella-authority",
+   "note-ella-roadmap"
   ]
  },
  "Sandboxed execution": {
@@ -926,7 +952,9 @@
   "notes": [
    "note-nexus-core-architecture",
    "note-nexus-core-roadmap",
-   "note-lagoon-sandboxes"
+   "note-lagoon-sandboxes",
+   "note-ella-authority",
+   "note-ella-media-research"
   ]
  },
  "Intent routing": {
@@ -949,7 +977,8 @@
   ],
   "notes": [
    "note-message-routing",
-   "note-lagoon-roadmap"
+   "note-lagoon-roadmap",
+   "note-ella-models"
   ]
  },
  "Streaming responses": {
@@ -972,7 +1001,8 @@
   ],
   "notes": [
    "note-nexus-core-architecture",
-   "note-lagoon-assistant"
+   "note-lagoon-assistant",
+   "note-ella-media-research"
   ]
  }
 }

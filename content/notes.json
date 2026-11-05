@@ -771,6 +771,398 @@
   ]
  },
  {
+  "slug": "note-ella-architecture",
+  "title": "ELLA, end to end",
+  "lede": "How a WhatsApp assistant is built so the chat app is only a transport, with an honest account of what is verified and what is not.",
+  "read": "8 min read",
+  "kind": "Implementation note",
+  "project": "ella",
+  "topics": [
+   "Architecture",
+   "Messaging"
+  ],
+  "figure": {
+   "labels": [
+    "WhatsApp message",
+    "Normalize",
+    "Context",
+    "BOUNDARY:NEXUS policy",
+    "Tools and reply"
+   ],
+   "caption": "A message is normalized before it enters the pipeline. Tool use passes through policy checks, never straight from the model."
+  },
+  "sections": [
+   {
+    "h": "WhatsApp is a transport, not the application",
+    "p": [
+     "ELLA is a modular, natural-language-first WhatsApp assistant built around NEXUS CORE. ELLA is the conversational face. NEXUS coordinates understanding, context, intent routing, policy checks, tools and the shape of the reply. The aim is a practical interface to useful AI capabilities without making the language model the authority over what the system may do.",
+     "Incoming messages are normalized before they reach the conversational pipeline, so nothing downstream depends on WhatsApp's raw format. The project is in active development: working paths sit beside partly connected and planned ones, and code existing in the repository does not by itself mean its production workflow has been verified."
+    ]
+   },
+   {
+    "h": "The pipeline",
+    "p": [
+     "A linked WhatsApp session receives the message, which is normalized and passed through activation and context resolution. NEXUS then detects intent, decides whether a clarifying question is needed, builds a bounded plan, evaluates authorization and tool policy, runs tools through typed contracts, validates their output, composes the reply, and records memory, audit events and telemetry.",
+     "The tools themselves are typed and registered: chat replies, image generation and analysis, transcription, speech, web search, document questions and more. A tool being technically able to run is never the same as being permitted to."
+    ]
+   },
+   {
+    "h": "Context that applies only when it applies",
+    "p": [
+     "Quoted messages, attachments, chat history and group references inform a reply only when they bear on the current request. WhatsApp embeds the message being replied to, so replying to an old photo with a short instruction can act on that photo.",
+     "Routing is attachment-aware before any text heuristics run: an image goes to vision, a voice note is transcribed and then answered, a document is ingested or queried. When wording and attachment both point somewhere, explicit intent such as asking for a sticker wins over plain image analysis."
+    ]
+   },
+   {
+    "h": "One process, many accounts",
+    "p": [
+     "Each linked account gets its own bot session. Shared infrastructure such as the model gateway, tools and memory is injected, while per-session state lives on the session itself. Every chat, document and memory lookup is scoped by account and chat, so two linked numbers never see each other's data even when they share a store.",
+     "Accounts use hashed passwords and opaque bearer tokens. The dashboard, plain HTML and JavaScript, handles signup, linking by QR code or pairing code, and settings. A few behaviors are explicit opt-in toggles: AI replies, automatic reactions, automatic read receipts, an always-online presence and re-posting deleted text."
+    ]
+   },
+   {
+    "h": "Storage, stated honestly",
+    "p": [
+     "Supabase holds selected account, session and persistence data, with migrations for persistence, WhatsApp session leases, account capability preferences, game sessions, web history and artifact metadata. Other parts still use JSON files or memory.",
+     "That means durability and horizontal scaling are not uniform across subsystems. Moving to one deliberate source of truth is part of the target architecture, covered in the roadmap note."
+    ]
+   },
+   {
+    "h": "A web workspace beside the bot",
+    "p": [
+     "A separate React and Vite web app hosts the research, scraping and agent tools, on top of the same account system. The next notes cover how those tools are kept safe."
+    ]
+   },
+   {
+    "h": "How it is checked",
+    "p": [
+     "Behavior is checked by about fifty standalone test scripts plus package tests, chained by the main test command: intent routing, media fetch, response guard, tool registry, conversation understanding, group references, call state, the agent platform and more. Many run against fake providers.",
+     "The project's own principle applies here: smoke-tested logic, live-provider behavior and end-to-end production workflows are different levels of verification. These tests were not re-run for this note."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-ella-authority",
+  "title": "Capability is not authority, in a chat",
+  "lede": "What changes when an assistant lives inside group chats: risk-tiered roles, untrusted everything, and a last check before every reply.",
+  "read": "7 min read",
+  "kind": "Design intent",
+  "project": "ella",
+  "topics": [
+   "Trust boundaries",
+   "AI agents"
+  ],
+  "figure": {
+   "labels": [
+    "Message",
+    "Model asks for a tool",
+    "BOUNDARY:Role and risk check",
+    "Approval if critical",
+    "Guarded reply"
+   ],
+   "caption": "The model may request a tool. A separate check on the actor's role and the tool's risk decides whether it runs."
+  },
+  "sections": [
+   {
+    "h": "The rule",
+    "p": [
+     "Capability does not imply authority. The model may request a tool, but it does not authorize it, and NEXUS never treats model-generated tool selection as permission. Authorization happens downstream, independently of what the planner chose."
+    ]
+   },
+   {
+    "h": "Risk-tiered roles",
+    "p": [
+     "There are five roles, from owner down through super admin, admin and moderator to user, and four risk levels. Low and medium risk tools are open to any user, high risk needs at least a moderator, and critical needs an admin. A critical tool still asks for approval unless the actor is the owner, because a role that clears the bar is still not blanket authority.",
+     "The role lookup is in memory today, with a store-backed lookup planned. The gate is real, and it is also still a first version."
+    ]
+   },
+   {
+    "h": "Everything that arrives is untrusted",
+    "p": [
+     "External messages, attachments, retrieved web pages, documents and model output are all treated as untrusted. The threat model names the risks plainly: direct and indirect prompt injection, excessive agency, privilege escalation, unauthorized group and admin actions, data leaking across users or groups, SSRF through URL tools, arbitrary code execution, malicious files, unbounded AI consumption, secrets leaking into prompts or logs, an insecure plugin supply chain, injection into queries and commands, and replayed or duplicate messages."
+    ]
+   },
+   {
+    "h": "The controls that answer them",
+    "p": [
+     "Least privilege for every tool. Typed schemas and strict validation. Per-user and per-group scope. Explicit approval for high-impact actions. Sandboxed code with no network. URL allow and deny policies. File type and size limits. Rate limits and quotas. Audit logs. Redaction of secrets in logs. Timeouts and resource limits. And adversarial tests for prompt injection."
+    ]
+   },
+   {
+    "h": "Where documents and code can disagree",
+    "p": [
+     "The README says it directly: do not assume a documented control is implemented simply because it appears in an architecture or threat-model document. The threat model states intended controls. How far each one is implemented varies, which is why the project asks readers to review authorization and account isolation before exposing the API publicly."
+    ]
+   },
+   {
+    "h": "A last check on the way out",
+    "p": [
+     "A response guard runs immediately before every user-facing send: HTTP replies, streamed replies, WhatsApp messages, media captions and even fallback and error messages. It drops internal diagnostic lines, removes provider and model identifiers so they stay in server-side diagnostics, replaces secret-shaped strings with a redaction marker and trims canned assistant boilerplate. It is defense in depth, not the primary control."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-ella-media-research",
+  "title": "From a link to an answer, safely",
+  "lede": "Four request types kept apart, URL rules that assume hostile input, and research whose citations can be checked.",
+  "read": "7 min read",
+  "kind": "Implementation note",
+  "project": "ella",
+  "topics": [
+   "Trust boundaries",
+   "Architecture"
+  ],
+  "figure": {
+   "labels": [
+    "Link or question",
+    "Classify the request",
+    "BOUNDARY:URL and policy checks",
+    "Fetch or search",
+    "Cited result"
+   ],
+   "caption": "A pasted link, a search, a supplied file and a generation request are different jobs with different rules."
+  },
+  "sections": [
+   {
+    "h": "Four paths, kept separate",
+    "p": [
+     "A request that involves the web can be web research, a search for an existing public-domain or licensed asset, a fetch of one explicit public link, or generation. Intent precedence keeps them apart. A bare link on a recognized platform is a fetch request. An ordinary article link stays web research. Searching for an existing asset stays asset search, and generation stays generation."
+    ]
+   },
+   {
+    "h": "Fetching media from a link",
+    "p": [
+     "One fetch pipeline handles direct public HTTPS files and public links on an exact allowlist of platforms. It has distinct modes for downloading, extracting audio, transcribing and analyzing, runs a pinned version of the extractor, and has focused tests for intent collisions and retries."
+    ]
+   },
+   {
+    "h": "URL rules that assume hostile input",
+    "p": [
+     "Opening a URL blocks embedded credentials, unusual ports, local, private and reserved addresses, unsupported schemes and unsafe redirects. Page content is untrusted and cannot override instructions or permissions.",
+     "Two honest caveats are written into the project. Network egress restrictions are still recommended on top of application checks, and DNS rebinding between validation and connection is a residual risk that application code alone cannot remove."
+    ]
+   },
+   {
+    "h": "Search that does not pretend",
+    "p": [
+     "Search results must come from live provider output, because a model's answer is not proof of a search. Every source-specific claim needs a direct URL. Publication date is not retrieval time, and a missing date stays missing. A failed search must not trigger a roundup made up from memory. A claim of a screenshot requires a real image, and song lookups return legal listening links and short previews, not downloads."
+    ]
+   },
+   {
+    "h": "Relevance without overclaiming",
+    "p": [
+     "Image and video search gathers candidates across providers, removes duplicates by source page and ranks them on titles, tags, descriptions and the original request. Poor metadata matches are rejected, and when nothing fits the answer is a not-found result, not a random picture. The check is metadata-based, not pixel-level, and the docs say so. Captions say a result was retrieved, never generated."
+    ]
+   },
+   {
+    "h": "Research that can be checked",
+    "p": [
+     "The web workspace adds a scraper with bounded extraction, sitemap discovery, focused crawling and quote-verified field extraction, and a research mode that plans, searches, reads, takes quote-backed notes, checks for gaps, writes a cited report and checks citations sentence by sentence. Citation checking is not a truth guarantee, and the system says so.",
+     "Autonomous agent tasks run under step, page, model and time budgets and can pause, resume, cancel and ask for approval. Crawls over 15 pages need approval, and in assisted mode every sandbox run does too. Fetched pages are treated as untrusted data, and the note-taking steps that read them have no tools. Robots rules are honoured.",
+     "These routes are off unless explicitly switched on, and the docs say not to enable them on a public host until network egress blocks private and metadata address ranges."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-ella-guest",
+  "title": "Behaving like a guest on WhatsApp",
+  "lede": "A bot on a consumer messaging network has to avoid looking like a bot, and has to be honest that no amount of care guarantees it.",
+  "read": "4 min read",
+  "kind": "Design intent",
+  "project": "ella",
+  "topics": [
+   "Reliability",
+   "Messaging"
+  ],
+  "figure": {
+   "labels": [
+    "Warm up",
+    "Wait for the user",
+    "Read and type like a person",
+    "Pace through the day",
+    "Track health"
+   ],
+   "caption": "Every pattern that makes automation easy to spot is a reason to slow it down."
+  },
+  "sections": [
+   {
+    "h": "The problem",
+    "p": [
+     "ELLA lives on a consumer messaging network that can remove accounts that look automated. It reaches WhatsApp through an unofficial client library, so continuity of an account cannot be promised by this project or by anyone."
+    ]
+   },
+   {
+    "h": "Humanizing the timing",
+    "p": [
+     "The session layer ramps up gradually after a new link, never starts a conversation on its own, and delays reading and typing with randomized, human-shaped timing. Pacing follows the time of day, rapid messages are debounced into one reply, and a health score tracks how the account is behaving."
+    ]
+   },
+   {
+    "h": "Toggles that work against it",
+    "p": [
+     "Instant read receipts and a constantly online presence are themselves detectable patterns. They exist as opt-in toggles for people who want them, not as defaults, and the settings page says why next to each one."
+    ]
+   },
+   {
+    "h": "What it does not promise",
+    "p": [
+     "The README is blunt: anti-ban timing and humanization features do not guarantee that WhatsApp will permit or preserve an account. External providers and unofficial integrations can change or fail independently of the repository."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-ella-models",
+  "title": "Many models, one voice",
+  "lede": "A gateway that routes, falls back and keeps credentials tidy, with a final layer that keeps the assistant sounding like one assistant.",
+  "read": "6 min read",
+  "kind": "Implementation note",
+  "project": "ella",
+  "topics": [
+   "AI agents",
+   "Reliability"
+  ],
+  "figure": {
+   "labels": [
+    "Request",
+    "Route by task",
+    "Provider adapter",
+    "BOUNDARY:Fallback and health",
+    "One voice"
+   ],
+   "caption": "Providers come and go. The gateway routes around failures, and the user hears one consistent assistant."
+  },
+  "sections": [
+   {
+    "h": "A gateway, not a model",
+    "p": [
+     "Provider adapters cover chat, vision, transcription, image generation, speech and search. A model registry, a capability registry and task routing decide which provider handles a request, and a fallback chain moves on when one fails or is unavailable. Several adapters are free or keyless, which keeps the system usable without paid keys."
+    ]
+   },
+   {
+    "h": "Fallback and provider health",
+    "p": [
+     "Fallback is ordered and the gateway tracks provider health, so a failing provider is skipped instead of retried forever. Providers can change or break independently of the project. The design treats that as normal."
+    ]
+   },
+   {
+    "h": "Credentials",
+    "p": [
+     "A credential store holds named keys, and values set in the environment win over keys stored through the dashboard. Admin tools manage the stored ones."
+    ]
+   },
+   {
+    "h": "Language that matches the user",
+    "p": [
+     "A language layer handles Nigerian English and Pidgin, alongside modules for conversation tone, conversation state and understanding. The goal is replies that fit how people actually write, including fragments and abbreviations, instead of rigid helpdesk phrasing."
+    ]
+   },
+   {
+    "h": "One voice",
+    "p": [
+     "An identity layer keeps the assistant's persona consistent. Provider and model identifiers stay in server diagnostics and are scrubbed from user-facing text, and response-quality checks treat requests for current availability or factual verification with extra care, so the assistant does not answer them from memory alone."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-ella-community",
+  "title": "More than a chatbot",
+  "lede": "Games, an economy, guilds, collectibles and group tools: the social layer that makes a chat assistant worth keeping in a group.",
+  "read": "4 min read",
+  "kind": "Implementation note",
+  "project": "ella",
+  "topics": [
+   "Architecture"
+  ],
+  "figure": {
+   "labels": [
+    "Message",
+    "Intent",
+    "Game or economy",
+    "Group tools",
+    "Reward and state"
+   ],
+   "caption": "The same pipeline that answers questions also runs games, tracks balances and handles group chores."
+  },
+  "sections": [
+   {
+    "h": "Games and an economy",
+    "p": [
+     "A registry of more than 200 named games is built from interactive engines such as Connect Four, Blackjack and Memory Match, plus content packs for trivia. Game results feed an economy with wallets, a bank, experience and levels, daily rewards, a shop and inventory, and a leaderboard. Everything is reachable in plain language, such as asking for a balance or to play a game."
+    ]
+   },
+   {
+    "h": "Social features",
+    "p": [
+     "Guilds with shared experience, away messages that reply when someone is mentioned, a card collection with rarity weights, and virtual pets sit beside native WhatsApp polls and a set of small utilities. A note on game moves covers keeping them safe from abuse."
+    ]
+   },
+   {
+    "h": "Group behavior",
+    "p": [
+     "In groups, ELLA replies to mentions, parses admin commands deterministically instead of asking the model, has link and spam moderation paths, and supports welcome and goodbye templates. Group activation rules decide when it speaks at all, which matters more in a busy group than in a private chat."
+    ]
+   },
+   {
+    "h": "Caveats worth keeping",
+    "p": [
+     "Persistence for these features is not uniform, and some parts depend on live participant data from WhatsApp. They are described here as present in the code, not as verified in every group."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-ella-roadmap",
+  "title": "Where ELLA goes next",
+  "lede": "A target architecture for durable work, with the current implementation and the plan kept deliberately separate.",
+  "read": "5 min read",
+  "kind": "Design intent",
+  "project": "ella",
+  "topics": [
+   "Roadmap"
+  ],
+  "figure": {
+   "labels": [
+    "Today",
+    "One database",
+    "Durable queues",
+    "Workers",
+    "Observability"
+   ],
+   "caption": "The target state is a plan. The current state is the single process described in the other notes."
+  },
+  "sections": [
+   {
+    "h": "Planned, not built",
+    "p": [
+     "This note describes target-state components, not claims that they are connected or production-ready. The project's own documents say the design material still has to be reconciled with the running implementation."
+    ]
+   },
+   {
+    "h": "A deliberate source of truth",
+    "p": [
+     "PostgreSQL would become the source of truth for persistent data, replacing today's mix of Supabase tables, JSON files and memory. Vector search would be added only where semantic retrieval is justified and evaluated, not by default."
+    ]
+   },
+   {
+    "h": "Durable background work",
+    "p": [
+     "Redis with a job queue would carry long-running tasks, handled by explicit worker processes with retries, idempotency, cancellation and result delivery. S3-compatible object storage would hold larger media and generated artifacts."
+    ]
+   },
+   {
+    "h": "Visibility and the order of work",
+    "p": [
+     "Structured observability, wider audit coverage and operational health checks come with it. The roadmap runs from a thin vertical slice, through persistence, a tool registry with permissions and audit, media pipelines, research and memory, queues and schedulers, group moderation and policies, plugins and an admin dashboard, sandboxed coding with approvals, and finally security testing, load testing, backups and deployment hardening."
+    ]
+   }
+  ]
+ },
+ {
   "slug": "note-message-routing",
   "title": "Sending a message to the right place",
   "lede": "Intent routing in a WhatsApp assistant, and why a message that looks like a command is not one.",
