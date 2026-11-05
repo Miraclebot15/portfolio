@@ -372,7 +372,17 @@
     "d": "The deployed API is covered by an availability check, so its state is visible instead of assumed."
    }
   ],
-  "eng_intro": "Design concerns for a combined messaging, stories and video platform."
+  "eng_intro": "Design concerns for a combined messaging, stories and video platform.",
+  "tech": [
+   "JavaScript",
+   "HTML5",
+   "CSS",
+   "Python",
+   "Cloudflare Workers",
+   "Durable Objects",
+   "WebSockets",
+   "Playwright"
+  ]
  },
  {
   "slug": "aurora",

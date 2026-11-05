@@ -321,3 +321,5 @@ python3 tests/smoke.py       # browser tests at four widths (needs Playwright)
 ```
 
 The build checks content first (slugs, states, motifs, colors, https URLs, status function files, note kinds and project references, stack icons, AI provider names) and the generated pages second (one h1, title, description length, unique ids, links and anchors, no dashes). If anything fails, nothing is written.
+
+Add `"path": true` to a note to put it on the Engineering page's reading path. Keep the path to about six curated notes. Every note still appears in the filterable grid below it.

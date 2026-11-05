@@ -104,6 +104,7 @@ def validate_content():
         if n.get("project") and n["project"] not in seen: errs.append(f"{w}: project '{n['project']}' does not exist")
         if re.search(r"\b(" + "|".join(BANNED_TECH) + r")\b", " ".join([n.get("title", ""), n.get("lede", "")] + [x for sec in n.get("sections", []) for x in sec.get("p", [])]), re.I):
             errs.append(f"{w}: AI model or provider name in the note text")
+        if "path" in n and not isinstance(n["path"], bool): errs.append(f"{w}: 'path' must be true or false")
         tp = n.get("topics")
         if not (isinstance(tp, list) and 1 <= len(tp) <= 3 and all(isinstance(x, str) and x.strip() for x in tp)): errs.append(f"{w}: 'topics' needs 1 to 3 short labels")
         for m, sec in enumerate(n.get("sections", [])):
@@ -470,12 +471,12 @@ for _n in NOTES:
 def note_proj(n): return next((p for p in PROJECTS if p["slug"] == n["project"]), None)
 note_cards = "".join(
     f'''<a class="note-card" href="{n["slug"]}.html" data-topics="{esc("|".join(n["topics"]))}"><span class="mono">{n["kind"]} \u00b7 {n["read"]}{(" \u00b7 " + esc(note_proj(n)["name"])) if note_proj(n) else ""}</span><h3>{esc(n["title"])}</h3><p>{esc(n["lede"])}</p><span class="etags">{"".join(f'<i class="etag">{esc(t)}</i>' for t in n["topics"])}</span><span class="note-go">Read {ic("right")}</span></a>''' for n in NOTES)
-rpath = ('<section class="erp rv" aria-labelledby="erp-h"><h2 class="erp-h" id="erp-h">Reading path</h2><p class="erp-s">Start with the principle, follow one system end to end, see where it goes next, then the smaller notes.</p><ol class="erp-l">'
-         + "".join(f'<li style="--i:{k}"><a href="{n["slug"]}.html"><b>{k + 1:02d}</b><span>{esc(n["title"])}</span><small>{n["kind"]} \u00b7 {n["read"]}</small></a></li>' for k, n in enumerate(NOTES)) + '</ol></section>')
+rpath = ('<section class="erp rv" aria-labelledby="erp-h"><h2 class="erp-h" id="erp-h">Reading path</h2><p class="erp-s">Start with the principle, follow two systems end to end, then explore the rest by topic.</p><ol class="erp-l">'
+         + "".join(f'<li style="--i:{k}"><a href="{n["slug"]}.html"><b>{k + 1:02d}</b><span>{esc(n["title"])}</span><small>{n["kind"]} \u00b7 {n["read"]}</small></a></li>' for k, n in enumerate(n for n in NOTES if n.get("path"))) + '</ol></section>')
 efil = ('<div class="efil" role="group" aria-label="Filter notes by topic"><button class="ef" type="button" data-t="all" aria-pressed="true">All</button>'
         + "".join(f'<button class="ef" type="button" data-t="{esc(t)}" aria-pressed="false">{esc(t)}</button>' for t in TOPICS) + f'</div><p class="ecount" aria-live="polite">{len(NOTES)} notes</p>')
 page("engineering.html", f"Engineering | {NAME}", "engineering", "Design and implementation notes on the systems behind the projects, with a reading path and topic filters.",
- ph("Journal", "Engineering", "Design intent and implementation notes: trust boundaries, an agent pipeline end to end, routing, availability checks and how this site is built.") +
+ ph("Journal", "Engineering", "Design intent and implementation notes: trust boundaries, two systems end to end, an assistant with limits, routing, availability checks and how this site is built.") +
  f'<div class="wrap" style="padding-bottom:90px">{rpath}{efil}<div class="notes enotes">{note_cards}</div></div>', css="eng.css", js="eng.js")
 for k, n in enumerate(NOTES):
     nxt = NOTES[(k + 1) % len(NOTES)]

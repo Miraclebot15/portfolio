@@ -70,7 +70,8 @@
   "topics": [
    "AI agents",
    "Trust boundaries"
-  ]
+  ],
+  "path": true
  },
  {
   "slug": "note-nexus-core-architecture",
@@ -177,7 +178,8 @@
      "After that come reproducible security tests that record false positives and false negatives, lifecycle failure tests for timeouts, disconnects and corrupted audit chains, one narrowly scoped real integration with every allowed, blocked, denied and failed path tested, signed audit checkpoints, and reliability baselines before any scaling decisions. The longer plan is in the next note."
     ]
    }
-  ]
+  ],
+  "path": true
  },
  {
   "slug": "note-nexus-core-roadmap",
@@ -277,6 +279,493 @@
     "p": [
      "Beyond that are controlled software-development and deployment workflows, browser and application automation, and, where proper safety systems exist, device control. Each needs its own threat model, tests and safeguards. None is implied by today's simulated tools.",
      "The long-term goal is a persistent, multi-agent automation system that can plan, act, observe, verify, recover and keep working toward objectives inside explicit, enforceable authority boundaries."
+    ]
+   }
+  ],
+  "path": true
+ },
+ {
+  "slug": "note-lagoon-architecture",
+  "title": "Lagoon, end to end",
+  "lede": "A social operating system built from a modular frontend and a real edge backend, with an honest map of what is live and what is simulated.",
+  "read": "8 min read",
+  "kind": "Implementation note",
+  "project": "lagoon",
+  "topics": [
+   "Architecture",
+   "Messaging"
+  ],
+  "figure": {
+   "labels": [
+    "Modular app",
+    "Features register",
+    "BOUNDARY:Sign in",
+    "Live backend",
+    "Realtime delivery"
+   ],
+   "caption": "The app runs fully on the device. Signing in swaps selected simulated features for real services."
+  },
+  "sections": [
+   {
+    "h": "What Lagoon is trying to be",
+    "p": [
+     "Lagoon is a social operating system built around communication, relationships, content, communities, information and personal productivity. It is not meant to be another feed-first network. The direction is relationship-oriented rather than engagement-oriented: connect people, their conversations, their interests and what they want to get done.",
+     "The idea is one environment where people can communicate privately, keep relationships and communities, share media, discover information, read, watch, learn and create, organize their conversations and activities, and use an integrated assistant. Communication is the foundation, but it is not the limit."
+    ]
+   },
+   {
+    "h": "A frontend built from registered modules",
+    "p": [
+     "The frontend is custom modular JavaScript, not a React or Next.js application. Numbered modules share one application namespace with common state, an event bus, feature registries, navigation and screen management, shared interface components, a shell and theme system, and a boot layer.",
+     "Features plug in through small registration calls for tabs, screens, attachments, settings, message types, chat actions, quick actions and shells, instead of being written into one enormous file. That gives Lagoon a plugin-like internal structure without a separate package per feature."
+    ]
+   },
+   {
+    "h": "A build step that enforces rules",
+    "p": [
+     "A build script collects the CSS and JavaScript from the source folder, sorts modules by filename, merges the CSS, keeps each JavaScript file as its own script tag so a syntax error stays isolated to one module, checks syntax, rejects em dashes and en dashes, and emits a self-contained HTML app.",
+     "One caution: older flat files sit beside the source folder as a parallel layout. Only the source folder is built, so the two must not be treated as interchangeable."
+    ]
+   },
+   {
+    "h": "A backend on the edge",
+    "p": [
+     "Cloudflare Workers handle the HTTP requests. D1 holds the relational data, Durable Objects hold live connections and shared counters, server-side AI runs on the same platform, and a separate hosted service executes remote code. An Inbox object manages one user's active WebSocket connections and event delivery.",
+     "An older room object is explicitly retired and answers with HTTP 410. Lagoon should not be described as having a room-based messaging service."
+    ]
+   },
+   {
+    "h": "Local first, live when signed in",
+    "p": [
+     "The app works locally with simulated conversations, messages, status changes and persistence. When a user signs in, selected features are replaced or extended by real services. So not every screen is a live capability: some are simulated, some live, some both, and some are in test mode.",
+     "Keeping demo state and live state strictly separate is a design rule, and the main thing the next stage should consolidate."
+    ]
+   },
+   {
+    "h": "Shells, not skins",
+    "p": [
+     "There are 25 shells, from Glass, Material and Bento to Editorial, Swiss, Terminal and two iOS variants. A shell is not a color preset. It can change navigation, layout, component shapes, typography, density, motion, light and dark themes, chat bubbles, lists, sheets, cards and responsive behavior. One feature implementation inherits every treatment without being rewritten."
+    ]
+   },
+   {
+    "h": "How it is checked",
+    "p": [
+     "Browser tests run at phone, tablet and desktop sizes and collect page and console errors, screenshots, shell audits, overflow and contrast checks and feature tests, across 36 frontend test files. Nine backend scripts cover authentication and general API behavior, messaging, WebSocket delivery, avatars, the assistant, code execution, public data adapters, privacy and social features. Some target the live API and others run against isolated local environments.",
+     "Honest limits: the existence of tests is not the same as passing them, and a code review is not a fresh run of the suite. The package's default test command is also a placeholder, so no single command runs everything yet."
+    ]
+   }
+  ],
+  "path": true
+ },
+ {
+  "slug": "note-lagoon-trust-models",
+  "title": "Two trust models in one product",
+  "lede": "Sealed one-to-one chats, per-member sealed groups and readable, moderated Spaces: different promises for different places, stated plainly.",
+  "read": "8 min read",
+  "kind": "Design intent",
+  "project": "lagoon",
+  "topics": [
+   "Trust boundaries",
+   "Messaging"
+  ],
+  "figure": {
+   "labels": [
+    "Sender device",
+    "Seal on device",
+    "BOUNDARY:Server relays sealed content",
+    "Recipient device",
+    "Open on device"
+   ],
+   "caption": "In private chats the server sees sealed envelopes. In moderated Spaces it deliberately sees readable text. The product says which is which."
+  },
+  "sections": [
+   {
+    "h": "Why there are two models",
+    "p": [
+     "A private conversation and a moderated community need opposite things. A private chat should be unreadable to the service. A community needs moderation, and moderation needs the service to see content. Lagoon keeps both and does not blur them.",
+     "Space messages are readable on the service so they can be moderated. They are **not end-to-end encrypted**, and the product should never imply that they are."
+    ]
+   },
+   {
+    "h": "One to one: sealed on the device",
+    "p": [
+     "A dedicated module uses the browser's cryptographic APIs: ECDH on P-256 for key agreement, HKDF with SHA-256 and HMAC-based derivation, and AES-GCM for encryption. Device keys live in IndexedDB. Public keys and prekeys are published, and the module handles session state, safety codes, encrypted files, and encrypted key backup and restore. It also contains ratchet-related logic and a prekey handshake.",
+     "The service stores message records in D1, but the client is built so that it receives sealed content rather than readable private text. This is a substantial implementation, not an encryption icon."
+    ]
+   },
+   {
+    "h": "What that does not prove",
+    "p": [
+     "Cryptographic code is not an audit. The protocol has not been independently reviewed, and strong security guarantees should wait until it has been."
+    ]
+   },
+   {
+    "h": "Delivery and sync",
+    "p": [
+     "The live path covers phone-number account lookup, sending, synchronization, delivery acknowledgements, history and live events over WebSockets. A per-user Inbox object holds the connections and delivers events."
+    ]
+   },
+   {
+    "h": "Groups: sealed per member",
+    "p": [
+     "For groups, the sending device seals each message separately for each member. The server keeps membership and roles and relays the encrypted envelopes. The backend covers creation, invitations, joining and leaving, member management, roles, editing, sync, delivery acknowledgements, read state, reports and moderation workflows.",
+     "Group encryption should not automatically be credited with every property of the one-to-one protocol."
+    ]
+   },
+   {
+    "h": "Spaces, communities and channels",
+    "p": [
+     "Spaces are invite-based environments with members, roles, text channels, channel permissions, reports, moderation, automated moderation rules, adult-channel restrictions and invite management. Communities are named groups with membership and an announcement feed controlled by owners and administrators.",
+     "Channels are one-to-many broadcasting: creation, a directory, following, posts, reactions, polls, reports and deletion. Followers pull the feed instead of the system pushing to each of them."
+    ]
+   },
+   {
+    "h": "Media",
+    "p": [
+     "Images, video, voice messages, documents and view-once media are uploaded in chunks, kept locally in IndexedDB and fetched on demand. The backend stores the chunks in D1 rather than in object storage. The limits in code are 384 KB per chunk, 25 MB per file and 200 MB of uploads per person per day.",
+     "That reduces infrastructure for now, but database-backed media deserves a dedicated scaling review."
+    ]
+   },
+   {
+    "h": "Calls",
+    "p": [
+     "There are two call paths: a simulated local experience and a live WebRTC implementation. The server handles signalling, call logs and ICE configuration while audio and video travel peer to peer. The live path is for individual calls. Group-call screens that exist in the simulated experience should not be presented as a finished live feature."
+    ]
+   }
+  ],
+  "path": true
+ },
+ {
+  "slug": "note-lagoon-assistant",
+  "title": "Ella proposes, the app decides",
+  "lede": "How an in-app assistant can be useful without being handed the keys: layered reasoning, an action allowlist and model output treated as data, not markup.",
+  "read": "7 min read",
+  "kind": "Implementation note",
+  "project": "lagoon",
+  "topics": [
+   "AI agents",
+   "Trust boundaries"
+  ],
+  "figure": {
+   "labels": [
+    "Ask",
+    "Local first",
+    "Server AI",
+    "BOUNDARY:Allowlist and renderer",
+    "Action or block"
+   ],
+   "caption": "The model can suggest an action or a layout. The application checks it against a fixed allowlist before anything happens or renders."
+  },
+  "sections": [
+   {
+    "h": "More than a chat window",
+    "p": [
+     "Ella, Lagoon's integrated assistant, is built in layers. It is not a chat box attached to an API, and each layer has its own limits."
+    ]
+   },
+   {
+    "h": "Layer one: local reasoning",
+    "p": [
+     "A local layer needs no network and no language model. It handles calculations, unit conversions, reminders, to-dos, timers, memory, message checking, rewriting and conversation summaries. A router decides whether a request stays local or goes to a remote service, and it can use public data services for selected information requests."
+    ]
+   },
+   {
+    "h": "Layer two: server AI",
+    "p": [
+     "Server routes cover chat, image generation and understanding, search, link fetching, research, speech, transcription and translation-related work. They run on the same edge platform and have daily usage limits.",
+     "A set of public data adapters each talk to a fixed, known host and include health checks. That is a deliberate choice: known sources mean a user-supplied address cannot become an unrestricted server fetch."
+    ]
+   },
+   {
+    "h": "Layer three: optional model providers",
+    "p": [
+     "Users can configure their own language model providers. This path supports streaming responses, tool execution and conversation context with consent controls, and it is separate from the free server-side path."
+    ]
+   },
+   {
+    "h": "Knowing the app without controlling it",
+    "p": [
+     "The agent layer learns Lagoon's real screens, settings and actions from the same registries the app uses. Its actions come from a fixed allowlist, so a model-generated instruction cannot become an arbitrary application operation. The documented restrictions exclude actions that involve money, accounts or other people."
+    ]
+   },
+   {
+    "h": "Structured answers, not injected markup",
+    "p": [
+     "The model can return data that describes supported interface components, and the frontend alone decides how to render them. Text is escaped, links must be HTTPS and actions must be on the allowlist. The model proposes content. It never gets to inject HTML into the app."
+    ]
+   },
+   {
+    "h": "What is still to build",
+    "p": [
+     "Multi-step tasks, durable task state, background continuation, approvals and a visible execution history are planned, not built. They are described in the roadmap note."
+    ]
+   }
+  ],
+  "path": true
+ },
+ {
+  "slug": "note-lagoon-sandboxes",
+  "title": "Running code in two sandboxes",
+  "lede": "A browser-side Linux emulator and a remote runner are different environments with different boundaries.",
+  "read": "5 min read",
+  "kind": "Implementation note",
+  "project": "lagoon",
+  "topics": [
+   "Trust boundaries",
+   "AI agents"
+  ],
+  "figure": {
+   "labels": [
+    "Code",
+    "Static checks",
+    "BOUNDARY:Signed request",
+    "Restricted runner",
+    "Output limits"
+   ],
+   "caption": "Different jobs, different boundaries: one runs inside the browser, the other on a separate service that trusts only signed requests."
+  },
+  "sections": [
+   {
+    "h": "Two environments, two purposes",
+    "p": [
+     "Lagoon can run code in two places, and they should never be confused. One is an emulated Linux environment inside the browser. The other is a remote runner on a separate service."
+    ]
+   },
+   {
+    "h": "In the browser",
+    "p": [
+     "A PC emulator boots a BusyBox environment inside a sandboxed iframe. The design intent is a guest with no network access, no access to Lagoon's own pages and a separate environment that runs shell scripts and forgets everything afterwards. The emulator files ship with the backend's public assets."
+    ]
+   },
+   {
+    "h": "On a remote runner",
+    "p": [
+     "The runner is a separate Deno service. Requests to it are signed with HMAC, carry a timestamp and a nonce, and are checked for replay. It limits code length, output size and execution time, runs one job at a time with restricted permissions in temporary job directories, and uses Pyodide for Python. The Worker also runs static checks on code before dispatching it."
+    ]
+   },
+   {
+    "h": "How it is checked",
+    "p": [
+     "The repository has offline guard tests and a separate probe script for the sandbox. As elsewhere, having them is not the same as having run them for this note."
+    ]
+   },
+   {
+    "h": "Why two",
+    "p": [
+     "The emulator keeps code inside the user's own browser. The remote runner offers more power under stricter control. They answer different threats, and both are described here by what the code does, not by any certification."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-lagoon-surfaces",
+  "title": "Six surfaces, one app",
+  "lede": "Stories, Snap, Reels, Channels, the Library and personal Spaces: what each one is and how much of it is live.",
+  "read": "6 min read",
+  "kind": "Implementation note",
+  "project": "lagoon",
+  "topics": [
+   "Architecture"
+  ],
+  "figure": {
+   "labels": [
+    "Local demo",
+    "Live service",
+    "Stories and Snap",
+    "Reels and Channels",
+    "Library and Spaces"
+   ],
+   "caption": "Many experiences have both a local simulation and a live backend. The notes name which is which."
+  },
+  "sections": [
+   {
+    "h": "Many surfaces, different maturity",
+    "p": [
+     "Lagoon has several distinct social and content systems. Some are real backend services, some are local simulations, and some use both depending on sign-in. Each is described below by what exists."
+    ]
+   },
+   {
+    "h": "Status and stories",
+    "p": [
+     "A local story experience sits beside a live status service. The live service supports publishing, audience settings, feeds, views, reactions, viewer lists, resharing and deletion."
+    ]
+   },
+   {
+    "h": "Snap",
+    "p": [
+     "Snap is a separate identity and sharing subsystem with usernames, friend relationships, snaps, view-once delivery, opened and viewed state, streaks, stories with expiry and friend discovery. Live state is kept apart from demo data."
+    ]
+   },
+   {
+    "h": "Reels",
+    "p": [
+     "Reels is real short video backed by the server: uploads, a feed, views, likes, saves, following creators, comments and comment deletion, creator profiles, video streaming and content rating checks."
+    ]
+   },
+   {
+    "h": "Channels",
+    "p": [
+     "Channels are one-to-many broadcasts with a directory, following, posts, reactions, polls and reports. Followers pull the feed rather than relying on push fan-out."
+    ]
+   },
+   {
+    "h": "Library and Watch",
+    "p": [
+     "The Library offers free public-domain books from fixed public sources. Readers can search inside a book, bookmark, customize the reader, keep opened books offline and ask the assistant about passages. Watch offers selected open-licence and public-domain media, including curated Internet Archive collections, open films and Wikimedia Commons material. It is not a subscription streaming service."
+    ]
+   },
+   {
+    "h": "Personal Spaces and Discover",
+    "p": [
+     "Personal Spaces is a local environment, calculated on the device: search across conversations and people, personal chat groupings, relationship activity, conversation timelines, plans detected in messages, notes, and export and restore. It must not be confused with the server-backed community Spaces.",
+     "Discover covers people, trends and content. The backend supplies real, data-derived trending and creator information, while some discovery and creator experiences still use local presentation logic."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-lagoon-safety",
+  "title": "Safety, privacy and what is not finished",
+  "lede": "Age checks, guardian consent, privacy rules enforced on the server and reporting with appeals, plus a plain statement of the work left before a public launch.",
+  "read": "6 min read",
+  "kind": "Implementation note",
+  "project": "lagoon",
+  "topics": [
+   "Safety",
+   "Trust boundaries"
+  ],
+  "figure": {
+   "labels": [
+    "Request",
+    "Rate limit",
+    "BOUNDARY:Server checks",
+    "Allowed or refused",
+    "Audit record"
+   ],
+   "caption": "Privacy and age rules are enforced on the backend, so a modified client cannot skip them."
+  },
+  "sections": [
+   {
+    "h": "Rules live on the server",
+    "p": [
+     "The privacy system controls last-seen visibility, active status, read receipts, profile visibility, audience restrictions, blocking and contact-based access. These are enforced on the backend, not only hidden in the interface, so a modified client cannot skip them."
+    ]
+   },
+   {
+    "h": "Age and guardians",
+    "p": [
+     "The backend determines age from date of birth, restricts minor accounts and limits adult-to-minor interaction. A guardian flow handles onboarding, confirmation, consent records and management, with optional identity review. An uploaded image is kept for human review and deleted after a decision.",
+     "This is a significant safety implementation. It still needs a production-grade operational and legal process around it."
+    ]
+   },
+   {
+    "h": "Reports, enforcement and appeals",
+    "p": [
+     "Users, groups, Spaces and advertisements can be reported. Administrators review reports, can suspend accounts with a recorded reason, and appeals are supported. Actions leave audit records."
+    ]
+   },
+   {
+    "h": "Account control",
+    "p": [
+     "People can export their data, delete their account, list and revoke sessions (sessions last 30 days), send feedback and manage devices."
+    ]
+   },
+   {
+    "h": "Request protection",
+    "p": [
+     "A guard module rate-limits with local counters and with shared counters held in Durable Objects, alongside platform-level protections. How it behaves when the shared counters are unavailable still needs failure testing."
+    ]
+   },
+   {
+    "h": "Business and advertising are prototypes",
+    "p": [
+     "Business features include profiles, catalogues, public pages, greeting, away and quick-reply messages, opt-in customer relationships with broadcast quotas, and reservations. Greeting and away behavior run on the device while the app is open.",
+     "Advertising is explicitly in test mode: advertiser accounts, test credits, campaigns and review, impression and click tracking, frequency controls and hide and report options. It is designed to show ads only to adults whose age is known and to avoid personalization. It is not a production payment system."
+    ]
+   },
+   {
+    "h": "What is not finished",
+    "p": [
+     "Lagoon is a substantial working system, not a production-certified service. Hardening of sign-in and verification, network policy, independent cryptographic review, legal documents, access-control audits, backup and restore tests, load tests and monitoring are all still ahead. The roadmap note lists them."
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "note-lagoon-roadmap",
+  "title": "Where Lagoon goes next",
+  "lede": "Consolidate and harden first, then connect what already exists before adding more.",
+  "read": "7 min read",
+  "kind": "Design intent",
+  "project": "lagoon",
+  "topics": [
+   "Roadmap",
+   "AI agents"
+  ],
+  "figure": {
+   "labels": [
+    "Demo versus live",
+    "Hardening",
+    "Relationship layer",
+    "Intent layer",
+    "Capable assistant",
+    "Scale"
+   ],
+   "caption": "Consolidate and harden first. Then connect what exists before adding more."
+  },
+  "sections": [
+   {
+    "h": "Planned, not built",
+    "p": [
+     "Everything in this note is planned. None of it is a claim about what exists today. The next stage should not be about adding features indiscriminately."
+    ]
+   },
+   {
+    "h": "First, make demo versus live honest",
+    "p": [
+     "Some screens are simulated, some are live and some are in test mode. The first job is to make that distinction consistent in the product and to keep the frontend and backend contracts in step."
+    ]
+   },
+   {
+    "h": "Production hardening",
+    "p": [
+     "Before a broad public launch: replace test-mode behavior with production behavior, tighten network and origin policy, complete the legal review, have the cryptography independently reviewed, test the guardian and age workflows, audit access control on every backend route, verify that data export and deletion are complete, test backup and restore, run load tests, set up monitoring and incident response, and verify that deployed bundles match the intended source revision."
+    ]
+   },
+   {
+    "h": "A relationship layer",
+    "p": [
+     "Grow the relationship graph beyond contacts and followers: relationship context, shared interests, important interactions, conversation continuity, personal relationship spaces and insights the user controls. It must help people manage relationships without turning private interactions into a surveillance mechanism."
+    ]
+   },
+   {
+    "h": "A unified intent layer",
+    "p": [
+     "A person should be able to say what they want: learn something, find someone, create something, organize an activity, continue a conversation, research a subject or plan an event. Lagoon should understand the destination and the context instead of treating every request as a search or a chat message."
+    ]
+   },
+   {
+    "h": "Connected features, with consent",
+    "p": [
+     "A conversation could become a plan, a plan a reminder, a reminder could link to a relevant Space, and a shared resource could enter the Library, with the assistant helping organize it. All of it would run through explicit permissions and user-controlled context sharing."
+    ]
+   },
+   {
+    "h": "A more capable assistant",
+    "p": [
+     "The assistant would grow from application actions toward multi-step tasks, durable task state, background continuation, better tool orchestration, verification, recovery from failures, permission tiers, human approval for consequential actions and a clear execution history. It should not receive unrestricted authority just because it can call tools."
+    ]
+   },
+   {
+    "h": "Search, knowledge and communities",
+    "p": [
+     "One search across people, chats, messages, groups, Spaces, communities, channels, reels, the Library and saved information, respecting each subsystem's access rules. A personal knowledge environment with notes, collections, saved resources, timelines and user-controlled export. Better collaboration, event coordination, shared plans, moderation tools and roles for communities. And for creators, analytics, publishing workflows, scheduling, audience insights, discovery and production-grade monetization."
+    ]
+   },
+   {
+    "h": "Infrastructure as usage grows",
+    "p": [
+     "Evaluate object storage and lifecycle management for media, database indexing and query performance, background jobs, more resilient event delivery, observability, backups and recovery, automated deployment checks, and load and concurrency testing. Database-backed media storage works today but needs its own scaling strategy."
     ]
    }
   ]

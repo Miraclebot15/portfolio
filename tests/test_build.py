@@ -121,7 +121,10 @@ class BuildTest(unittest.TestCase):
                 if t not in topics: topics.append(t)
         self.assertEqual(html.count('class="ef"'), len(topics) + 1)
         self.assertEqual(html.count('class="note-card"'), len(notes))
-        pos = [html.index(f'<li style="--i:{k}"><a href="{n["slug"]}.html">') for k, n in enumerate(notes)]
+        path = [n for n in notes if n.get("path")]
+        self.assertGreaterEqual(len(path), 5)
+        pos = [html.index(f'<li style="--i:{k}"><a href="{n["slug"]}.html">') for k, n in enumerate(path)]
+        self.assertEqual(html.count('<li style="--i:'), len(path))
         self.assertEqual(pos, sorted(pos))
         self.assertIn('href="eng.css"', html)
         self.assertIn('src="eng.js"', html)
@@ -135,6 +138,22 @@ class BuildTest(unittest.TestCase):
         self.assertIn("note-nexus-core-roadmap.html", read(os.path.join(self.repo, "sitemap.xml")))
         tool = read(os.path.join(self.repo, "stack-audit-trails.html"))
         self.assertIn('href="note-nexus-core-architecture.html"', tool)
+
+    def test_lagoon_notes_are_published_and_safe_to_publish(self):
+        notes = json.loads(read(os.path.join(self.repo, "content/notes.json")))
+        lagoon = [n for n in notes if n["project"] == "lagoon"]
+        self.assertGreaterEqual(len(lagoon), 6)
+        for n in lagoon:
+            html = read(os.path.join(self.repo, n["slug"] + ".html"))
+            self.assertNotIn("github.com/Miraclebot15/lagoon", html, n["slug"])
+            for risky in ("OTP_MODE", "ALLOWED_ORIGIN", "Access-Control-Allow-Origin"):
+                self.assertNotIn(risky, html, n["slug"] + " " + risky)
+        self.assertIn('href="lagoon.html"', read(os.path.join(self.repo, "stack-cloudflare-workers.html")))
+        self.assertIn("note-lagoon-trust-models.html", read(os.path.join(self.repo, "sitemap.xml")))
+
+    def test_rejects_non_boolean_path(self):
+        self.edit_json("content/notes.json", lambda d: d[0].update(path="yes"))
+        self.assert_fails(self.run_build(), "'path' must be true or false")
 
     def test_rejects_note_without_topics(self):
         self.edit_json("content/notes.json", lambda d: d[0].pop("topics"))
