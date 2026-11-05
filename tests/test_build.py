@@ -151,6 +151,18 @@ class BuildTest(unittest.TestCase):
         self.assertIn('href="lagoon.html"', read(os.path.join(self.repo, "stack-cloudflare-workers.html")))
         self.assertIn("note-lagoon-trust-models.html", read(os.path.join(self.repo, "sitemap.xml")))
 
+    def test_ella_notes_are_published_and_safe_to_publish(self):
+        notes = json.loads(read(os.path.join(self.repo, "content/notes.json")))
+        ella = [n for n in notes if n["project"] == "ella"]
+        self.assertGreaterEqual(len(ella), 6)
+        for n in ella:
+            html = read(os.path.join(self.repo, n["slug"] + ".html"))
+            self.assertNotIn("github.com/Miraclebot15/ella-bot", html, n["slug"])
+            for risky in ("DEV_CONSOLE_SECRET", "X-Dev-Secret", "DEV_PHONE_NUMBERS", "ADMIN_PHONE_NUMBERS", "GROQ_API_KEY"):
+                self.assertNotIn(risky, html, n["slug"] + " " + risky)
+        self.assertIn('href="ella.html"', read(os.path.join(self.repo, "stack-supabase.html")))
+        self.assertIn("note-ella-authority.html", read(os.path.join(self.repo, "sitemap.xml")))
+
     def test_rejects_non_boolean_path(self):
         self.edit_json("content/notes.json", lambda d: d[0].update(path="yes"))
         self.assert_fails(self.run_build(), "'path' must be true or false")

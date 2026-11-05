@@ -106,7 +106,15 @@
   ],
   "tech": [
    "Node.js",
-   "Supabase"
+   "TypeScript",
+   "Express",
+   "React",
+   "Vite",
+   "Supabase",
+   "WhatsApp",
+   "FFmpeg",
+   "Playwright",
+   "Render"
   ],
   "flow": {
    "title": "How a message is handled",
