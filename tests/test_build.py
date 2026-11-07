@@ -192,6 +192,29 @@ class BuildTest(unittest.TestCase):
         self.assertIn("<h3>Education</h3>", html)
         self.assertIn("Acme", html)
 
+    def test_resume_has_three_tailored_versions(self):
+        data = json.loads(read(os.path.join(self.repo, "content/resume.json")))
+        self.assertEqual(len(data["variants"]), 3)
+        html = read(os.path.join(self.repo, "resume.html"))
+        for v in data["variants"]:
+            rel = f"assets/Miracle-Agbebaku-Resume-{v['file']}.pdf"
+            self.assertIn(f'href="{rel}"', html)
+            self.assertTrue(read(os.path.join(self.repo, rel), True).startswith(b"%PDF"), rel)
+            slugs = [p["slug"] for p in v["projects"]]
+            self.assertEqual(len(set(slugs)), len(slugs))
+
+    def test_rejects_bad_resume_variants(self):
+        def f(d):
+            d["variants"][0]["projects"][0]["slug"] = "ghost"
+            d["variants"][1]["skills"][0]["items"].append("Rust")
+            d["variants"][2]["id"] = d["variants"][0]["id"]
+        self.edit_json("content/resume.json", f)
+        r = self.run_build()
+        self.assert_fails(r, "slug 'ghost' is not in the main resume projects")
+        out = r.stdout + r.stderr
+        self.assertIn("'Rust' is not in the stack list", out)
+        self.assertIn("duplicate id", out)
+
     def test_rejects_unknown_resume_skill(self):
         self.edit_json("content/resume.json", lambda d: d["skills"][0]["items"].append("Rust"))
         self.assert_fails(self.run_build(), "'Rust' is not in the stack list")

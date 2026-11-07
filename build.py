@@ -161,6 +161,23 @@ def validate_content():
     for k, e in enumerate(r.get("education", [])):
         for f in ("school", "program", "period"):
             if not e.get(f): errs.append(f"resume.json education[{k}]: missing '{f}'")
+    vids = set()
+    base_slugs = {x["slug"] for x in r.get("projects", [])}
+    for k, v in enumerate(r.get("variants", [])):
+        w = f"resume.json variants[{k}]"
+        for f in ("id", "file", "label", "blurb", "headline", "summary", "projects", "skills"):
+            if not v.get(f): errs.append(f"{w}: missing '{f}'")
+        if v.get("id") in vids: errs.append(f"{w}: duplicate id '{v.get('id')}'")
+        vids.add(v.get("id"))
+        if not re.fullmatch(r"[A-Za-z0-9-]+", v.get("file", "")): errs.append(f"{w}: file must be letters, digits and hyphens")
+        for m, p in enumerate(v.get("projects", [])):
+            if p.get("slug") not in base_slugs: errs.append(f"{w} projects[{m}]: slug '{p.get('slug')}' is not in the main resume projects")
+            if not p.get("line") or not (isinstance(p.get("bullets"), list) and 2 <= len(p["bullets"]) <= 4): errs.append(f"{w} projects[{m}]: needs 'line' and 2 to 4 bullets")
+        for g in v.get("skills", []):
+            if not g.get("label") or not g.get("items"): errs.append(f"{w} skills: every row needs 'label' and 'items'")
+            if not g.get("free"):
+                for it in g.get("items", []):
+                    if it not in names: errs.append(f"{w} skills: '{it}' is not in the stack list")
     rtxt = json.dumps({k: v for k, v in r.items() if k != "contact"}, ensure_ascii=False)
     if "\u2014" in rtxt or "\u2013" in rtxt: errs.append("resume.json: em or en dash found")
     if ban.search(rtxt): errs.append("resume.json: AI model or provider name in the text")
@@ -482,9 +499,13 @@ paper = (f'<article class="paper rv" aria-label="Resume of {NAME}"><header><h2 c
          + (_sec("Education", _edu) if _edu else "")
          + _sec("Writing", f'<p>{len(NOTES)} engineering notes on trust boundaries, AI agent pipelines, messaging systems and how the portfolio is built.</p><p><a class="rlink" href="engineering.html">Read the engineering notes</a></p>')
          + '</article>')
-page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku, software engineer: summary, projects and skills. View it here or download the PDF.",
+_vars = ""
+if RESUME.get("variants"):
+    _vars = ('<div class="rvars rv"><p class="rvt">Tailored versions</p><ul class="rvl">' + "".join(
+        f'<li><a class="btn mag" href="assets/Miracle-Agbebaku-Resume-{v["file"]}.pdf" download>{esc(v["label"])} {ic("download")}</a><small>{esc(v["blurb"])}</small></li>' for v in RESUME["variants"]) + '</ul></div>')
+page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku, software engineer: summary, projects and skills, with versions for AI and agent, backend and full-stack roles. View it here or download the PDF.",
  ph("Resume", "Resume", "Read it here, or take it with you.") +
- f'''<div class="wrap" style="padding-bottom:80px"><div class="cta rv" style="margin:0 0 34px"><a class="btn pri mag" href="{RESUME_PDF}" download>Download PDF {ic("download")}</a><a class="btn mag" href="{RESUME_PDF}" target="_blank" rel="noopener noreferrer">Open PDF {ic("ext")}<span class="sr">(opens in a new tab)</span></a><button class="btn mag" id="print" type="button">Print</button></div>{paper}</div>''')
+ f'''<div class="wrap" style="padding-bottom:80px"><div class="cta rv" style="margin:0 0 34px"><a class="btn pri mag" href="{RESUME_PDF}" download>Download PDF {ic("download")}</a><a class="btn mag" href="{RESUME_PDF}" target="_blank" rel="noopener noreferrer">Open PDF {ic("ext")}<span class="sr">(opens in a new tab)</span></a><button class="btn mag" id="print" type="button">Print</button></div>{_vars}{paper}</div>''')
 def figure(f):
     lis, k = "", 0
     for idx, l in enumerate(f["labels"]):

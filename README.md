@@ -333,5 +333,7 @@ The resume page and the PDF are both generated from `content/resume.json`: headl
 "education": [{"school": "School", "program": "Program", "period": "2019 to 2023", "note": "optional"}]
 ```
 
-After editing the file, run `python3 build.py` and `python3 tools/make_resume.py`, then commit both the pages and `assets/Miracle-Agbebaku-Resume.pdf`.
+`variants` holds the role-targeted versions (`id`, `file`, `label`, `blurb`, `headline`, `summary`, `projects` with a `slug`, `line` and 2 to 4 `bullets` each, and `skills` rows). A variant reuses each project's name, status and tech from the main list, so it can reorder and re-emphasize but never contradict. Each one becomes `assets/Miracle-Agbebaku-Resume-<file>.pdf` and a download button on the resume page.
+
+After editing the file, run `python3 build.py` and `python3 tools/make_resume.py`, then commit the pages and every PDF in `assets/` whose name starts with `Miracle-Agbebaku-Resume`.
 

@@ -125,5 +125,322 @@
     "automated testing"
    ]
   }
+ ],
+ "variants": [
+  {
+   "id": "ai",
+   "file": "AI-Agents",
+   "label": "AI and agent engineer",
+   "blurb": "Agent pipelines, policy, sandboxes",
+   "headline": "AI and agent systems engineer",
+   "summary": "Builds AI-agent systems where the model proposes and deterministic code decides: structured plans, fail-closed policy checks, risk-tiered permissions, audit trails and tests. Three systems so far: an agent governance pipeline, a WhatsApp assistant with provider fallback and an in-app assistant with sandboxed code execution.",
+   "projects": [
+    {
+     "slug": "nexus-core",
+     "line": "Governance-first agent orchestration: the model plans, a deterministic fail-closed policy engine decides.",
+     "bullets": [
+      "Built a planner and a correction agent whose structured plans are validated with Pydantic and checked by a deterministic, fail-closed policy engine before anything runs. Blocked plans get at most two bounded corrections, each checked again.",
+      "Streams each pipeline stage over Server-Sent Events and records SHA-256 hash-linked audit events, so every decision can be inspected afterwards.",
+      "Kept execution honest: mostly simulated, with read-only web search as the one real tool, and the limits written down."
+     ]
+    },
+    {
+     "slug": "ella",
+     "line": "WhatsApp assistant built around NEXUS CORE, running many linked accounts in one process.",
+     "bullets": [
+      "Added a risk-tiered permission engine (five roles, four risk levels) in which critical tools need approval, and a response guard that strips internal data before every outgoing message.",
+      "Built a provider gateway with ordered fallback and health tracking, plus rules that treat links and fetched pages as hostile input in the media and research tools.",
+      "Handles Nigerian English and Pidgin, and is covered by about 50 test scripts."
+     ]
+    },
+    {
+     "slug": "lagoon",
+     "line": "Social platform with an in-app assistant and two code-execution sandboxes.",
+     "bullets": [
+      "Built the assistant in layers: local reasoning first, server AI second, optional user-configured providers third, with a fixed action allowlist and model output rendered as data, not markup.",
+      "Runs code in two separate sandboxes: an emulated Linux environment inside the browser and a remote runner that accepts only signed requests, with limits on code size, output and execution time.",
+      "Used fixed-host data adapters so a user-supplied address cannot become an unrestricted server fetch."
+     ]
+    }
+   ],
+   "skills": [
+    {
+     "label": "Languages",
+     "items": [
+      "Python",
+      "TypeScript",
+      "JavaScript"
+     ]
+    },
+    {
+     "label": "Backend and APIs",
+     "items": [
+      "FastAPI",
+      "Pydantic",
+      "Node.js",
+      "Express",
+      "Zod"
+     ]
+    },
+    {
+     "label": "Realtime and edge",
+     "items": [
+      "Cloudflare Workers",
+      "Durable Objects",
+      "WebSockets",
+      "Server-sent events"
+     ]
+    },
+    {
+     "label": "Data",
+     "items": [
+      "SQLite",
+      "Supabase",
+      "PostgreSQL"
+     ]
+    },
+    {
+     "label": "Testing and delivery",
+     "items": [
+      "Playwright",
+      "Vitest",
+      "GitHub Actions",
+      "Git",
+      "Render",
+      "Vercel"
+     ]
+    },
+    {
+     "label": "Integrations",
+     "items": [
+      "WhatsApp",
+      "FFmpeg"
+     ]
+    },
+    {
+     "label": "Practices",
+     "items": [
+      "policy gates",
+      "audit logging",
+      "input validation",
+      "sandboxing",
+      "automated testing"
+     ],
+     "free": true
+    }
+   ]
+  },
+  {
+   "id": "backend",
+   "file": "Backend",
+   "label": "Backend engineer",
+   "blurb": "APIs, realtime, edge services",
+   "headline": "Backend engineer: APIs, realtime and edge services",
+   "summary": "Backend engineer who builds APIs and realtime services in Python and TypeScript: a FastAPI orchestration pipeline, a multi-account WhatsApp service and a Cloudflare edge backend with WebSockets and Durable Objects. Focus on validation at boundaries, isolation between accounts, rate limits and tests.",
+   "projects": [
+    {
+     "slug": "ella",
+     "line": "Multi-account WhatsApp service built around NEXUS CORE.",
+     "bullets": [
+      "Runs many linked WhatsApp accounts in one Node.js and TypeScript process, with each account’s session isolated and every chat, document and memory lookup scoped by account and chat.",
+      "Persists account, session and preference data in Supabase with migrations, and built a provider gateway with ordered fallback and health tracking.",
+      "Treats links and fetched pages as hostile input, blocking credentials, unusual ports, private addresses and unsafe redirects, with about 50 test scripts."
+     ]
+    },
+    {
+     "slug": "lagoon",
+     "line": "Cloudflare edge backend for a social platform: Workers, D1 and Durable Objects.",
+     "bullets": [
+      "Built live messaging over WebSockets with a per-user Durable Object that holds connections and delivers events, plus delivery acknowledgements, sync and history.",
+      "Added chunked media upload with limits of 384 KB per chunk, 25 MB per file and 200 MB per person per day, and request protection with local and shared rate-limit counters.",
+      "Enforced privacy and age rules on the server instead of the interface, with reports, suspensions and appeals leaving audit records."
+     ]
+    },
+    {
+     "slug": "nexus-core",
+     "line": "FastAPI service for a governed AI agent pipeline.",
+     "bullets": [
+      "Built the API for a pipeline that validates model output with Pydantic and streams every stage to clients over Server-Sent Events.",
+      "Stored projects, conversations, tasks and hash-linked audit records in SQLite, with full-text message search where the runtime supports it.",
+      "Found and fixed a timestamp ordering bug: mixed ISO formats sorted wrongly as text, so every timestamp is now written with explicit microsecond precision."
+     ]
+    }
+   ],
+   "skills": [
+    {
+     "label": "Languages",
+     "items": [
+      "Python",
+      "TypeScript",
+      "JavaScript"
+     ]
+    },
+    {
+     "label": "Backend and APIs",
+     "items": [
+      "FastAPI",
+      "Pydantic",
+      "Node.js",
+      "Express",
+      "Zod",
+      "Webhooks"
+     ]
+    },
+    {
+     "label": "Realtime and edge",
+     "items": [
+      "Cloudflare Workers",
+      "Durable Objects",
+      "WebSockets",
+      "Server-sent events"
+     ]
+    },
+    {
+     "label": "Data and auth",
+     "items": [
+      "PostgreSQL",
+      "SQLite",
+      "Supabase"
+     ]
+    },
+    {
+     "label": "Testing and delivery",
+     "items": [
+      "Playwright",
+      "Vitest",
+      "GitHub Actions",
+      "Git",
+      "Render",
+      "Vercel"
+     ]
+    },
+    {
+     "label": "Integrations",
+     "items": [
+      "WhatsApp",
+      "FFmpeg"
+     ]
+    },
+    {
+     "label": "Practices",
+     "items": [
+      "input validation",
+      "account isolation",
+      "rate limiting",
+      "audit logging",
+      "automated testing"
+     ],
+     "free": true
+    }
+   ]
+  },
+  {
+   "id": "fullstack",
+   "file": "Full-Stack",
+   "label": "Full-stack engineer",
+   "blurb": "React, TypeScript, edge backends",
+   "headline": "Full-stack engineer: React, TypeScript and edge backends",
+   "summary": "Full-stack engineer who builds both sides: React and Next.js interfaces fed by streamed backend events, a modular JavaScript app with 25 interchangeable UI shells, and the APIs, realtime services and data layers behind them. Works in TypeScript and Python and tests across phone, tablet and desktop sizes.",
+   "projects": [
+    {
+     "slug": "lagoon",
+     "line": "Social platform with a modular JavaScript frontend and a Cloudflare edge backend.",
+     "bullets": [
+      "Built a registry-based frontend where features register tabs, screens, settings and actions, with 25 interchangeable UI shells that change layout, navigation, type, density and motion without rewriting features.",
+      "Connected it to live messaging over WebSockets, with client-side encryption for one-to-one chats.",
+      "Tests with browser suites at phone, tablet and desktop sizes, collecting page and console errors and checking overflow and contrast."
+     ]
+    },
+    {
+     "slug": "nexus-core",
+     "line": "Next.js and React Command Center for a governed agent pipeline.",
+     "bullets": [
+      "Built the interface where users submit tasks and watch each pipeline stage and governance decision arrive over Server-Sent Events.",
+      "Added conversation and project management, message editing and regeneration, an audit viewer with chain status, and full-text message search.",
+      "Backed by a FastAPI and SQLite service, with model output validated by Pydantic before it becomes a plan."
+     ]
+    },
+    {
+     "slug": "ella",
+     "line": "WhatsApp assistant with a web dashboard and a React workspace.",
+     "bullets": [
+      "Built an account dashboard in plain HTML and JavaScript for signup, linking by QR code or pairing code, and per-account settings.",
+      "Added a React and Vite workspace for research, scraping and agent tools on the same account system.",
+      "Backed by a TypeScript and Express service with Supabase persistence and about 50 test scripts."
+     ]
+    }
+   ],
+   "skills": [
+    {
+     "label": "Languages",
+     "items": [
+      "Python",
+      "TypeScript",
+      "JavaScript",
+      "HTML5",
+      "CSS"
+     ]
+    },
+    {
+     "label": "Frontend",
+     "items": [
+      "React",
+      "Next.js",
+      "Vite",
+      "Tailwind CSS",
+      "Three.js"
+     ]
+    },
+    {
+     "label": "Backend and APIs",
+     "items": [
+      "FastAPI",
+      "Node.js",
+      "Express",
+      "Pydantic",
+      "Zod"
+     ]
+    },
+    {
+     "label": "Realtime and edge",
+     "items": [
+      "Cloudflare Workers",
+      "Durable Objects",
+      "WebSockets",
+      "Server-sent events"
+     ]
+    },
+    {
+     "label": "Data and auth",
+     "items": [
+      "PostgreSQL",
+      "SQLite",
+      "Supabase",
+      "Clerk"
+     ]
+    },
+    {
+     "label": "Testing and delivery",
+     "items": [
+      "Playwright",
+      "Vitest",
+      "GitHub Actions",
+      "Git",
+      "Vercel",
+      "Render"
+     ]
+    },
+    {
+     "label": "Practices",
+     "items": [
+      "responsive testing",
+      "contrast checks",
+      "input validation",
+      "automated testing"
+     ],
+     "free": true
+    }
+   ]
+  }
  ]
 }
