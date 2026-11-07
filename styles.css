@@ -742,3 +742,8 @@ main{padding:0!important}.wrap{padding:0!important;max-width:none!important}
 @media (max-width:560px){.paper .rsk div{grid-template-columns:1fr}}
 .paper a.rlink{display:inline-flex;align-items:center;min-height:44px}
 .paper .plinks{gap:0 22px}
+.rvars{margin:0 0 34px}
+.rvt{margin:0 0 10px;color:var(--mute);font:500 12px var(--f-mono);letter-spacing:.1em;text-transform:uppercase}
+.rvl{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:14px}
+.rvl li{display:flex;flex-direction:column;gap:6px}
+.rvl small{padding-left:8px;color:var(--mute);font-size:13px}

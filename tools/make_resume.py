@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate assets/Miracle-Agbebaku-Resume.pdf from content/resume.json, the same data the resume page uses.
+"""Generate the resume PDFs (the general one and the tailored variants) from content/resume.json, the same data the resume page uses.
 
 Requires reportlab (pip install reportlab). Run from the repo root: python3 tools/make_resume.py
 Nothing here is invented: the experience and education sections appear only when entries exist in resume.json.
@@ -77,44 +77,63 @@ def bullets(items):
     return [Paragraph(esc(b), st["bullet"], bulletText="\u2022") for b in items]
 
 
-c = R["contact"]
-site_short = site["domain"].replace("https://", "")
-contact = "  \u00b7  ".join([
-    f'<a href="mailto:{esc(c["email"])}" color="#14110d">{esc(c["email"])}</a>',
-    f'<a href="https://wa.me/{c["whatsapp"].lstrip("+")}" color="#14110d">WhatsApp {esc(c["whatsapp_display"])}</a>',
-    f'<a href="{site["domain"]}" color="#14110d">{esc(site_short)}</a>'])
 
-story = [Paragraph(esc(site["name"]), st["name"]), Spacer(1, 2), Paragraph(esc(R["headline"]), st["headline"]), Spacer(1, 3),
-         Paragraph(contact, st["contact"]), Spacer(1, 6), AccentRule()]
-story += section("Summary") + [Paragraph(esc(R["summary"]), st["body"])]
+def render(D, out):
+    """Build one PDF from a resume data dict. Returns the page count."""
+    c = D["contact"]
+    site_short = site["domain"].replace("https://", "")
+    contact = "  \u00b7  ".join([
+        f'<a href="mailto:{esc(c["email"])}" color="#14110d">{esc(c["email"])}</a>',
+        f'<a href="https://wa.me/{c["whatsapp"].lstrip("+")}" color="#14110d">WhatsApp {esc(c["whatsapp_display"])}</a>',
+        f'<a href="{site["domain"]}" color="#14110d">{esc(site_short)}</a>'])
 
-if R.get("experience"):
-    story += section("Experience")
-    for e in R["experience"]:
-        sub = esc(e["org"]) + (f' \u00b7 {esc(e["location"])}' if e.get("location") else "")
-        story.append(KeepTogether([head_row(f'{esc(e["role"])}', esc(e["period"])), Paragraph(sub, st["ptech"]), Spacer(1, 1.5)] + bullets(e.get("bullets", [])) + [Spacer(1, 4)]))
+    story = [Paragraph(esc(site["name"]), st["name"]), Spacer(1, 2), Paragraph(esc(D["headline"]), st["headline"]), Spacer(1, 3),
+             Paragraph(contact, st["contact"]), Spacer(1, 6), AccentRule()]
+    story += section("Summary") + [Paragraph(esc(D["summary"]), st["body"])]
 
-story += section("Projects")
-for p in R["projects"]:
-    story.append(KeepTogether([head_row(esc(p["name"]), esc(p["status"])), Paragraph(esc(p["tech"]), st["ptech"]), Paragraph(esc(p["line"]), st["pline"])] + bullets(p["bullets"]) + [Spacer(1, 4)]))
+    if D.get("experience"):
+        story += section("Experience")
+        for e in D["experience"]:
+            sub = esc(e["org"]) + (f' \u00b7 {esc(e["location"])}' if e.get("location") else "")
+            story.append(KeepTogether([head_row(f'{esc(e["role"])}', esc(e["period"])), Paragraph(sub, st["ptech"]), Spacer(1, 1.5)] + bullets(e.get("bullets", [])) + [Spacer(1, 4)]))
 
-story += section("Skills")
-rows = [[Paragraph(esc(g["label"]), st["skl"]), Paragraph(esc(", ".join(g["items"])), st["ski"])] for g in R["skills"]]
-sk = Table(rows, colWidths=[34 * mm, FW - 34 * mm])
-sk.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0.6), ("BOTTOMPADDING", (0, 0), (-1, -1), 0.6)]))
-story.append(sk)
+    story += section("Projects")
+    for p in D["projects"]:
+        story.append(KeepTogether([head_row(esc(p["name"]), esc(p["status"])), Paragraph(esc(p["tech"]), st["ptech"]), Paragraph(esc(p["line"]), st["pline"])] + bullets(p["bullets"]) + [Spacer(1, 4)]))
 
-if R.get("education"):
-    story += section("Education")
-    for e in R["education"]:
-        story.append(KeepTogether([head_row(esc(e["school"]), esc(e["period"])), Paragraph(esc(e["program"]) + (f' \u00b7 {esc(e["note"])}' if e.get("note") else ""), st["ptech"]), Spacer(1, 3)]))
+    story += section("Skills")
+    rows = [[Paragraph(esc(g["label"]), st["skl"]), Paragraph(esc(", ".join(g["items"])), st["ski"])] for g in D["skills"]]
+    sk = Table(rows, colWidths=[34 * mm, FW - 34 * mm])
+    sk.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0.6), ("BOTTOMPADDING", (0, 0), (-1, -1), 0.6)]))
+    story.append(sk)
 
-story.append(KeepTogether(section("Writing") + [Paragraph(f'{len(notes)} engineering notes on trust boundaries, AI agent pipelines, messaging systems and how the portfolio is built, at <a href="{site["domain"]}/engineering.html" color="#14110d">{esc(site_short)}/engineering</a>.', st["body"])]))
+    if D.get("education"):
+        story += section("Education")
+        for e in D["education"]:
+            story.append(KeepTogether([head_row(esc(e["school"]), esc(e["period"])), Paragraph(esc(e["program"]) + (f' \u00b7 {esc(e["note"])}' if e.get("note") else ""), st["ptech"]), Spacer(1, 3)]))
 
-out = os.path.join(ROOT, "assets", "Miracle-Agbebaku-Resume.pdf")
-doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=LM, rightMargin=RM, topMargin=TM, bottomMargin=BM,
-                        title=f'{site["name"]}: Resume', author=site["name"], subject="Software engineer resume", keywords="software engineer, AI agents, backend, automation")
-doc.build(story)
-print("wrote", out, "| pages:", doc.page)
-if doc.page > 1:
-    print("note: the resume runs past one page; trim bullets or font size if you want a single page", file=sys.stderr)
+    story.append(KeepTogether(section("Writing") + [Paragraph(f'{len(notes)} engineering notes on trust boundaries, AI agent pipelines, messaging systems and how the portfolio is built, at <a href="{site["domain"]}/engineering.html" color="#14110d">{esc(site_short)}/engineering</a>.', st["body"])]))
+
+
+    doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=LM, rightMargin=RM, topMargin=TM, bottomMargin=BM,
+                            title=f'{site["name"]}: Resume', author=site["name"], subject="Software engineer resume", keywords="software engineer, AI agents, backend, automation")
+    doc.build(story)
+    return doc.page
+
+
+def variant_data(v):
+    """The base resume with one variant's headline, summary, project order and bullets, and skill rows."""
+    base = {p["slug"]: p for p in R["projects"]}
+    projects = [{**base[x["slug"]], "line": x["line"], "bullets": x["bullets"]} for x in v["projects"]]
+    return {**R, "headline": v["headline"], "summary": v["summary"], "projects": projects, "skills": v["skills"]}
+
+
+jobs = [(R, os.path.join(ROOT, "assets", "Miracle-Agbebaku-Resume.pdf"))]
+jobs += [(variant_data(v), os.path.join(ROOT, "assets", f"Miracle-Agbebaku-Resume-{v['file']}.pdf")) for v in R.get("variants", [])]
+bad = 0
+for data, out in jobs:
+    pages = render(data, out)
+    print("wrote", os.path.relpath(out, ROOT), "| pages:", pages)
+    bad += pages > 1
+if bad:
+    print("note: some resumes run past one page; trim bullets if you want a single page each", file=sys.stderr)
