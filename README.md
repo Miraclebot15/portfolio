@@ -318,6 +318,7 @@ python3 -m unittest discover -s tests -v    # generator tests, on throwaway copi
 node tests/api-check.js      # status functions
 python3 tests/budgets.py     # gzip size budgets for pages, CSS, JS and images
 python3 tests/smoke.py       # browser tests at four widths (needs Playwright)
+python3 tests/touch.py       # phone emulation: touch versions of the mouse-only effects (needs Playwright)
 ```
 
 The build checks content first (slugs, states, motifs, colors, https URLs, status function files, note kinds and project references, stack icons, AI provider names) and the generated pages second (one h1, title, description length, unique ids, links and anchors, no dashes). If anything fails, nothing is written.
@@ -336,4 +337,8 @@ The resume page and the PDF are both generated from `content/resume.json`: headl
 `variants` holds the role-targeted versions (`id`, `file`, `label`, `blurb`, `headline`, `summary`, `projects` with a `slug`, `line` and 2 to 4 `bullets` each, and `skills` rows). A variant reuses each project's name, status and tech from the main list, so it can reorder and re-emphasize but never contradict. Each one becomes `assets/Miracle-Agbebaku-Resume-<file>.pdf` and a download button on the resume page.
 
 After editing the file, run `python3 build.py` and `python3 tools/make_resume.py`, then commit the pages and every PDF in `assets/` whose name starts with `Miracle-Agbebaku-Resume`.
+
+### Motion on phones
+
+Anything that needs a mouse on desktop has a touch version, and `tests/touch.py` fails if one is lost. Buttons with `.mag` follow the cursor on desktop and lean toward the finger, spring back and pulse on touch. The hero photo and the Stack cards tilt toward a mouse, and toward a press or drag on touch. The hero photo also sways as the page scrolls on touch screens. All of it is skipped when the device asks for reduced motion. The scroll-driven story section still animates only above 900px.
 

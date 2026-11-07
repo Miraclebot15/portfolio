@@ -75,6 +75,11 @@ pz.addEventListener('click',function(){setPaused(!document.body.classList.contai
 if(!reduce&&matchMedia('(hover:hover) and (pointer:fine)').matches){$$('.mag').forEach(function(b){
 b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.transform='translate('+((e.clientX-r.left-r.width/2)*.16).toFixed(1)+'px,'+((e.clientY-r.top-r.height/2)*.22).toFixed(1)+'px)'});
 b.addEventListener('pointerleave',function(){b.style.transform=''})})}
+/* Touch: the same buttons lean toward the finger, then spring back (no hover on phones) */
+if(!reduce&&matchMedia('(hover:none), (pointer:coarse)').matches){$$('.mag').forEach(function(b){
+b.addEventListener('pointerdown',function(e){var r=b.getBoundingClientRect(),x=Math.max(-9,Math.min(9,(e.clientX-r.left-r.width/2)*.16)),y=Math.max(-6,Math.min(6,(e.clientY-r.top-r.height/2)*.22));b.style.transition='transform .12s ease-out';b.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) scale(.96)';b.classList.remove('tpr');void b.offsetWidth;b.classList.add('tpr')});
+var up=function(){b.style.transition='transform .55s cubic-bezier(.2,.9,.25,1.5)';b.style.transform='';setTimeout(function(){b.style.transition=''},600)};
+['pointerup','pointercancel','pointerleave'].forEach(function(t){b.addEventListener(t,up)})})}
 
 /* Project filters */
 var fb=$$('.filters button');
@@ -108,10 +113,12 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
 /* Hero: pointer spotlight, photo tilt and gentle parallax (fine pointers only) */
 (function(){var hero=document.querySelector('[data-hero]');if(!hero||reduce)return;
 var fig=hero.querySelector('.hero2-photo'),tilt=fig&&fig.querySelector('.tilt'),fine=matchMedia('(hover:hover) and (pointer:fine)').matches,raf=0,px=0,py=0;
-if(fine){hero.addEventListener('pointermove',function(e){px=e.clientX;py=e.clientY;if(raf)return;raf=requestAnimationFrame(function(){raf=0;var r=hero.getBoundingClientRect();hero.style.setProperty('--mx',((px-r.left)/r.width*100).toFixed(1)+'%');hero.style.setProperty('--my',((py-r.top)/r.height*100).toFixed(1)+'%');
-if(tilt){var b=fig.getBoundingClientRect(),dx=(px-(b.left+b.width/2))/(innerWidth/2),dy=(py-(b.top+b.height/2))/(innerHeight/2);tilt.style.setProperty('--ry',(dx*6).toFixed(2)+'deg');tilt.style.setProperty('--rx',(-dy*5).toFixed(2)+'deg')}})});
-hero.addEventListener('pointerleave',function(){if(tilt){tilt.style.setProperty('--rx','0deg');tilt.style.setProperty('--ry','0deg')}})}
-if(fig){var t=0;addEventListener('scroll',function(){if(t)return;t=requestAnimationFrame(function(){t=0;var y=scrollY;if(y<innerHeight*1.2)fig.style.transform='translateY('+(y*.07).toFixed(1)+'px)'})},{passive:true})}})();
+var onMove=function(e){px=e.clientX;py=e.clientY;if(raf)return;raf=requestAnimationFrame(function(){raf=0;var r=hero.getBoundingClientRect();hero.style.setProperty('--mx',((px-r.left)/r.width*100).toFixed(1)+'%');hero.style.setProperty('--my',((py-r.top)/r.height*100).toFixed(1)+'%');
+if(tilt){var b=fig.getBoundingClientRect(),dx=(px-(b.left+b.width/2))/(innerWidth/2),dy=(py-(b.top+b.height/2))/(innerHeight/2);tilt.style.setProperty('--ry',(dx*6).toFixed(2)+'deg');tilt.style.setProperty('--rx',(-dy*5).toFixed(2)+'deg')}})};
+var onLeave=function(){if(tilt){tilt.style.setProperty('--rx','0deg');tilt.style.setProperty('--ry','0deg')}};
+hero.addEventListener('pointermove',onMove);hero.addEventListener('pointerleave',onLeave);
+if(!fine){hero.addEventListener('pointerdown',onMove);hero.addEventListener('pointerup',onLeave);hero.addEventListener('pointercancel',onLeave)}
+if(fig){var t=0;addEventListener('scroll',function(){if(t)return;t=requestAnimationFrame(function(){t=0;var y=scrollY;if(y<innerHeight*1.2){fig.style.transform='translateY('+(y*.07).toFixed(1)+'px)';if(!fine&&tilt){tilt.style.setProperty('--ry',(Math.sin(y/150)*5).toFixed(2)+'deg');tilt.style.setProperty('--rx',(Math.cos(y/220)*3).toFixed(2)+'deg')}}})},{passive:true})}})();
 
 /* Approach: scroll-driven story (pinned on large screens, static elsewhere) */
 (function(){var story=document.querySelector('[data-story]');if(!story)return;
