@@ -747,3 +747,6 @@ main{padding:0!important}.wrap{padding:0!important;max-width:none!important}
 .rvl{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:14px}
 .rvl li{display:flex;flex-direction:column;gap:6px}
 .rvl small{padding-left:8px;color:var(--mute);font-size:13px}
+.tpr{animation:tpulse .55s ease-out}
+@keyframes tpulse{from{box-shadow:0 0 0 0 rgba(201,56,16,.5)}to{box-shadow:0 0 0 16px rgba(201,56,16,0)}}
+@media (prefers-reduced-motion:reduce){.tpr{animation:none}}

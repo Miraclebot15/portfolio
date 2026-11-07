@@ -35,3 +35,5 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Run responsive browser smoke tests
         run: python tests/smoke.py
+      - name: Touch parity checks
+        run: python tests/touch.py

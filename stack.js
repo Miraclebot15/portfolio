@@ -73,8 +73,8 @@
     }
   });
 
-  // Pointer tilt and glare (mouse and pen only; transform is rAF-throttled).
-  if (fine && !reduce) {
+  // Pointer tilt and glare. A mouse tracks hover; a finger tilts the card toward the press point.
+  if (!reduce) {
     cards.forEach(function (c) {
       var inner = $('.stkc-i', c), raf = 0, ev = null;
       function frame() {
@@ -86,11 +86,14 @@
         inner.style.setProperty('--gy', (y * 100).toFixed(1) + '%');
       }
       inner.addEventListener('pointerenter', function () { inner.classList.add('mv'); });
-      inner.addEventListener('pointermove', function (e) { ev = e; if (!raf) raf = requestAnimationFrame(frame); });
-      inner.addEventListener('pointerleave', function () {
+      function move(e) { ev = e; if (!raf) raf = requestAnimationFrame(frame); }
+      function rest() {
         inner.classList.remove('mv');
         inner.style.setProperty('--rx', '0deg'); inner.style.setProperty('--ry', '0deg');
-      });
+      }
+      inner.addEventListener('pointermove', move);
+      inner.addEventListener('pointerdown', function (e) { inner.classList.add('mv'); move(e); });
+      ['pointerleave', 'pointerup', 'pointercancel'].forEach(function (t) { inner.addEventListener(t, rest); });
     });
   }
 
