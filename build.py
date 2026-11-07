@@ -11,6 +11,7 @@ def load(p): return json.load(open(os.path.join(ROOT, p), encoding="utf-8"))
 SITE, PROJECTS, ICONS = load("content/site.json"), load("content/projects.json"), load("content/icons.json")
 NOTES = load("content/notes.json")
 TOOLS = load("content/tools.json")
+RESUME = load("content/resume.json")
 DOMAIN, NAME = SITE["domain"], SITE["name"]
 STACK = SITE["stack"]
 STACK_ITEMS = [it for c in STACK for it in c["items"]]
@@ -137,6 +138,32 @@ def validate_content():
             errs.append(f"tools.json['{n}']: AI model or provider name in the text")
     for n in TOOLS:
         if n not in names: errs.append(f"tools.json: '{n}' is not in the stack")
+    r = RESUME
+    for f in ("headline", "summary", "contact", "projects", "skills"):
+        if not r.get(f): errs.append(f"resume.json: missing '{f}'")
+    for f in ("email", "whatsapp", "whatsapp_display"):
+        if not r.get("contact", {}).get(f): errs.append(f"resume.json contact: missing '{f}'")
+    proj_slugs = {p["slug"] for p in PROJECTS}
+    for k, p in enumerate(r.get("projects", [])):
+        w = f"resume.json projects[{k}]"
+        for f in ("slug", "name", "status", "tech", "line", "bullets"):
+            if not p.get(f): errs.append(f"{w}: missing '{f}'")
+        if p.get("slug") not in proj_slugs: errs.append(f"{w}: slug '{p.get('slug')}' is not a project")
+        if not (isinstance(p.get("bullets"), list) and 2 <= len(p["bullets"]) <= 4): errs.append(f"{w}: needs 2 to 4 bullets")
+    for k, g in enumerate(r.get("skills", [])):
+        if not g.get("label") or not g.get("items"): errs.append(f"resume.json skills[{k}]: needs 'label' and 'items'")
+        if not g.get("free"):
+            for it in g.get("items", []):
+                if it not in names: errs.append(f"resume.json skills: '{it}' is not in the stack list")
+    for k, e in enumerate(r.get("experience", [])):
+        for f in ("role", "org", "period", "bullets"):
+            if not e.get(f): errs.append(f"resume.json experience[{k}]: missing '{f}'")
+    for k, e in enumerate(r.get("education", [])):
+        for f in ("school", "program", "period"):
+            if not e.get(f): errs.append(f"resume.json education[{k}]: missing '{f}'")
+    rtxt = json.dumps({k: v for k, v in r.items() if k != "contact"}, ensure_ascii=False)
+    if "\u2014" in rtxt or "\u2013" in rtxt: errs.append("resume.json: em or en dash found")
+    if ban.search(rtxt): errs.append("resume.json: AI model or provider name in the text")
     if errs:
         raise SystemExit("build failed, content problems:\n  - " + "\n  - ".join(errs))
 validate_content()
@@ -442,16 +469,20 @@ about_markup = """
 PROJECT_JSON = json.dumps([{"name": p["name"], "slug": p["slug"], "state": p["state"]} for p in PROJECTS]).replace("</", "<\\/")
 page("about.html", f"About | {NAME}", "about", "About Miracle Agbebaku: AI systems, product engineering, automation and future robotics.", about_markup.replace("{ABOUT_PHOTO}", ABOUT_PHOTO).replace("{ARROW}", ic("right")).replace("{PROJECT_JSON}", PROJECT_JSON))
 RESUME_PDF = "assets/Miracle-Agbebaku-Resume.pdf"
-SUMMARY = "Software developer working on AI systems, agent orchestration, backend engineering and complete products. I care about how a system behaves when real users, messy inputs and failure meet."
-FOCUS = ["AI agents and orchestration", "Backend, APIs and integrations", "Frontend with React, Next.js and TypeScript", "Messaging automation and developer tooling"]
-paper_projects = "".join(f'<div class="rp"><dt><a href="{p["slug"]}.html" translate="no">{esc(p["name"])}</a><span>{p["state"]}</span></dt><dd>{esc(p["purpose"])}</dd></div>' for p in PROJECTS)
-paper = f'''<article class="paper rv" aria-label="Resume of {NAME}"><header><h2 class="pname" translate="no">{NAME}</h2><p class="prole">Software developer · AI systems, backend and automation</p>
-<p class="plinks"><a href="{DOMAIN}">{DOMAIN.replace("https://", "")}</a> · <a data-c="gh" href="#">GitHub</a> · <a data-c="x" href="#">X</a></p></header>
-<section><h3>Summary</h3><p>{SUMMARY}</p></section>
-<section><h3>Focus</h3><ul>{"".join(f"<li>{x}</li>" for x in FOCUS)}</ul></section>
-<section><h3>Selected projects</h3><dl>{paper_projects}</dl></section>
-<section><h3>Technologies</h3><p>{", ".join(STACK_NAMES)}</p></section></article>'''
-page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku: summary, focus, projects and technologies. View it here or download the PDF.",
+def _rp_list(items): return "".join(f"<li>{esc(x)}</li>" for x in items)
+def _sec(title, body): return f'<section><h3>{title}</h3>{body}</section>'
+_exp = "".join(f'<div class="rp"><h4>{esc(e["role"])}<span>{esc(e["period"])}</span></h4><p class="rline">{esc(e["org"])}{(" \u00b7 " + esc(e["location"])) if e.get("location") else ""}</p><ul class="rb">{_rp_list(e.get("bullets", []))}</ul></div>' for e in RESUME.get("experience", []))
+_edu = "".join(f'<div class="rp"><h4>{esc(e["school"])}<span>{esc(e["period"])}</span></h4><p class="rline">{esc(e["program"])}{(" \u00b7 " + esc(e["note"])) if e.get("note") else ""}</p></div>' for e in RESUME.get("education", []))
+_proj = "".join(f'<div class="rp"><h4><a href="{p["slug"]}.html" translate="no">{esc(p["name"])}</a><span>{esc(p["status"])}</span></h4><p class="rtech">{esc(p["tech"])}</p><p class="rline">{esc(p["line"])}</p><ul class="rb">{_rp_list(p["bullets"])}</ul></div>' for p in RESUME["projects"])
+_skills = '<dl class="rsk">' + "".join(f'<div><dt>{esc(g["label"])}</dt><dd>{esc(", ".join(g["items"]))}</dd></div>' for g in RESUME["skills"]) + '</dl>'
+paper = (f'<article class="paper rv" aria-label="Resume of {NAME}"><header><h2 class="pname" translate="no">{NAME}</h2><p class="prole">{esc(RESUME["headline"])}</p>'
+         f'<p class="plinks"><a data-c="mail" href="#">Email</a> <a data-c="wa" href="#">WhatsApp</a> <a href="{DOMAIN}">{DOMAIN.replace("https://", "")}</a></p></header>'
+         + _sec("Summary", f'<p>{esc(RESUME["summary"])}</p>')
+         + (_sec("Experience", _exp) if _exp else "") + _sec("Projects", _proj) + _sec("Skills", _skills)
+         + (_sec("Education", _edu) if _edu else "")
+         + _sec("Writing", f'<p>{len(NOTES)} engineering notes on trust boundaries, AI agent pipelines, messaging systems and how the portfolio is built.</p><p><a class="rlink" href="engineering.html">Read the engineering notes</a></p>')
+         + '</article>')
+page("resume.html", f"Resume | {NAME}", "resume", "Resume of Miracle Agbebaku, software engineer: summary, projects and skills. View it here or download the PDF.",
  ph("Resume", "Resume", "Read it here, or take it with you.") +
  f'''<div class="wrap" style="padding-bottom:80px"><div class="cta rv" style="margin:0 0 34px"><a class="btn pri mag" href="{RESUME_PDF}" download>Download PDF {ic("download")}</a><a class="btn mag" href="{RESUME_PDF}" target="_blank" rel="noopener noreferrer">Open PDF {ic("ext")}<span class="sr">(opens in a new tab)</span></a><button class="btn mag" id="print" type="button">Print</button></div>{paper}</div>''')
 def figure(f):

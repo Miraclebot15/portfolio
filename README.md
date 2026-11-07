@@ -323,3 +323,15 @@ python3 tests/smoke.py       # browser tests at four widths (needs Playwright)
 The build checks content first (slugs, states, motifs, colors, https URLs, status function files, note kinds and project references, stack icons, AI provider names) and the generated pages second (one h1, title, description length, unique ids, links and anchors, no dashes). If anything fails, nothing is written.
 
 Add `"path": true` to a note to put it on the Engineering page's reading path. Keep the path to about six curated notes. Every note still appears in the filterable grid below it.
+
+### Resume
+
+The resume page and the PDF are both generated from `content/resume.json`: headline, summary, contact, projects, skills and two lists, `experience` and `education`, which stay empty until there are real entries (a section with no entries is not shown). Skills must be names from the stack list (a group marked `"free": true`, such as practices, is free text). The PDF is built with `python3 tools/make_resume.py` (needs reportlab; the fonts are in `tools/fonts/`), is one A4 page, and prints the email and WhatsApp number from the `contact` block. The web page never prints those as plain text, and a test checks that no HTML file contains them. Example entries:
+
+```json
+"experience": [{"role": "Role", "org": "Company", "location": "City", "period": "2024 to 2025", "bullets": ["One true thing you did."]}],
+"education": [{"school": "School", "program": "Program", "period": "2019 to 2023", "note": "optional"}]
+```
+
+After editing the file, run `python3 build.py` and `python3 tools/make_resume.py`, then commit both the pages and `assets/Miracle-Agbebaku-Resume.pdf`.
+

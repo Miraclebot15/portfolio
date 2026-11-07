@@ -163,6 +163,52 @@ class BuildTest(unittest.TestCase):
         self.assertIn('href="ella.html"', read(os.path.join(self.repo, "stack-supabase.html")))
         self.assertIn("note-ella-authority.html", read(os.path.join(self.repo, "sitemap.xml")))
 
+    def test_resume_renders_from_data_and_hides_empty_sections(self):
+        html = read(os.path.join(self.repo, "resume.html"))
+        for text in ("<h3>Summary</h3>", "<h3>Projects</h3>", "<h3>Skills</h3>", "<h3>Writing</h3>", "NEXUS CORE", "ELLA", "Lagoon"):
+            self.assertIn(text, html)
+        self.assertNotIn("<h3>Experience</h3>", html)
+        self.assertNotIn("<h3>Education</h3>", html)
+        self.assertTrue(read(os.path.join(self.repo, "assets/Miracle-Agbebaku-Resume.pdf"), True).startswith(b"%PDF"))
+
+    def test_resume_keeps_contact_details_out_of_every_page(self):
+        data = json.loads(read(os.path.join(self.repo, "content/resume.json")))
+        email_user = data["contact"]["email"].split("@")[0]
+        digits = data["contact"]["whatsapp"].lstrip("+")[-9:]
+        for f in os.listdir(self.repo):
+            if f.endswith(".html"):
+                html = read(os.path.join(self.repo, f))
+                self.assertNotIn(email_user, html, f)
+                self.assertNotIn(digits, html, f)
+
+    def test_resume_sections_appear_when_filled(self):
+        def f(d):
+            d["experience"] = [{"role": "Developer", "org": "Acme", "period": "2024 to 2025", "bullets": ["Did a real thing."]}]
+            d["education"] = [{"school": "Some School", "program": "BSc Something", "period": "2019 to 2023"}]
+        self.edit_json("content/resume.json", f)
+        self.assertEqual(self.run_build().returncode, 0)
+        html = read(os.path.join(self.repo, "resume.html"))
+        self.assertIn("<h3>Experience</h3>", html)
+        self.assertIn("<h3>Education</h3>", html)
+        self.assertIn("Acme", html)
+
+    def test_rejects_unknown_resume_skill(self):
+        self.edit_json("content/resume.json", lambda d: d["skills"][0]["items"].append("Rust"))
+        self.assert_fails(self.run_build(), "'Rust' is not in the stack list")
+
+    def test_rejects_resume_project_that_does_not_exist(self):
+        self.edit_json("content/resume.json", lambda d: d["projects"][0].update(slug="ghost"))
+        self.assert_fails(self.run_build(), "slug 'ghost' is not a project")
+
+    def test_rejects_incomplete_resume_entries_and_dashes(self):
+        def f(d):
+            d["experience"] = [{"role": "Developer"}]
+            d["summary"] = "A summary \u2014 with a dash."
+        self.edit_json("content/resume.json", f)
+        r = self.run_build()
+        self.assert_fails(r, "experience[0]: missing 'org'")
+        self.assertIn("resume.json: em or en dash found", r.stdout + r.stderr)
+
     def test_rejects_non_boolean_path(self):
         self.edit_json("content/notes.json", lambda d: d[0].update(path="yes"))
         self.assert_fails(self.run_build(), "'path' must be true or false")

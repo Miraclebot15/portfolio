@@ -1,48 +1,120 @@
 #!/usr/bin/env python3
-"""Generate assets/Miracle-Agbebaku-Resume.pdf from the same content the site uses.
+"""Generate assets/Miracle-Agbebaku-Resume.pdf from content/resume.json, the same data the resume page uses.
 
 Requires reportlab (pip install reportlab). Run from the repo root: python3 tools/make_resume.py
-Nothing here is invented: sections appear only when the content exists.
+Nothing here is invented: the experience and education sections appear only when entries exist in resume.json.
+Fonts (Carlito, Caladea; SIL OFL) are Latin subsets in tools/fonts/.
 """
-import json, os
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
+import json, os, sys
+from xml.sax.saxutils import escape as esc
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_RIGHT
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable, KeepTogether
+from reportlab.lib.units import mm
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import Flowable, HRFlowable, KeepTogether, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-site = json.load(open(os.path.join(ROOT, "content/site.json"), encoding="utf-8"))
-projects = json.load(open(os.path.join(ROOT, "content/projects.json"), encoding="utf-8"))
-ACC, INK, MUTE = colors.HexColor("#c93810"), colors.HexColor("#14110d"), colors.HexColor("#5d584f")
-SUMMARY = ("Software developer working on AI systems, agent orchestration, backend engineering and complete products. "
-           "I care about how a system behaves when real users, messy inputs and failure meet.")
-FOCUS = ["AI agents and orchestration", "Backend, APIs and integrations",
-         "Frontend with React, Next.js and TypeScript", "Messaging automation and developer tooling"]
-LINKS = [("Portfolio", site["domain"]), ("GitHub", "https://github.com/Miraclebot15"), ("X", "https://x.com/MiracleTechX")]
+load = lambda p: json.load(open(os.path.join(ROOT, p), encoding="utf-8"))
+site, R = load("content/site.json"), load("content/resume.json")
+notes = load("content/notes.json")
 
-S = lambda n, **k: ParagraphStyle(n, fontName=k.pop("font", "Helvetica"), textColor=k.pop("color", INK), **k)
-name = S("name", font="Helvetica-Bold", fontSize=27, leading=30)
-role = S("role", fontSize=11.5, leading=15, color=MUTE)
-links = S("links", fontSize=9.5, leading=14, color=MUTE)
-h = S("h", font="Helvetica-Bold", fontSize=8.5, leading=12, color=ACC, spaceBefore=14, spaceAfter=5, charSpace=1.6)
-body = S("body", fontSize=10, leading=14.5)
-pname = S("pname", font="Helvetica-Bold", fontSize=10.5, leading=14)
-pdesc = S("pdesc", fontSize=9.6, leading=13.5, color=MUTE, spaceAfter=7, leftIndent=0)
-bullet = S("bullet", fontSize=10, leading=14.5, leftIndent=11, bulletIndent=0)
+FD = os.path.join(ROOT, "tools", "fonts")
+for name, f in (("Carlito", "Carlito-Regular"), ("Carlito-Bold", "Carlito-Bold"), ("Carlito-Italic", "Carlito-Italic"), ("Caladea-Bold", "Caladea-Bold")):
+    pdfmetrics.registerFont(TTFont(name, os.path.join(FD, f + ".ttf")))
+pdfmetrics.registerFontFamily("Carlito", normal="Carlito", bold="Carlito-Bold", italic="Carlito-Italic", boldItalic="Carlito-Bold")
 
-story = [Paragraph(site["name"], name), Spacer(1, 3), Paragraph("Software developer · AI systems, backend and automation", role), Spacer(1, 5),
-         Paragraph("  ·  ".join(f'{l}: <a href="{u}" color="#c93810">{u.replace("https://", "")}</a>' for l, u in LINKS), links),
-         Spacer(1, 8), HRFlowable(width="100%", thickness=1.4, color=ACC, spaceAfter=2)]
-story += [Paragraph("SUMMARY", h), Paragraph(SUMMARY, body), Paragraph("FOCUS", h)]
-story += [Paragraph(t, bullet, bulletText="•") for t in FOCUS]
-story.append(Paragraph("SELECTED PROJECTS", h))
-for p in projects:
-    story.append(KeepTogether([Paragraph(f'{p["name"]} <font color="#5d584f" size="8.5">· {p["state"]}</font>', pname), Paragraph(p["purpose"], pdesc)]))
-story += [Paragraph("TECHNOLOGIES", h), Paragraph(", ".join(i["name"] for c in site["stack"] if c.get("kind") != "concepts" for i in c["items"]), body)]
+INK, MUTE, ACC, HAIR = (colors.HexColor(x) for x in ("#14110d", "#555048", "#c93810", "#cfc8b8"))
+LM, RM, TM, BM = 17 * mm, 17 * mm, 12.5 * mm, 11 * mm
+W = A4[0] - LM - RM
+FW = W - 12  # the default frame has 6pt of padding on each side
 
-out = os.path.join(ROOT, "assets/Miracle-Agbebaku-Resume.pdf")
-doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=19*mm, rightMargin=19*mm, topMargin=17*mm, bottomMargin=16*mm,
-                        title="Miracle Agbebaku: Resume", author=site["name"], subject="Software developer resume")
+
+def S(name, **k):
+    return ParagraphStyle(name, fontName=k.pop("font", "Carlito"), textColor=k.pop("color", INK), **k)
+
+
+st = dict(
+    name=S("name", font="Caladea-Bold", fontSize=27, leading=29),
+    headline=S("headline", fontSize=11.5, leading=15, color=MUTE),
+    contact=S("contact", fontSize=9.6, leading=13, color=MUTE),
+    h=S("h", font="Carlito-Bold", fontSize=8.8, leading=11, charSpace=1.3, spaceBefore=9.5, spaceAfter=1.5),
+    body=S("body", fontSize=10, leading=14),
+    pname=S("pname", font="Carlito-Bold", fontSize=10.8, leading=13.5),
+    pstat=S("pstat", font="Carlito-Italic", fontSize=9, leading=13, color=MUTE, alignment=TA_RIGHT),
+    ptech=S("ptech", font="Carlito-Italic", fontSize=9.2, leading=12, color=MUTE),
+    pline=S("pline", fontSize=9.8, leading=13.4, spaceBefore=1, spaceAfter=1.5),
+    bullet=S("bullet", fontSize=9.7, leading=13.1, leftIndent=10, bulletIndent=0, spaceAfter=1.2),
+    skl=S("skl", font="Carlito-Bold", fontSize=9.7, leading=13.1),
+    ski=S("ski", fontSize=9.7, leading=13.1),
+)
+
+
+class AccentRule(Flowable):
+    """A hairline across the page with a short accent segment at the left."""
+    def wrap(self, aw, ah):
+        self.aw = aw
+        return aw, 5
+    def draw(self):
+        c = self.canv
+        c.setStrokeColor(HAIR); c.setLineWidth(0.6); c.line(0, 2, self.aw, 2)
+        c.setStrokeColor(ACC); c.setLineWidth(2.2); c.line(0, 2, 22 * mm, 2)
+
+
+def section(title):
+    return [Paragraph(title.upper(), st["h"]), HRFlowable(width="100%", thickness=0.5, color=HAIR, spaceBefore=1, spaceAfter=4.5)]
+
+
+def head_row(left, right):
+    t = Table([[Paragraph(left, st["pname"]), Paragraph(right, st["pstat"])]], colWidths=[FW * 0.7, FW * 0.3])
+    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "BOTTOM"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
+    return t
+
+
+def bullets(items):
+    return [Paragraph(esc(b), st["bullet"], bulletText="\u2022") for b in items]
+
+
+c = R["contact"]
+site_short = site["domain"].replace("https://", "")
+contact = "  \u00b7  ".join([
+    f'<a href="mailto:{esc(c["email"])}" color="#14110d">{esc(c["email"])}</a>',
+    f'<a href="https://wa.me/{c["whatsapp"].lstrip("+")}" color="#14110d">WhatsApp {esc(c["whatsapp_display"])}</a>',
+    f'<a href="{site["domain"]}" color="#14110d">{esc(site_short)}</a>'])
+
+story = [Paragraph(esc(site["name"]), st["name"]), Spacer(1, 2), Paragraph(esc(R["headline"]), st["headline"]), Spacer(1, 3),
+         Paragraph(contact, st["contact"]), Spacer(1, 6), AccentRule()]
+story += section("Summary") + [Paragraph(esc(R["summary"]), st["body"])]
+
+if R.get("experience"):
+    story += section("Experience")
+    for e in R["experience"]:
+        sub = esc(e["org"]) + (f' \u00b7 {esc(e["location"])}' if e.get("location") else "")
+        story.append(KeepTogether([head_row(f'{esc(e["role"])}', esc(e["period"])), Paragraph(sub, st["ptech"]), Spacer(1, 1.5)] + bullets(e.get("bullets", [])) + [Spacer(1, 4)]))
+
+story += section("Projects")
+for p in R["projects"]:
+    story.append(KeepTogether([head_row(esc(p["name"]), esc(p["status"])), Paragraph(esc(p["tech"]), st["ptech"]), Paragraph(esc(p["line"]), st["pline"])] + bullets(p["bullets"]) + [Spacer(1, 4)]))
+
+story += section("Skills")
+rows = [[Paragraph(esc(g["label"]), st["skl"]), Paragraph(esc(", ".join(g["items"])), st["ski"])] for g in R["skills"]]
+sk = Table(rows, colWidths=[34 * mm, FW - 34 * mm])
+sk.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0.6), ("BOTTOMPADDING", (0, 0), (-1, -1), 0.6)]))
+story.append(sk)
+
+if R.get("education"):
+    story += section("Education")
+    for e in R["education"]:
+        story.append(KeepTogether([head_row(esc(e["school"]), esc(e["period"])), Paragraph(esc(e["program"]) + (f' \u00b7 {esc(e["note"])}' if e.get("note") else ""), st["ptech"]), Spacer(1, 3)]))
+
+story.append(KeepTogether(section("Writing") + [Paragraph(f'{len(notes)} engineering notes on trust boundaries, AI agent pipelines, messaging systems and how the portfolio is built, at <a href="{site["domain"]}/engineering.html" color="#14110d">{esc(site_short)}/engineering</a>.', st["body"])]))
+
+out = os.path.join(ROOT, "assets", "Miracle-Agbebaku-Resume.pdf")
+doc = SimpleDocTemplate(out, pagesize=A4, leftMargin=LM, rightMargin=RM, topMargin=TM, bottomMargin=BM,
+                        title=f'{site["name"]}: Resume', author=site["name"], subject="Software engineer resume", keywords="software engineer, AI agents, backend, automation")
 doc.build(story)
-print("wrote", out)
+print("wrote", out, "| pages:", doc.page)
+if doc.page > 1:
+    print("note: the resume runs past one page; trim bullets or font size if you want a single page", file=sys.stderr)

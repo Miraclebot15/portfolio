@@ -1,0 +1,129 @@
+{
+ "headline": "Software engineer: AI agents, backend and automation",
+ "summary": "Software engineer who builds AI-agent and messaging systems where the model proposes and deterministic code decides: structured plans, policy checks, audit trails and tests. Works in TypeScript and Python and on edge infrastructure. Three systems so far: an agent governance pipeline, a multi-account WhatsApp assistant and a social platform backend.",
+ "contact": {
+  "email": "miracleagbebaku122@gmail.com",
+  "whatsapp": "+2349021637905",
+  "whatsapp_display": "+234 902 163 7905"
+ },
+ "experience": [],
+ "education": [],
+ "projects": [
+  {
+   "slug": "nexus-core",
+   "name": "NEXUS CORE",
+   "status": "Working prototype",
+   "tech": "Next.js, React, TypeScript, FastAPI, Pydantic, SQLite",
+   "line": "Governance-first AI agent orchestration: the model plans, a deterministic fail-closed policy engine decides.",
+   "bullets": [
+    "Designed the pipeline so no model-generated plan executes without passing a deterministic, fail-closed policy check. Blocked plans get at most two bounded corrections, each checked again.",
+    "Streams every pipeline stage to the interface over Server-Sent Events and records SHA-256 hash-linked audit events in SQLite.",
+    "Validates model output with Pydantic schemas. Execution is mostly simulated, with read-only web search as the one real tool, and the limits are documented."
+   ]
+  },
+  {
+   "slug": "ella",
+   "name": "ELLA",
+   "status": "Active development",
+   "tech": "TypeScript, Node.js, Express, Supabase, React, Vite",
+   "line": "WhatsApp assistant built around NEXUS CORE, running many linked accounts in one process.",
+   "bullets": [
+    "Isolated each linked account’s session and scoped every chat, document and memory lookup by account and chat.",
+    "Added a risk-tiered permission engine (five roles, four risk levels) and a response guard that strips internal data before every outgoing message.",
+    "Built a provider gateway with ordered fallback and health tracking, Nigerian English and Pidgin handling, hostile-URL rules for link tools and about 50 test scripts."
+   ]
+  },
+  {
+   "slug": "lagoon",
+   "name": "Lagoon",
+   "status": "In development",
+   "tech": "JavaScript, Cloudflare Workers, Durable Objects, WebSockets, Playwright",
+   "line": "Social platform on a modular JavaScript frontend and a Cloudflare edge backend.",
+   "bullets": [
+    "Implemented live messaging over WebSockets with per-user Durable Objects, and client-side encryption for one-to-one chats using browser crypto (ECDH P-256, HKDF, AES-GCM). Groups are sealed per member.",
+    "Kept moderated Spaces deliberately readable and labelled as not end-to-end encrypted, so each place makes a clear privacy promise.",
+    "Built a registry-based frontend with 25 interchangeable UI shells, tested with browser suites across phone, tablet and desktop sizes."
+   ]
+  }
+ ],
+ "skills": [
+  {
+   "label": "Languages",
+   "items": [
+    "Python",
+    "TypeScript",
+    "JavaScript",
+    "HTML5",
+    "CSS"
+   ]
+  },
+  {
+   "label": "Frontend",
+   "items": [
+    "React",
+    "Next.js",
+    "Vite",
+    "Tailwind CSS",
+    "Three.js"
+   ]
+  },
+  {
+   "label": "Backend and APIs",
+   "items": [
+    "FastAPI",
+    "Pydantic",
+    "Node.js",
+    "Express",
+    "Zod",
+    "Webhooks"
+   ]
+  },
+  {
+   "label": "Realtime and edge",
+   "items": [
+    "Cloudflare Workers",
+    "Durable Objects",
+    "WebSockets",
+    "Server-sent events"
+   ]
+  },
+  {
+   "label": "Data and auth",
+   "items": [
+    "PostgreSQL",
+    "SQLite",
+    "Supabase",
+    "Clerk"
+   ]
+  },
+  {
+   "label": "Testing and delivery",
+   "items": [
+    "Playwright",
+    "Vitest",
+    "GitHub Actions",
+    "Git",
+    "Vercel",
+    "Render"
+   ]
+  },
+  {
+   "label": "Integrations",
+   "items": [
+    "WhatsApp",
+    "FFmpeg"
+   ]
+  },
+  {
+   "label": "Practices",
+   "free": true,
+   "items": [
+    "Policy gates",
+    "audit logging",
+    "input validation",
+    "streaming interfaces",
+    "automated testing"
+   ]
+  }
+ ]
+}
