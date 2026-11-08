@@ -759,8 +759,9 @@ main{padding:0!important}.wrap{padding:0!important;max-width:none!important}
 @media (max-width:900px){
 .js .story.mstory .story-grid{display:flex;flex-direction:column;gap:0}
 .js .story.mstory .story-grid>div:first-child{display:contents}
-.js .story.mstory .flow{order:1;align-self:stretch;display:flex;justify-content:center;margin:18px 0 6px;border-bottom:1px solid var(--rule)}
-.js .story.mstory .flow svg{width:auto;height:min(32vh,232px)}
+.js .story.mstory .flow{order:1;top:0;align-self:stretch;display:flex;justify-content:center;margin:18px 0 0;padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
+.js .story.mstory .flow::after{content:"";position:absolute;left:0;right:0;top:100%;height:26px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+.js .story.mstory .flow svg{width:auto;height:min(28vh,212px)}
 .js .story.mstory .steps{order:2}
 }
 @media (prefers-reduced-motion:reduce){.js .story.mstory .step{opacity:1}}

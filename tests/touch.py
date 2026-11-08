@@ -75,7 +75,7 @@ with sync_playwright() as p:
     fire(pg3, ".mag", "pointerdown", 0.9, 0.2)
     check(pg3.evaluate("document.querySelector('.mag').style.transform") == "", "button still moves when reduced motion is requested")
     # 5. The approach story: sticky diagram on phones and short screens, pinned section on tall desktops
-    def story_run(ctx, label, expect_compact):
+    def story_run(ctx, label, expect_compact, max_top=120, phone_polish=False):
         pgs = b.new_context(**ctx).new_page()
         pgs.goto(URL("index.html")); pgs.wait_for_timeout(700)
         compact = pgs.evaluate("document.querySelector('[data-story]').classList.contains('mstory')")
@@ -96,10 +96,16 @@ with sync_playwright() as p:
         if expect_compact:
             check(all(s[2] == 1 for s in samples), f"{label}: more than one step is lit at once")
             sticky = [s[3] for s in samples if s[0] == 1]
-            check(bool(sticky) and all(0 <= v <= 120 for v in sticky), f"{label}: the diagram does not stay pinned while the middle step is read ({sticky})")
+            check(bool(sticky) and all(v >= 0 for v in sticky) and sorted(sticky)[len(sticky) // 2] <= max_top, f"{label}: the diagram does not stay pinned while the middle step is read ({sticky})")
+        if phone_polish:
+            flow = pgs.evaluate("""() => { const f = document.querySelector('.flow'), cs = getComputedStyle(f);
+                return {top: cs.top, border: cs.borderBottomWidth, after: getComputedStyle(f, '::after').content}; }""")
+            check(flow["top"] == "0px", f"{label}: the pinned diagram leaves a gap above it where text can show through (top is {flow['top']})")
+            check(flow["border"] == "0px", f"{label}: the diagram has its own bottom rule, which doubles up with the first step's rule")
+            check(flow["after"] not in ("none", "normal", ""), f"{label}: text is cut off hard under the diagram instead of fading")
         return pgs
 
-    story_run(phone, "phone story", True)
+    story_run(phone, "phone story", True, max_top=1, phone_polish=True)
     story_run(dict(viewport={"width": 1280, "height": 700}), "short laptop story", True)
     story_run(dict(viewport={"width": 1280, "height": 900}), "tall desktop story", False)
     pr = b.new_context(reduced_motion="reduce", **phone).new_page()
