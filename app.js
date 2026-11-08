@@ -120,13 +120,18 @@ hero.addEventListener('pointermove',onMove);hero.addEventListener('pointerleave'
 if(!fine){hero.addEventListener('pointerdown',onMove);hero.addEventListener('pointerup',onLeave);hero.addEventListener('pointercancel',onLeave)}
 if(fig){var t=0;addEventListener('scroll',function(){if(t)return;t=requestAnimationFrame(function(){t=0;var y=scrollY;if(y<innerHeight*1.2){fig.style.transform='translateY('+(y*.07).toFixed(1)+'px)';if(!fine&&tilt){tilt.style.setProperty('--ry',(Math.sin(y/150)*5).toFixed(2)+'deg');tilt.style.setProperty('--rx',(Math.cos(y/220)*3).toFixed(2)+'deg')}}})},{passive:true})}})();
 
-/* Approach: scroll-driven story (pinned on large screens, static elsewhere) */
+/* Approach: scroll-driven story. Tall large screens pin the section; phones and short screens keep the diagram stuck while the steps scroll past */
 (function(){var story=document.querySelector('[data-story]');if(!story)return;
-var steps=[].slice.call(story.querySelectorAll('.step')),flow=story.querySelector('.flow'),mq=matchMedia('(min-width:901px)'),raf=0;
+var steps=[].slice.call(story.querySelectorAll('.step')),flow=story.querySelector('.flow'),pin=matchMedia('(min-width:901px) and (min-height:781px)'),raf=0;
 function ty(p){return p<.33?128*(p/.33):p<.66?128:128+152*((p-.66)/.34)}
-function paint(p,s){steps.forEach(function(el,i){el.classList.toggle('on',i===s)});flow.dataset.s=s;flow.style.setProperty('--ty',ty(p).toFixed(1)+'px')}
-function update(){raf=0;if(!mq.matches||reduce){steps.forEach(function(el){el.classList.add('on')});flow.dataset.s=2;flow.style.setProperty('--ty','280px');return}
-var r=story.getBoundingClientRect(),span=r.height-innerHeight,p=span>0?Math.min(1,Math.max(0,-r.top/span)):0;paint(p,p<.33?0:p<.66?1:2)}
+function set(s,t){steps.forEach(function(el,i){el.classList.toggle('on',i===s)});flow.dataset.s=s;flow.style.setProperty('--ty',t.toFixed(1)+'px')}
+function update(){raf=0;
+if(reduce){story.classList.remove('mstory');steps.forEach(function(el){el.classList.add('on')});flow.dataset.s=2;flow.style.setProperty('--ty','280px');return}
+if(pin.matches){story.classList.remove('mstory');var r=story.getBoundingClientRect(),span=r.height-innerHeight,p=span>0?Math.min(1,Math.max(0,-r.top/span)):0;set(p<.33?0:p<.66?1:2,ty(p));return}
+story.classList.add('mstory');
+var line=innerHeight*.62,k=0;steps.forEach(function(el,i){if(el.getBoundingClientRect().top<=line)k=i});
+var b=steps[k].getBoundingClientRect(),f=Math.min(1,Math.max(0,(line-b.top)/Math.max(1,b.height)));
+set(k,k===0?128*f:k===1?128:128+152*f)}
 function req(){if(!raf)raf=requestAnimationFrame(update)}
 addEventListener('scroll',req,{passive:true});addEventListener('resize',req);update()})();
 

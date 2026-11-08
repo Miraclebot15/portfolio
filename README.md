@@ -340,5 +340,5 @@ After editing the file, run `python3 build.py` and `python3 tools/make_resume.py
 
 ### Motion on phones
 
-Anything that needs a mouse on desktop has a touch version, and `tests/touch.py` fails if one is lost. Buttons with `.mag` follow the cursor on desktop and lean toward the finger, spring back and pulse on touch. The hero photo and the Stack cards tilt toward a mouse, and toward a press or drag on touch. The hero photo also sways as the page scrolls on touch screens. All of it is skipped when the device asks for reduced motion. The scroll-driven story section still animates only above 900px.
+Anything that needs a mouse on desktop has a touch version, and `tests/touch.py` fails if one is lost. Buttons with `.mag` follow the cursor on desktop and lean toward the finger, spring back and pulse on touch. The hero photo and the Stack cards tilt toward a mouse, and toward a press or drag on touch. The hero photo also sways as the page scrolls on touch screens. All of it is skipped when the device asks for reduced motion. The approach story is pinned and scroll-driven on tall desktop screens. On phones and on screens under 780px tall it switches to a compact mode: the diagram stays stuck near the top and one step lights up at a time as you scroll, with the token travelling the same path.
 
