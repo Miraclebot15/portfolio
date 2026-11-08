@@ -750,3 +750,17 @@ main{padding:0!important}.wrap{padding:0!important;max-width:none!important}
 .tpr{animation:tpulse .55s ease-out}
 @keyframes tpulse{from{box-shadow:0 0 0 0 rgba(201,56,16,.5)}to{box-shadow:0 0 0 16px rgba(201,56,16,0)}}
 @media (prefers-reduced-motion:reduce){.tpr{animation:none}}
+/* Story, compact mode (phones and short screens): the diagram sticks while one step at a time lights up */
+.js .story.mstory .story-grid{align-items:start}
+.js .story.mstory .flow{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:3;align-self:start;max-width:none;padding:10px 0 12px;background:var(--bg)}
+.js .story.mstory .step{opacity:.38;padding:30px 0;min-height:24vh;align-content:center}
+.js .story.mstory .step.on{opacity:1}
+@media (min-width:901px){.js .story.mstory .flow{top:calc(env(safe-area-inset-top,0px) + 96px)}}
+@media (max-width:900px){
+.js .story.mstory .story-grid{display:flex;flex-direction:column;gap:0}
+.js .story.mstory .story-grid>div:first-child{display:contents}
+.js .story.mstory .flow{order:1;align-self:stretch;display:flex;justify-content:center;margin:18px 0 6px;border-bottom:1px solid var(--rule)}
+.js .story.mstory .flow svg{width:auto;height:min(32vh,232px)}
+.js .story.mstory .steps{order:2}
+}
+@media (prefers-reduced-motion:reduce){.js .story.mstory .step{opacity:1}}
